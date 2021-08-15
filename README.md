@@ -1,3 +1,3 @@
-# CamlBoy
+# CAMLBOY
 
-A Game Boy emulator written in OCaml.
+A WIP Game Boy emulator written in OCaml.
