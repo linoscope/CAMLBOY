@@ -28,85 +28,113 @@ type condition =
   | C  [@printer fun fmt _ -> fprintf fmt "C"]
 [@@deriving show]
 
-let print_jp = fun fmt (c, x) ->
-  match c with
-  | None -> Format.fprintf fmt "JP %s" (show_arg16 x)
-  | NZ | Z | NC | C -> Format.fprintf fmt "JP %s, %s" (show_condition c) (show_arg16 x)
-
-let print_call = fun fmt (c, x) ->
-  match c with
-  | None -> Format.fprintf fmt "CALL %s" (show_uint16 x)
-  | NZ | Z | NC | C -> Format.fprintf fmt "CALL %s, %s" (show_condition c) (show_uint16 x)
-
-let print_jr = fun fmt (c, x) ->
-  match c with
-  | None -> Format.fprintf fmt "JR %s" (show_uint8 x)
-  | NZ | Z | NC | C -> Format.fprintf fmt "JR %s, %s" (show_condition c) (show_uint8 x)
-
 type t =
   | LD of arg * arg
-          [@printer fun fmt (l,r) -> fprintf fmt "LD %s, %s" (show_arg l) (show_arg r)]
-  | LD16 of arg16 * arg16
-            [@printer fun fmt (l,r) -> fprintf fmt "LD %s, %s" (show_arg16 l) (show_arg16 r)]
   | PUSH of Registers.rr
-            [@printer fun fmt rr -> fprintf fmt "PUSH %s" (Registers.show_rr rr)]
   | POP of Registers.rr
-           [@printer fun fmt rr -> fprintf fmt "POP %s" (Registers.show_rr rr)]
   | ADD of arg * arg
-           [@printer fun fmt (l,r) -> fprintf fmt "ADD %s, %s" (show_arg l) (show_arg r)]
-  | ADD16 of arg16 * arg16
-             [@printer fun fmt (l,r) -> fprintf fmt "ADD %s, %s" (show_arg16 l) (show_arg16 r)]
   | ADC of arg * arg
-           [@printer fun fmt (l,r) -> fprintf fmt "ADC %s, %s" (show_arg l) (show_arg r)]
   | SUB of arg * arg
-           [@printer fun fmt (l,r) -> fprintf fmt "SUB %s, %s" (show_arg l) (show_arg r)]
   | SBC of arg * arg
-           [@printer fun fmt (l,r) -> fprintf fmt "SBC %s, %s" (show_arg l) (show_arg r)]
   | AND of arg * arg
-           [@printer fun fmt (l,r) -> fprintf fmt "AND %s, %s" (show_arg l) (show_arg r)]
   | OR of arg * arg
-          [@printer fun fmt (l,r) -> fprintf fmt "OR %s, %s" (show_arg l) (show_arg r)]
   | XOR of arg * arg
-           [@printer fun fmt (l,r) -> fprintf fmt "XOR %s, %s" (show_arg l) (show_arg r)]
   | CP of arg * arg
-          [@printer fun fmt (l,r) -> fprintf fmt "CP %s, %s" (show_arg l) (show_arg r)]
   | INC of arg
-           [@printer fun fmt x -> fprintf fmt "INC %s" (show_arg x)]
-  | INC16 of arg16
-             [@printer fun fmt x -> fprintf fmt "INC %s" (show_arg16 x)]
   | DEC of arg
-           [@printer fun fmt x -> fprintf fmt "DEC %s" (show_arg x)]
-  | DEC16 of arg16
-             [@printer fun fmt x -> fprintf fmt "DEC %s" (show_arg16 x)]
   | SWAP of arg
-            [@printer fun fmt x -> fprintf fmt "SWAP %s" (show_arg x)]
-  | DAA                        [@printer fun fmt _ -> fprintf fmt "DAA"]
-  | CPL                        [@printer fun fmt _ -> fprintf fmt "CPL"]
-  | CCF                        [@printer fun fmt _ -> fprintf fmt "CCF"]
-  | SCF                        [@printer fun fmt _ -> fprintf fmt "SCF"]
-  | NOP                        [@printer fun fmt _ -> fprintf fmt "NOP"]
-  | HALT                       [@printer fun fmt _ -> fprintf fmt "HALT"]
-  | STOP                       [@printer fun fmt _ -> fprintf fmt "STOP"]
-  | DI                         [@printer fun fmt _ -> fprintf fmt "DI"]
-  | EI                         [@printer fun fmt _ -> fprintf fmt "EI"]
-  | RLCA                       [@printer fun fmt _ -> fprintf fmt "RLCA"]
-  | RLA                        [@printer fun fmt _ -> fprintf fmt "RLA"]
-  | RRCA                       [@printer fun fmt _ -> fprintf fmt "RRCA"]
-  | RRA                        [@printer fun fmt _ -> fprintf fmt "RRA"]
-  | RLC of arg                 [@printer fun fmt x -> fprintf fmt "RLC %s" (show_arg x)]
-  | RL of arg                  [@printer fun fmt x -> fprintf fmt "RL %s" (show_arg x)]
-  | RRC of arg                 [@printer fun fmt x -> fprintf fmt "RRC %s" (show_arg x)]
-  | RR of arg                  [@printer fun fmt x -> fprintf fmt "RR %s" (show_arg x)]
-  | SLA of arg                 [@printer fun fmt x -> fprintf fmt "SLA %s" (show_arg x)]
-  | SRA of arg                 [@printer fun fmt x -> fprintf fmt "SRA %s" (show_arg x)]
-  | SRL of arg                 [@printer fun fmt x -> fprintf fmt "SRL %s" (show_arg x)]
-  | BIT of uint8 * arg         [@printer fun fmt (n,x) -> fprintf fmt "BIT %s, %s" (show_uint8 n) (show_arg x)]
-  | SET of uint8 * arg         [@printer fun fmt (n,x) -> fprintf fmt "SET %s, %s" (show_uint8 n) (show_arg x)]
-  | RES of uint8 * arg         [@printer fun fmt (n,x) -> fprintf fmt "RES %s, %s" (show_uint8 n) (show_arg x)]
-  | JP of condition * arg16    [@printer print_jp]
-  | JR of condition * uint8    [@printer print_jr]
-  | CALL of condition * uint16 [@printer print_call]
-  | RST of uint16              [@printer fun fmt x -> fprintf fmt "RST %s" (show_uint16 x)]
-  | RET of condition           [@printer fun fmt c -> fprintf fmt "RET %s" (show_condition c)]
-  | RETI                       [@printer fun fmt _ -> fprintf fmt "RETI"]
+  | LD16 of arg16 * arg16
+  | ADD16 of arg16 * arg16
+  | DEC16 of arg16
+  | INC16 of arg16
+  | DAA
+  | CPL
+  | CCF
+  | SCF
+  | NOP
+  | HALT
+  | STOP
+  | DI
+  | EI
+  | RLCA
+  | RLA
+  | RRCA
+  | RRA
+  | RLC of arg
+  | RL of arg
+  | RRC of arg
+  | RR of arg
+  | SLA of arg
+  | SRA of arg
+  | SRL of arg
+  | BIT of uint8 * arg
+  | SET of uint8 * arg
+  | RES of uint8 * arg
+  | JP of condition * arg16
+  | JR of condition * uint8
+  | CALL of condition * uint16
+  | RST of uint16
+  | RET of condition
+  | RETI
 [@@deriving show]
+
+let show = function
+  | LD (x, y)    -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
+  | PUSH rr      -> Printf.sprintf "PUSH %s" (Registers.show_rr rr)
+  | POP rr       -> Printf.sprintf "POP %s" (Registers.show_rr rr)
+  | ADD (x, y)   -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
+  | ADC (x, y)   -> Printf.sprintf "ADC %s, %s" (show_arg x) (show_arg y)
+  | SUB (x, y)   -> Printf.sprintf "SUB %s, %s" (show_arg x) (show_arg y)
+  | SBC (x, y)   -> Printf.sprintf "SBC %s, %s" (show_arg x) (show_arg y)
+  | AND (x, y)   -> Printf.sprintf "AND %s, %s" (show_arg x) (show_arg y)
+  | OR (x, y)    -> Printf.sprintf "OR %s, %s" (show_arg x) (show_arg y)
+  | XOR (x, y)   -> Printf.sprintf "XOR %s, %s" (show_arg x) (show_arg y)
+  | CP (x, y)    -> Printf.sprintf "CP %s, %s" (show_arg x) (show_arg y)
+  | INC x        -> Printf.sprintf "INC %s" (show_arg x)
+  | DEC x        -> Printf.sprintf "DEC %s" (show_arg x)
+  | SWAP x       -> Printf.sprintf "SWAP %s" (show_arg x)
+  | ADD16 (x, y) -> Printf.sprintf "ADD %s, %s" (show_arg16 x) (show_arg16 y)
+  | LD16 (x, y)  -> Printf.sprintf "LD %s, %s" (show_arg16 x) (show_arg16 y)
+  | INC16 x      -> Printf.sprintf "INC %s" (show_arg16 x)
+  | DEC16 x      -> Printf.sprintf "DEC %s" (show_arg16 x)
+  | DAA          -> Printf.sprintf "DAA"
+  | CPL          -> Printf.sprintf "CPL"
+  | CCF          -> Printf.sprintf "CCF"
+  | SCF          -> Printf.sprintf "SCF"
+  | NOP          -> Printf.sprintf "NOP"
+  | HALT         -> Printf.sprintf "HALT"
+  | STOP         -> Printf.sprintf "STOP"
+  | DI           -> Printf.sprintf "DI"
+  | EI           -> Printf.sprintf "EI"
+  | RLCA         -> Printf.sprintf "RLCA"
+  | RLA          -> Printf.sprintf "RLA"
+  | RRCA         -> Printf.sprintf "RRCA"
+  | RRA          -> Printf.sprintf "RRA"
+  | RLC x        -> Printf.sprintf "RLC %s" (show_arg x)
+  | RL x         -> Printf.sprintf "RL %s" (show_arg x)
+  | RRC x        -> Printf.sprintf "RRC %s" (show_arg x)
+  | RR x         -> Printf.sprintf "RR %s" (show_arg x)
+  | SLA x        -> Printf.sprintf "SLA %s" (show_arg x)
+  | SRA x        -> Printf.sprintf "SRA %s" (show_arg x)
+  | SRL x        -> Printf.sprintf "SRL %s" (show_arg x)
+  | BIT (n, x)   -> Printf.sprintf "BIT %s, %s" (show_uint8 n) (show_arg x)
+  | SET (n, x)   -> Printf.sprintf "SET %s, %s" (show_uint8 n) (show_arg x)
+  | RES (n, x)   -> Printf.sprintf "RES %s, %s" (show_uint8 n) (show_arg x)
+  | JP (c, x) -> (
+      match c with
+      | None -> Printf.sprintf "JP %s" (show_arg16 x)
+      | NZ | Z | NC | C -> Printf.sprintf "JP %s, %s" (show_condition c) (show_arg16 x)
+    )
+  | JR (c, x) -> (
+      match c with
+      | None -> Printf.sprintf "JR %s" (show_uint8 x)
+      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (show_uint8 x)
+    )
+  | CALL (c, x) -> (
+      match c with
+      | None -> Printf.sprintf "CALL %s" (show_uint16 x)
+      | NZ | Z | NC | C -> Printf.sprintf "CALL %s, %s" (show_condition c) (show_uint16 x)
+    )
+  | RST x -> Printf.sprintf "RST %s" (show_uint16 x)
+  | RET c -> Printf.sprintf "RET %s" (show_condition c)
+  | RETI  -> Printf.sprintf "RETI"

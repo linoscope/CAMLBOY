@@ -72,7 +72,7 @@ module Uint16 = struct
     external to_int : t -> int = "%identity"
 
     let show = Printf.sprintf "0x%04x"
-    let pp fmt = Format.fprintf fmt "0x%04x"
+    let pp fmt t = Format.fprintf fmt "%s" (show t)
   end
   include B
 
