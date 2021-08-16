@@ -1,6 +1,6 @@
 include Camlboy_lib
-open Base
 open Ints
+open StdLabels
 
 
 let%expect_test "test write and read single register" =
@@ -47,11 +47,10 @@ let%expect_test "set and read flag" =
   let subtraction = Registers.read_flag t Subtraction in
   let zero = Registers.read_flag t Zero in
 
-  (carry, half_carry, subtraction, zero)
-  |> [%sexp_of : bool * bool * bool * bool]
-  |> Stdio.print_s;
+  [carry; half_carry; subtraction; zero]
+  |> List.iter ~f:(Printf.printf "%b ");
 
-  [%expect {|(true false true false)|}]
+  [%expect {|true false true false|}]
 
 let%expect_test "set, unset and read flag" =
   let t = Registers.create () in
@@ -67,8 +66,7 @@ let%expect_test "set, unset and read flag" =
   let subtraction = Registers.read_flag t Subtraction in
   let zero = Registers.read_flag t Zero in
 
-  (carry, half_carry, subtraction, zero)
-  |> [%sexp_of : bool * bool * bool * bool]
-  |> Stdio.print_s;
+  [carry; half_carry; subtraction; zero]
+  |> List.iter ~f:(Printf.printf "%b ");
 
-  [%expect {|(true true false false)|}]
+  [%expect {|true true false false|}]
