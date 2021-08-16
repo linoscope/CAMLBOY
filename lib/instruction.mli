@@ -2,4 +2,5 @@ open Ints
 
 include module type of Instruction_types
 
-val fetch : Memory.t -> pc:uint16 -> t
+(* Returns (length_of_instruction, instruction) pair *)
+val fetch : Memory.t -> pc:uint16 -> uint16 * t

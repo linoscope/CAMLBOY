@@ -1,5 +1,5 @@
 module type Basics = sig
-  type t
+  type t [@@deriving show]
 
   val max_int : t
   val zero : t
@@ -20,12 +20,6 @@ module type Basics = sig
   val shift_right : t -> int -> t
   val of_int : int -> t
   val to_int : t -> int
-
-  val to_string : t -> string
-  val to_hexstring : t -> string
-  val pp : Format.formatter -> t -> unit
-  val pp_hex : Format.formatter -> t -> unit
-
 end
 
 module type Infix = sig
@@ -44,8 +38,9 @@ module type Infix = sig
 end
 
 module type S = sig
-  include Basics
+  type t
 
+  include Basics with type t := t
   module Infix : Infix with type t := t
   include Infix with type t := t
 end

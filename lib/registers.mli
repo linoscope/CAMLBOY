@@ -11,12 +11,14 @@ type r =
   | F
   | H
   | L
+[@@deriving show]
 
 type rr =
   | AF
   | BC
   | DE
   | HL
+[@@deriving show]
 
 type flag =
   | Carry

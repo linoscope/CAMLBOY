@@ -5,6 +5,6 @@ module Uint16 : sig
   val of_uint8 : Uint8.t -> t
 end
 
-type uint8 = Uint8.t
+type uint8 = Uint8.t [@@deriving show]
 
-type uint16 = Uint16.t
+type uint16 = Uint16.t [@@deriving show]

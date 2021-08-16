@@ -11,9 +11,23 @@ type t = {
   mutable l : uint8;
 }
 
-type r = A | B | C | D | E | F | H | L
+type r =
+  | A [@printer fun fmt _ -> fprintf fmt "A"]
+  | B [@printer fun fmt _ -> fprintf fmt "B"]
+  | C [@printer fun fmt _ -> fprintf fmt "C"]
+  | D [@printer fun fmt _ -> fprintf fmt "D"]
+  | E [@printer fun fmt _ -> fprintf fmt "E"]
+  | F [@printer fun fmt _ -> fprintf fmt "F"]
+  | H [@printer fun fmt _ -> fprintf fmt "H"]
+  | L [@printer fun fmt _ -> fprintf fmt "L"]
+[@@deriving show]
 
-type rr = AF | BC | DE | HL
+type rr =
+  | AF [@printer fun fmt _ -> fprintf fmt "AF"]
+  | BC [@printer fun fmt _ -> fprintf fmt "BC"]
+  | DE [@printer fun fmt _ -> fprintf fmt "DE"]
+  | HL [@printer fun fmt _ -> fprintf fmt "HL"]
+[@@deriving show]
 
 type flag = Carry | Half_carry | Subtraction | Zero
 

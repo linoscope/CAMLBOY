@@ -1,109 +1,147 @@
 open Ints
 
 type load_term =
-  | Immediate8 of uint8         (* Ex. 0x9A *)
-  | Immediate16 of uint16       (* Ex. 0x9ABC *)
-  | R_direct of Registers.r     (* Ex. A *)
-  | RR_direct of Registers.rr   (* Ex. BC *)
-  | RR_indirect of Registers.rr (* Ex. (BC) *)
-  | Direct of uint16            (* Ex. (0x9ABC) *)
-  | FF00_offset of uint8        (* Ex. (0xFF00+0x10) *)
-  | FF00_C
-  | SP                          (* SP *)
-  | HL_inc                      (* (HL+) *)
-  | HL_dec                      (* (HL-) *)
+  | Immediate8 of uint8         (* Ex. 0x9A *)          [@printer pp_uint8]
+  | Immediate16 of uint16       (* Ex. 0x9ABC *)        [@printer pp_uint16]
+  | R_direct of Registers.r     (* Ex. A *)             [@printer Registers.pp_r]
+  | RR_direct of Registers.rr   (* Ex. BC *)            [@printer Registers.pp_rr]
+  | RR_indirect of Registers.rr (* Ex. (BC) *)          [@printer fun fmt rr -> fprintf fmt "(%s)" (Registers.show_rr rr)]
+  | Direct of uint16            (* Ex. (0x9ABC) *)      [@printer fun fmt x -> fprintf fmt "(%s)" (show_uint16 x)]
+  | FF00_offset of uint8        (* Ex. (0xFF00+0x10) *) [@printer fun fmt x -> fprintf fmt "(0xFF00+%s)" (show_uint8 x)]
+  | FF00_C                      (* (0xFF00+C) *)        [@printer fun fmt _ -> fprintf fmt "(0xFF00+C)"]
+  | SP                          (* SP *)                [@printer fun fmt _ -> fprintf fmt "(SP)"]
+  | HL_inc                      (* (HL+) *)             [@printer fun fmt _ -> fprintf fmt "(HL+)"]
+  | HL_dec                      (* (HL-) *)             [@printer fun fmt _ -> fprintf fmt "(HL-)"]
+[@@deriving show]
 
 type load_operand = load_term * load_term
+                    [@printer fun fmt (l, r) -> fprintf fmt "%s, %s" (show_load_term l) (show_load_term r)]
+[@@deriving show]
 
 type alu_operand =
-  | Immediate of uint8      (* Ex. 0x9A *)
-  | R_direct of Registers.r (* Ex. A *)
-  | HL_indirect             (* Ex. (HL) *)
+  | Immediate of uint8      [@printer pp_uint8]
+  | R_direct of Registers.r [@printer Registers.pp_r]
+  | HL_indirect             [@printer fun fmt _ -> fprintf fmt "(HL)"]
+[@@deriving show]
 
 type to_hl =
-  | RR_direct of Registers.rr
-  | SP
+  | RR_direct of Registers.rr [@printer Registers.pp_rr]
+  | SP                        [@printer fun fmt _ -> fprintf fmt "SP"]
+[@@deriving show]
 
 type add_operand =
-  | To_A of alu_operand
-  | To_HL of to_hl
-  | To_SP of uint8
+  | To_A of alu_operand [@printer fun fmt x -> fprintf fmt "A, %s" (show_alu_operand x)]
+  | To_HL of to_hl      [@printer fun fmt x -> fprintf fmt "HL, %s" (show_to_hl x)]
+  | To_SP of uint8      [@printer fun fmt x -> fprintf fmt "SP, %s" (show_uint8 x)]
+[@@deriving show]
 
 type inc_operand =
-  | R_direct of Registers.r     (* Ex. A *)
-  | RR_direct of Registers.rr   (* Ex. BC *)
-  | HL_indirect                 (* (HL) *)
-  | SP
+  | R_direct of Registers.r   [@printer Registers.pp_r]
+  | RR_direct of Registers.rr [@printer Registers.pp_rr]
+  | HL_indirect               [@printer fun fmt _ -> fprintf fmt "(HL)"]
+  | SP                        [@printer fun fmt _ -> fprintf fmt "SP"]
+[@@deriving show]
 
 type dec_operand = inc_operand
+[@@deriving show]
 
 type r_operand =
-  | R_direct of Registers.r (* Ex. A *)
-  | HL_indirect             (* (HL) *)
+  | R_direct of Registers.r [@printer Registers.pp_r]
+  | HL_indirect             [@printer fun fmt _ -> fprintf fmt "(HL)"]
+[@@deriving show]
 
 type rr_operand =
-  | RR_direct of Registers.rr
+  | RR_direct of Registers.rr [@printer Registers.pp_rr]
+[@@deriving show]
 
 type condition = NZ | Z | NC | C
+[@@deriving show]
 
 type jp_operand =
-  | No_cond of uint16
-  | Cond of condition * uint16
-  | HL_indirect
+  | No_cond of uint16          [@printer pp_uint16]
+  | Cond of condition * uint16 [@printer fun fmt (c, x) -> fprintf fmt "%s, %s" (show_condition c) (show_uint16 x)]
+  | HL_indirect                [@printer fun fmt _ -> fprintf fmt "(HL)"]
+[@@deriving show]
 
 type jr_operand =
-  | No_cond of uint8
-  | Cond of condition * uint8
+  | No_cond of uint8          [@printer pp_uint8]
+  | Cond of condition * uint8 [@printer fun fmt (c, x) -> fprintf fmt "%s, %s" (show_condition c) (show_uint8 x)]
+[@@deriving show]
 
 type call_operand =
-  | No_cond of uint16
-  | Cond of condition * uint16
+  | No_cond of uint16          [@printer pp_uint16]
+  | Cond of condition * uint16 [@printer fun fmt (c, x) -> fprintf fmt "%s, %s" (show_condition c) (show_uint16 x)]
+[@@deriving show]
 
 type ret_operand =
-  | No_cond
-  | Cond of condition
+  | No_cond           [@printer fun fmt _ -> fprintf fmt ""]
+  | Cond of condition [@printer pp_condition]
+[@@deriving show]
+
+module RST_offset = struct
+  let x00 = 0x00 |> Uint16.of_int
+  let x08 = 0x08 |> Uint16.of_int
+  let x10 = 0x10 |> Uint16.of_int
+  let x18 = 0x18 |> Uint16.of_int
+  let x20 = 0x20 |> Uint16.of_int
+  let x28 = 0x28 |> Uint16.of_int
+  let x30 = 0x30 |> Uint16.of_int
+  let x38 = 0x38 |> Uint16.of_int
+end
+
+module Bit_pos = struct
+  let b0 = 0 |> Uint8.of_int
+  let b1 = 1 |> Uint8.of_int
+  let b2 = 2 |> Uint8.of_int
+  let b3 = 3 |> Uint8.of_int
+  let b4 = 4 |> Uint8.of_int
+  let b5 = 5 |> Uint8.of_int
+  let b6 = 6 |> Uint8.of_int
+  let b7 = 7 |> Uint8.of_int
+end
 
 type t =
-  | LD of load_operand
-  | PUSH of rr_operand
-  | POP of rr_operand
-  | ADD of add_operand
-  | ADC of alu_operand
-  | SUB of alu_operand
-  | SBC of alu_operand
-  | AND of alu_operand
-  | OR of alu_operand
-  | XOR of alu_operand
-  | CP of alu_operand
-  | INC of inc_operand
-  | DEC of dec_operand
-  | SWAP of r_operand
-  | DAA
-  | CPL
-  | CCF
-  | SCF
-  | NOP
-  | HALT
-  | STOP
-  | DI
-  | EI
-  | RLCA
-  | RLA
-  | RRCA
-  | RRA
-  | RLC of r_operand
-  | RL of r_operand
-  | RRC of r_operand
-  | RR of r_operand
-  | SLA of r_operand
-  | SRA of r_operand
-  | SRL of r_operand
-  | BIT of uint8 * r_operand
-  | SET of uint8 * r_operand
-  | RES of uint8 * r_operand
-  | JP of jp_operand
-  | JR of jr_operand
-  | CALL of call_operand
-  | RST of uint16
-  | RET of ret_operand
-  | RETI
+  | LD of load_operand       [@printer fun fmt x -> fprintf fmt "LD %s" (show_load_operand x)]
+  | PUSH of rr_operand       [@printer fun fmt x -> fprintf fmt "PUSH %s" (show_rr_operand x)]
+  | POP of rr_operand        [@printer fun fmt x -> fprintf fmt "POP %s" (show_rr_operand x)]
+  | ADD of add_operand       [@printer fun fmt x -> fprintf fmt "ADD %s" (show_add_operand x)]
+  | ADC of alu_operand       [@printer fun fmt x -> fprintf fmt "ADC %s" (show_alu_operand x)]
+  | SUB of alu_operand       [@printer fun fmt x -> fprintf fmt "SUB %s" (show_alu_operand x)]
+  | SBC of alu_operand       [@printer fun fmt x -> fprintf fmt "SBC %s" (show_alu_operand x)]
+  | AND of alu_operand       [@printer fun fmt x -> fprintf fmt "AND %s" (show_alu_operand x)]
+  | OR of alu_operand        [@printer fun fmt x -> fprintf fmt "OR %s" (show_alu_operand x)]
+  | XOR of alu_operand       [@printer fun fmt x -> fprintf fmt "XOR %s" (show_alu_operand x)]
+  | CP of alu_operand        [@printer fun fmt x -> fprintf fmt "CP %s" (show_alu_operand x)]
+  | INC of inc_operand       [@printer fun fmt x -> fprintf fmt "INC %s" (show_inc_operand x)]
+  | DEC of dec_operand       [@printer fun fmt x -> fprintf fmt "INC %s" (show_dec_operand x)]
+  | SWAP of r_operand        [@printer fun fmt x -> fprintf fmt "SWAP %s" (show_r_operand x)]
+  | DAA                      [@printer fun fmt _ -> fprintf fmt "DAA"]
+  | CPL                      [@printer fun fmt _ -> fprintf fmt "CPL"]
+  | CCF                      [@printer fun fmt _ -> fprintf fmt "CCF"]
+  | SCF                      [@printer fun fmt _ -> fprintf fmt "SCF"]
+  | NOP                      [@printer fun fmt _ -> fprintf fmt "NOP"]
+  | HALT                     [@printer fun fmt _ -> fprintf fmt "HAL"]
+  | STOP                     [@printer fun fmt _ -> fprintf fmt "STOP"]
+  | DI                       [@printer fun fmt _ -> fprintf fmt "DI"]
+  | EI                       [@printer fun fmt _ -> fprintf fmt "EI"]
+  | RLCA                     [@printer fun fmt _ -> fprintf fmt "RLCA"]
+  | RLA                      [@printer fun fmt _ -> fprintf fmt "RLA"]
+  | RRCA                     [@printer fun fmt _ -> fprintf fmt "RRCA"]
+  | RRA                      [@printer fun fmt _ -> fprintf fmt "RRA"]
+  | RLC of r_operand         [@printer fun fmt x -> fprintf fmt "RLC %s" (show_r_operand x)]
+  | RL of r_operand          [@printer fun fmt x -> fprintf fmt "RL %s" (show_r_operand x)]
+  | RRC of r_operand         [@printer fun fmt x -> fprintf fmt "RRC %s" (show_r_operand x)]
+  | RR of r_operand          [@printer fun fmt x -> fprintf fmt "RR %s" (show_r_operand x)]
+  | SLA of r_operand         [@printer fun fmt x -> fprintf fmt "SLA %s" (show_r_operand x)]
+  | SRA of r_operand         [@printer fun fmt x -> fprintf fmt "SRA %s" (show_r_operand x)]
+  | SRL of r_operand         [@printer fun fmt x -> fprintf fmt "SRL %s" (show_r_operand x)]
+  | BIT of uint8 * r_operand [@printer fun fmt (n, x) -> fprintf fmt "BIT %s, %s" (show_uint8 n) (show_r_operand x)]
+  | SET of uint8 * r_operand [@printer fun fmt (n, x) -> fprintf fmt "SET %s, %s" (show_uint8 n) (show_r_operand x)]
+  | RES of uint8 * r_operand [@printer fun fmt (n, x) -> fprintf fmt "RES %s, %s" (show_uint8 n) (show_r_operand x)]
+  | JP of jp_operand         [@printer fun fmt x -> fprintf fmt "JP %s" (show_jp_operand x)]
+  | JR of jr_operand         [@printer fun fmt x -> fprintf fmt "JR %s" (show_jr_operand x)]
+  | CALL of call_operand     [@printer fun fmt x -> fprintf fmt "CALL %s" (show_call_operand x)]
+  | RST of uint16            [@printer fun fmt x -> fprintf fmt "RST %s" (show_uint16 x)]
+  | RET of ret_operand       [@printer fun fmt x -> fprintf fmt "RET %s" (show_ret_operand x)]
+  | RETI                     [@printer fun fmt _ -> fprintf fmt "RETI"]
+[@@deriving show]
