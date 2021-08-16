@@ -1,6 +1,12 @@
 open Ints
+module Bytes = BytesLabels
 
 type t = bytes
+
+let create () = Bytes.create 0xFFFF
+
+let load t ~src ~dst_pos =
+  Bytes.blit ~src ~src_pos:0 ~dst:t ~dst_pos:(Uint16.to_int dst_pos) ~len:(Bytes.length src)
 
 let read_byte t addr =
   let addr = Uint16.to_int addr in

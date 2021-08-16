@@ -31,7 +31,7 @@ let fetch memory ~pc =
   | 0x0D -> l1, DEC (R_direct C)
   | 0x0E -> l2, LD (R_direct C, Immediate8 (next_byte ()))
   | 0x0F -> l1, RRCA
-  | 0x10 -> l1, STOP
+  | 0x10 -> ignore(next_byte ()); l2, STOP
   | 0x11 -> l3, LD (RR_direct DE, Immediate16 (next_word ()))
   | 0x12 -> l1, LD (RR_indirect DE, R_direct A)
   | 0x13 -> l1, INC (RR_direct DE)
@@ -42,12 +42,12 @@ let fetch memory ~pc =
   | 0x18 -> l2, JR (No_cond (next_byte ()))
   | 0x19 -> l1, ADD (To_HL (RR_direct DE))
   | 0x1A -> l1, LD (R_direct A, RR_indirect DE)
-  | 0x1B -> l1, DEC (RR_direct BC)
+  | 0x1B -> l1, DEC (RR_direct DE)
   | 0x1C -> l1, INC (R_direct E)
   | 0x1D -> l1, DEC (R_direct E)
   | 0x1E -> l2, LD (R_direct E, Immediate8 (next_byte ()))
   | 0x1F -> l1, RRA
-  | 0x20 -> l1, JR (Cond (NZ, next_byte ()))
+  | 0x20 -> l2, JR (Cond (NZ, next_byte ()))
   | 0x21 -> l3, LD (RR_direct HL, Immediate16 (next_word ()))
   | 0x22 -> l1, LD (HL_inc, R_direct A)
   | 0x23 -> l1, INC (RR_direct HL)
@@ -232,7 +232,7 @@ let fetch memory ~pc =
   | 0xD7 -> l1, RST RST_offset.x10
   | 0xD8 -> l1, RET (Cond C)
   | 0xD9 -> l1, RETI
-  | 0xDA -> l1, RET (Cond NZ)
+  | 0xDA -> l3, JP (Cond (C, next_word ()))
   | 0xDB -> l1, NOP
   | 0xDC -> l3, CALL (Cond (C, next_word ()))
   | 0xDD -> l1, NOP
@@ -262,7 +262,7 @@ let fetch memory ~pc =
   | 0xF5 -> l1, PUSH (RR_direct AF)
   | 0xF6 -> l2, OR (Immediate (next_byte ()))
   | 0xF7 -> l1, RST RST_offset.x30
-  | 0xF8 -> l1, LD (RR_direct HL, SP)
+  | 0xF8 -> l2, LD (RR_direct HL, SP_offset (next_byte ()))
   | 0xF9 -> l1, LD (SP, RR_direct HL)
   | 0xFA -> l3, LD (R_direct A, Immediate16 (next_word ()))
   | 0xFB -> l1, EI
