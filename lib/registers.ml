@@ -10,6 +10,7 @@ type t = {
   mutable h : uint8;
   mutable l : uint8;
 }
+[@@deriving show]
 
 type r =
   | A [@printer fun fmt _ -> fprintf fmt "A"]
@@ -31,6 +32,17 @@ type rr =
 
 type flag = Carry | Half_carry | Subtraction | Zero
 
+let create () = {
+  a = Uint8.zero;
+  b = Uint8.zero;
+  c = Uint8.zero;
+  d = Uint8.zero;
+  e = Uint8.zero;
+  f = Uint8.zero;
+  h = Uint8.zero;
+  l = Uint8.zero;
+}
+
 let read_r t = function
   | A -> t.a
   | B -> t.b
@@ -44,11 +56,10 @@ let read_r t = function
 let read_rr t rr =
   let open Uint16 in
   match rr with
-  | AF -> (of_uint8 t.a lsr 8) land of_uint8 t.f
-  | BC -> (of_uint8 t.b lsr 8) land of_uint8 t.c
-  | DE -> (of_uint8 t.d lsr 8) land of_uint8 t.e
-  | HL -> (of_uint8 t.h lsr 8) land of_uint8 t.l
-
+  | AF -> (of_uint8 t.a lsl 8) lor of_uint8 t.f
+  | BC -> (of_uint8 t.b lsl 8) lor of_uint8 t.c
+  | DE -> (of_uint8 t.d lsl 8) lor of_uint8 t.e
+  | HL -> (of_uint8 t.h lsl 8) lor of_uint8 t.l
 
 let write_r t r x = match r with
   | A -> t.a <- x

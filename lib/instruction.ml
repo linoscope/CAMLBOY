@@ -2,6 +2,28 @@ open Ints
 
 include Instruction_types
 
+module RST_offset = struct
+  let x00 = 0x00 |> Uint16.of_int
+  let x08 = 0x08 |> Uint16.of_int
+  let x10 = 0x10 |> Uint16.of_int
+  let x18 = 0x18 |> Uint16.of_int
+  let x20 = 0x20 |> Uint16.of_int
+  let x28 = 0x28 |> Uint16.of_int
+  let x30 = 0x30 |> Uint16.of_int
+  let x38 = 0x38 |> Uint16.of_int
+end
+
+module Bit_pos = struct
+  let b0 = 0 |> Uint8.of_int
+  let b1 = 1 |> Uint8.of_int
+  let b2 = 2 |> Uint8.of_int
+  let b3 = 3 |> Uint8.of_int
+  let b4 = 4 |> Uint8.of_int
+  let b5 = 5 |> Uint8.of_int
+  let b6 = 6 |> Uint8.of_int
+  let b7 = 7 |> Uint8.of_int
+end
+
 module Instruction_length = struct
   let l1 = 1 |> Uint16.of_int
   let l2 = 2 |> Uint16.of_int
@@ -9,7 +31,6 @@ module Instruction_length = struct
 end
 
 let fetch memory ~pc =
-  let open Registers in
   let open Instruction_length in
   let next_byte () = Memory.read_byte memory Uint16.(succ pc) in
   let next_word () = Memory.read_word memory Uint16.(succ pc) in

@@ -1,6 +1,7 @@
 open Ints
 
 type t
+[@@deriving show]
 
 type r =
   | A
@@ -25,6 +26,8 @@ type flag =
   | Half_carry
   | Subtraction
   | Zero
+
+val create : unit -> t
 
 val read_r : t -> r -> uint8
 

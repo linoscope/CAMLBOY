@@ -15,7 +15,7 @@ let%expect_test "show instruction" =
 
   [%expect {| BIT 0x01, B |}];
 
-  RST (Instruction.RST_offset.x10)
+  RST (0x10 |> Uint16.of_int)
   |> Instruction.show
   |> print_endline;
 

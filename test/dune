@@ -1,5 +1,5 @@
 (library
  (name camlboy_test)
- (libraries camlboy_lib)
+ (libraries camlboy_lib base)
  (inline_tests)
  (preprocess (pps ppx_jane)))

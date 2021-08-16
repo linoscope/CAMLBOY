@@ -83,28 +83,6 @@ type ret_operand =
   | Cond of condition [@printer pp_condition]
 [@@deriving show]
 
-module RST_offset = struct
-  let x00 = 0x00 |> Uint16.of_int
-  let x08 = 0x08 |> Uint16.of_int
-  let x10 = 0x10 |> Uint16.of_int
-  let x18 = 0x18 |> Uint16.of_int
-  let x20 = 0x20 |> Uint16.of_int
-  let x28 = 0x28 |> Uint16.of_int
-  let x30 = 0x30 |> Uint16.of_int
-  let x38 = 0x38 |> Uint16.of_int
-end
-
-module Bit_pos = struct
-  let b0 = 0 |> Uint8.of_int
-  let b1 = 1 |> Uint8.of_int
-  let b2 = 2 |> Uint8.of_int
-  let b3 = 3 |> Uint8.of_int
-  let b4 = 4 |> Uint8.of_int
-  let b5 = 5 |> Uint8.of_int
-  let b6 = 6 |> Uint8.of_int
-  let b7 = 7 |> Uint8.of_int
-end
-
 type t =
   | LD of load_operand       [@printer fun fmt x -> fprintf fmt "LD %s" (show_load_operand x)]
   | PUSH of rr_operand       [@printer fun fmt x -> fprintf fmt "PUSH %s" (show_rr_operand x)]
