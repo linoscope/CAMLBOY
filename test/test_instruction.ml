@@ -511,8 +511,8 @@ let%expect_test "test all instructions" =
     AND A, 0xab
     RST 0x0020
     ADD SP, 0xab
-    JP (HL)
-    LD 0xcdab, A
+    JP HL
+    LD (0xcdab), A
     NOP
     NOP
     NOP
@@ -528,7 +528,7 @@ let%expect_test "test all instructions" =
     RST 0x0030
     LD HL, SP+0xab
     LD SP, HL
-    LD A, 0xcdab
+    LD A, (0xcdab)
     EI
     NOP
     NOP
