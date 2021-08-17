@@ -15,7 +15,7 @@ let create_cpu () =
   let zeros = Bytes.create 0x10 in
   Bytes.fill zeros 0 0x10 (Char.chr 0);
   Memory.load memory ~src:zeros ~dst_pos:Uint16.zero;
-  Cpu.create_for_testing
+  Cpu.For_tests.create
     ~memory
     ~registers
     ~pc:Uint16.zero
@@ -25,7 +25,7 @@ let print_inst_result inst =
   let t = create_cpu () in
 
   inst
-  |> Cpu.execute t (Uint16.of_int 2);
+  |> Cpu.For_tests.execute t (Uint16.of_int 2);
   Cpu.show t
   |> print_endline
 

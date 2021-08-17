@@ -94,5 +94,7 @@ let tick t  =
   Instruction.fetch t.memory ~pc:t.pc
   |> (fun (inst_len, inst) -> execute t inst_len inst)
 
-
-let create_for_testing ~memory ~registers ~sp ~pc = {registers; memory; sp; pc}
+module For_tests = struct
+  let execute = execute
+  let create ~memory ~registers ~sp ~pc = {registers; memory; sp; pc}
+end
