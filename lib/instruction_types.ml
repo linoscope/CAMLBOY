@@ -123,18 +123,15 @@ let show = function
   | JP (c, x) -> (
       match c with
       | None -> Printf.sprintf "JP %s" (show_arg16 x)
-      | NZ | Z | NC | C -> Printf.sprintf "JP %s, %s" (show_condition c) (show_arg16 x)
-    )
+      | NZ | Z | NC | C -> Printf.sprintf "JP %s, %s" (show_condition c) (show_arg16 x))
   | JR (c, x) -> (
       match c with
       | None -> Printf.sprintf "JR %s" (show_uint8 x)
-      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (show_uint8 x)
-    )
+      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (show_uint8 x))
   | CALL (c, x) -> (
       match c with
       | None -> Printf.sprintf "CALL %s" (show_uint16 x)
-      | NZ | Z | NC | C -> Printf.sprintf "CALL %s, %s" (show_condition c) (show_uint16 x)
-    )
+      | NZ | Z | NC | C -> Printf.sprintf "CALL %s, %s" (show_condition c) (show_uint16 x))
   | RST x -> Printf.sprintf "RST %s" (show_uint16 x)
   | RET c -> Printf.sprintf "RET %s" (show_condition c)
   | RETI  -> Printf.sprintf "RETI"

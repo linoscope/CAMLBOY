@@ -6,7 +6,7 @@ let disassemble instr_bin_file out  =
   let rom_len = in_channel_length rom_in in
   let rom_bytes = really_input_string rom_in rom_len |> Bytes.of_string in
 
-  let memory = Memory.create () in
+  let memory = Memory.create ~size:0x3FF in
   Memory.load memory ~src:rom_bytes ~dst_pos:Uint16.zero;
 
   let rom_len = rom_len |> Uint16.of_int in
