@@ -20,7 +20,27 @@ let create mmu = {
 (** Functions for reading/writing arguments of 8 bit load/arithmic operations
  **  such as "LD B, 0xAB" and "ADD B, 0xAB" *)
 module Eight_bit_mode = struct
-  let (<--) (x : Instruction.arg) (y : uint8) (t : t) : unit =
+  let read (x : Instruction.arg) (t : t) : uint8 =
+    match x with
+    | Immediate n -> n
+    | Direct addr -> Mmu.read_byte t.mmu addr
+    | R r -> Registers.read_r t.registers r
+    | RR_indirect rr ->
+      let addr = Registers.read_rr t.registers rr in
+      Mmu.read_byte t.mmu addr
+    | FF00_offset n ->
+      let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
+      Mmu.read_byte t.mmu addr
+    | FF00_C ->
+      let c = Registers.read_r t.registers C in
+      let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
+      Mmu.read_byte t.mmu addr
+    | HL_inc
+    | HL_dec ->
+      let addr = Registers.read_rr t.registers HL in
+      Mmu.read_byte t.mmu addr
+
+  let write (x : Instruction.arg) (y : uint8) (t : t) : unit =
     match x with
     | R r -> Registers.write_r t.registers r y
     | RR_indirect rr ->
@@ -44,39 +64,13 @@ module Eight_bit_mode = struct
     | Direct addr -> Mmu.write_byte t.mmu ~addr ~data:y
     | Immediate _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg x)
 
-  let read (x : Instruction.arg) (t : t) : uint8 =
-    match x with
-    | Immediate n -> n
-    | Direct addr -> Mmu.read_byte t.mmu addr
-    | R r -> Registers.read_r t.registers r
-    | RR_indirect rr ->
-      let addr = Registers.read_rr t.registers rr in
-      Mmu.read_byte t.mmu addr
-    | FF00_offset n ->
-      let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
-      Mmu.read_byte t.mmu addr
-    | FF00_C ->
-      let c = Registers.read_r t.registers C in
-      let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
-      Mmu.read_byte t.mmu addr
-    | HL_inc
-    | HL_dec ->
-      let addr = Registers.read_rr t.registers HL in
-      Mmu.read_byte t.mmu addr
+
+  let (<--) x y t = write x y t
 end
 
 (** Functions for reading/writing arguments of 16 bit load/arithmic operations
  **  such as "LD BC, 0xABCD" and "ADD BC, 0xABCD" *)
 module Sixteen_bit_mode = struct
-  let (<--) (x : Instruction.arg16) (y : uint16) (t : t) : unit =
-    match x with
-    | Direct addr -> Mmu.write_word t.mmu ~addr ~data:y
-    | RR rr -> Registers.write_rr t.registers rr y
-    | SP -> t.sp <- y
-    | Immediate _
-    | Immediate8 _
-    | SP_offset _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg16 x)
-
   let read (x : Instruction.arg16) (t : t) : uint16 =
     match x with
     | Immediate n -> n
@@ -85,6 +79,17 @@ module Sixteen_bit_mode = struct
     | RR rr -> Registers.read_rr t.registers rr
     | SP -> t.sp
     | SP_offset n -> Uint16.(t.sp + of_uint8 n)
+
+  let write (x : Instruction.arg16) (y : uint16) (t : t) : unit =
+    match x with
+    | Direct addr -> Mmu.write_word t.mmu ~addr ~data:y
+    | RR rr -> Registers.write_rr t.registers rr y
+    | SP -> t.sp <- y
+    | Immediate _
+    | Immediate8 _
+    | SP_offset _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg16 x)
+
+  let (<--) x y t = write x y t
 end
 
 type next_pc = Next | Jump of uint16
