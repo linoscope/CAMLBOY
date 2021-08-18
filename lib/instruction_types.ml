@@ -30,7 +30,9 @@ type condition =
 
 type t =
   | LD of arg * arg
+  | LD16 of arg16 * arg16
   | ADD of arg * arg
+  | ADD16 of arg16 * arg16
   | ADC of arg * arg
   | SUB of arg * arg
   | SBC of arg * arg
@@ -39,12 +41,10 @@ type t =
   | XOR of arg * arg
   | CP of arg * arg
   | INC of arg
-  | DEC of arg
-  | SWAP of arg
-  | LD16 of arg16 * arg16
-  | ADD16 of arg16 * arg16
-  | DEC16 of arg16
   | INC16 of arg16
+  | DEC of arg
+  | DEC16 of arg16
+  | SWAP of arg
   | DAA
   | CPL
   | CCF
@@ -81,7 +81,9 @@ type t =
 
 let show = function
   | LD (x, y)    -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
+  | LD16 (x, y)  -> Printf.sprintf "LD %s, %s" (show_arg16 x) (show_arg16 y)
   | ADD (x, y)   -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
+  | ADD16 (x, y) -> Printf.sprintf "ADD %s, %s" (show_arg16 x) (show_arg16 y)
   | ADC (x, y)   -> Printf.sprintf "ADC %s, %s" (show_arg x) (show_arg y)
   | SUB (x, y)   -> Printf.sprintf "SUB %s, %s" (show_arg x) (show_arg y)
   | SBC (x, y)   -> Printf.sprintf "SBC %s, %s" (show_arg x) (show_arg y)
@@ -90,12 +92,10 @@ let show = function
   | XOR (x, y)   -> Printf.sprintf "XOR %s, %s" (show_arg x) (show_arg y)
   | CP (x, y)    -> Printf.sprintf "CP %s, %s" (show_arg x) (show_arg y)
   | INC x        -> Printf.sprintf "INC %s" (show_arg x)
-  | DEC x        -> Printf.sprintf "DEC %s" (show_arg x)
-  | SWAP x       -> Printf.sprintf "SWAP %s" (show_arg x)
-  | ADD16 (x, y) -> Printf.sprintf "ADD %s, %s" (show_arg16 x) (show_arg16 y)
-  | LD16 (x, y)  -> Printf.sprintf "LD %s, %s" (show_arg16 x) (show_arg16 y)
   | INC16 x      -> Printf.sprintf "INC %s" (show_arg16 x)
+  | DEC x        -> Printf.sprintf "DEC %s" (show_arg x)
   | DEC16 x      -> Printf.sprintf "DEC %s" (show_arg16 x)
+  | SWAP x       -> Printf.sprintf "SWAP %s" (show_arg x)
   | DAA          -> Printf.sprintf "DAA"
   | CPL          -> Printf.sprintf "CPL"
   | CCF          -> Printf.sprintf "CCF"

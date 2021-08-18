@@ -30,7 +30,7 @@ module Instruction_length = struct
   let l3 = 3 |> Uint16.of_int
 end
 
-let fetch memory ~pc =
+let fetch_and_decode memory ~pc =
   let open Instruction_length in
   let next_byte () = Memory.read_byte memory Uint16.(succ pc) in
   let next_word () = Memory.read_word memory Uint16.(succ pc) in

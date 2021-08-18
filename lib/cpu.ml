@@ -124,8 +124,7 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
       (x <-- n) t;
       Next
     | ADC (x, y) ->
-      let carry_f = Registers.(read_flag t.registers Carry) in
-      let c = if carry_f then Uint8.one else Uint8.zero in
+      let c = if Registers.(read_flag t.registers Carry) then Uint8.one else Uint8.zero in
       let x', y' = read x t, read y t in
       let n = Uint8.(x' + y' + c) in
       set_flags
@@ -197,6 +196,46 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
       let open SBM in
       (x <-- Uint16.(pred @@ read x t)) t;
       Next
+    | SWAP x ->
+      let x' = read x t in
+      (x <-- Uint8.((x' lsl 4) lor (x' lsr 4))) t;
+      Next
+    | DAA -> assert false;
+    | CPL ->
+      set_flags ~n:true ~h:true ();
+      Registers.read_r t.registers A
+      |> (fun n -> Uint8.(n lxor max_int))
+      |> Registers.write_r t.registers A;
+      Next
+    | CCF ->
+      let c = Registers.read_flag t.registers Carry in
+      set_flags ~n:false ~h:false ~c:(not c) ();
+      Next
+    | SCF ->
+      set_flags ~n:false ~h:false ~c:true ();
+      Next
+    | NOP -> Next
+    | HALT -> assert false;
+    | STOP -> assert false;
+    | DI -> assert false;
+    | EI -> assert false;
+    | RLCA ->
+      assert false;
+    | RLA          -> assert false;
+    | RRCA         -> assert false;
+    | RRA          -> assert false;
+    | RLC x        -> ignore(x); assert false;
+    | RL x         -> ignore(x); assert false;
+    | RRC x        -> ignore(x); assert false;
+    | RR x         -> ignore(x); assert false;
+    | SLA x        -> ignore(x); assert false;
+    | SRA x        -> ignore(x); assert false;
+    | SRL x        -> ignore(x); assert false;
+    | BIT (n, x)   -> ignore(x, n); assert false;
+    | SET (n, x)   -> ignore(x, n); assert false;
+    | RES (n, x)   -> ignore(x, n); assert false;
+    | PUSH rr      -> ignore(rr); assert false;
+    | POP rr       -> ignore(rr); assert false;
     | JR (c, x) ->
       if check_condition t c then
         Jump Uint16.(t.pc + of_uint8 x)
@@ -212,15 +251,17 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
         Jump SBM.(read x t)
       else
         Next
-    | _ -> failwith "Not implemented"
+    | RST x -> ignore(x); assert false;
+    | RET c -> ignore(c); assert false;
+    | RETI  -> assert false
   in
   match next_pc with
   | Next -> t.pc <- Uint16.(t.pc + inst_len)
   | Jump addr -> t.pc <- addr
 
 let tick t  =
-  Instruction.fetch t.memory ~pc:t.pc
-  |> (fun (inst_len, inst) -> execute t inst_len inst)
+  let (inst_len, inst) = Instruction.fetch_and_decode t.memory ~pc:t.pc in
+  execute t inst_len inst
 
 module For_tests = struct
   let execute = execute
