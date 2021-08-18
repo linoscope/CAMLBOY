@@ -5,6 +5,7 @@ type t = {
   mutable pc : uint16;
   mutable sp : uint16;
   mmu : Mmu.t;
+  mutable halted : bool;
 }
 [@@deriving show]
 
@@ -12,7 +13,8 @@ let create mmu = {
   registers = Registers.create ();
   pc = Uint16.zero;
   sp = Uint16.zero;
-  mmu
+  mmu;
+  halted = false;
 }
 
 (** Functions for reading/writing arguments of 8 bit load/arithmic operations
@@ -31,10 +33,14 @@ module Eight_bit_mode = struct
       let c = Registers.read_r t.registers C in
       let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
       Mmu.write_byte t.mmu ~addr ~data:y
-    | HL_inc
+    | HL_inc ->
+      let addr = Registers.read_rr t.registers HL in
+      Mmu.write_byte t.mmu ~addr ~data:y;
+      Registers.write_rr t.registers HL Uint16.(succ addr)
     | HL_dec ->
       let addr = Registers.read_rr t.registers HL in
-      Mmu.write_byte t.mmu ~addr ~data:y
+      Mmu.write_byte t.mmu ~addr ~data:y;
+      Registers.write_rr t.registers HL Uint16.(pred addr)
     | Direct addr -> Mmu.write_byte t.mmu ~addr ~data:y
     | Immediate _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg x)
 
@@ -215,27 +221,26 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
       set_flags ~n:false ~h:false ~c:true ();
       Next
     | NOP -> Next
-    | HALT -> assert false;
+    | HALT -> t.halted <- true; Next
     | STOP -> assert false;
     | DI -> assert false;
     | EI -> assert false;
-    | RLCA ->
-      assert false;
-    | RLA          -> assert false;
-    | RRCA         -> assert false;
-    | RRA          -> assert false;
-    | RLC x        -> ignore(x); assert false;
-    | RL x         -> ignore(x); assert false;
-    | RRC x        -> ignore(x); assert false;
-    | RR x         -> ignore(x); assert false;
-    | SLA x        -> ignore(x); assert false;
-    | SRA x        -> ignore(x); assert false;
-    | SRL x        -> ignore(x); assert false;
-    | BIT (n, x)   -> ignore(x, n); assert false;
-    | SET (n, x)   -> ignore(x, n); assert false;
-    | RES (n, x)   -> ignore(x, n); assert false;
-    | PUSH rr      -> ignore(rr); assert false;
-    | POP rr       -> ignore(rr); assert false;
+    | RLCA -> assert false;
+    | RLA -> assert false;
+    | RRCA -> assert false;
+    | RRA -> assert false;
+    | RLC x -> ignore(x); assert false;
+    | RL x -> ignore(x); assert false;
+    | RRC x -> ignore(x); assert false;
+    | RR x -> ignore(x); assert false;
+    | SLA x -> ignore(x); assert false;
+    | SRA x -> ignore(x); assert false;
+    | SRL x -> ignore(x); assert false;
+    | BIT (n, x) -> ignore(x, n); assert false;
+    | SET (n, x) -> ignore(x, n); assert false;
+    | RES (n, x) -> ignore(x, n); assert false;
+    | PUSH rr -> ignore(rr); assert false;
+    | POP rr -> ignore(rr); assert false;
     | JR (c, x) ->
       if check_condition t c then
         Jump Uint16.(t.pc + of_uint8 x)
@@ -265,5 +270,5 @@ let tick t  =
 
 module For_tests = struct
   let execute = execute
-  let create ~mmu ~registers ~sp ~pc = {registers; mmu; sp; pc}
+  let create ~mmu ~registers ~sp ~pc ~halted = {registers; mmu; sp; pc; halted}
 end
