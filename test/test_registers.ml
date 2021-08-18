@@ -70,3 +70,20 @@ let%expect_test "set, unset and read flag" =
   |> List.iter ~f:(Printf.printf "%b ");
 
   [%expect {|true true false false|}]
+
+
+let%expect_test "set_flags" =
+  let t = Registers.create () in
+
+  Registers.set_flag t Carry;
+  Registers.set_flags t ~c:false ~h:true ~n:true ~z:true ();
+
+  let carry = Registers.read_flag t Carry in
+  let half_carry = Registers.read_flag t Half_carry in
+  let subtraction = Registers.read_flag t Subtraction in
+  let zero = Registers.read_flag t Zero in
+
+  [carry; half_carry; subtraction; zero]
+  |> List.iter ~f:(Printf.printf "%b ");
+
+  [%expect {|false true true true|}]

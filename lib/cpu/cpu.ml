@@ -4,7 +4,7 @@ type t = {
   registers : Registers.t;
   mutable pc : uint16;
   mutable sp : uint16;
-  mmu : Mmu.t;
+  mmu : Mmu.t; [@opaque]
   mutable halted : bool;
 }
 [@@deriving show]
@@ -226,19 +226,77 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
       set_flags ~n:false ~h:false ~c:true ();
       Next
     | NOP -> Next
-    | HALT -> t.halted <- true; Next
+    | HALT ->
+      t.halted <- true;
+      Next
     | STOP -> assert false;
     | DI -> assert false;
     | EI -> assert false;
-    | RLCA -> assert false;
-    | RLA -> assert false;
-    | RRCA -> assert false;
-    | RRA -> assert false;
-    | RLC x -> ignore(x); assert false;
-    | RL x -> ignore(x); assert false;
-    | RRC x -> ignore(x); assert false;
-    | RR x -> ignore(x); assert false;
-    | SLA x -> ignore(x); assert false;
+    | RLCA ->
+      let a = Registers.read_r t.registers A in
+      let c = Uint8.(a land of_int 0x80 <> zero) in
+      let n = Uint8.((a lsl 1) lor if c then one else zero) in
+      Registers.write_r t.registers A n;
+      set_flags ~n:false ~h:false ~z:false ~c ();
+      Next
+    | RLA ->
+      let a = Registers.read_r t.registers A in
+      let old_c = Registers.read_flag t.registers Carry in
+      let n = Uint8.((a lsl 1) lor if old_c then one else zero) in
+      Registers.write_r t.registers A n;
+      let new_c = Uint8.(a land of_int 0x80 <> zero) in
+      set_flags ~n:false ~h:false ~z:false ~c:new_c ();
+      Next
+    | RRCA ->
+      let a = Registers.read_r t.registers A in
+      let c = Uint8.(a land of_int 1 <> zero) in
+      let n = Uint8.((a lsr 1) lor if c then of_int 0x80 else zero) in
+      Registers.write_r t.registers A n;
+      set_flags ~n:false ~h:false ~z:false ~c:c ();
+      Next
+    | RRA ->
+      let a = Registers.read_r t.registers A in
+      let old_c = Registers.read_flag t.registers Carry in
+      let n = Uint8.((a lsr 1) lor if old_c then of_int 0x80 else zero) in
+      Registers.write_r t.registers A n;
+      let new_c = Uint8.(a land of_int 0x80 <> zero) in
+      set_flags ~n:false ~h:false ~z:false ~c:new_c ();
+      Next
+    | RLC x ->
+      let x' = read x t in
+      let c = Uint8.(x' land of_int 0x80 <> zero) in
+      let n = Uint8.((x' lsl 1) lor if c then one else zero) in
+      (x <-- n) t;
+      set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c ();
+      Next
+    | RL x ->
+      let x' = read x t in
+      let old_c = Registers.read_flag t.registers Carry in
+      let n = Uint8.((x' lsl 1) lor if old_c then one else zero) in
+      (x <-- n) t;
+      let new_c = Uint8.(x' land of_int 0x80 <> zero) in
+      set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:new_c ();
+      Next
+    | RRC x ->
+      let x' = read x t in
+      let c = Uint8.(x' land of_int 1 <> zero) in
+      let n = Uint8.((x' lsr 1) lor if c then of_int 0x80 else zero) in
+      (x <-- n) t;
+      set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c ();
+      Next
+    | RR x ->
+      let x' = read x t in
+      let old_c = Registers.read_flag t.registers Carry in
+      let n = Uint8.((x' lsr 1) lor if old_c then of_int 0x80 else zero) in
+      (x <-- n) t;
+      set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x80 <> zero) ();
+      Next
+    | SLA x ->
+      let x' = read x t in
+      let n = Uint8.(x' lsl 1) in
+      (x <-- n) t;
+      set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x80 <> zero) ();
+      Next
     | SRA x -> ignore(x); assert false;
     | SRL x -> ignore(x); assert false;
     | BIT (n, x) -> ignore(x, n); assert false;

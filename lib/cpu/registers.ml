@@ -112,10 +112,10 @@ let set_flags t
     ?(z = read_flag t Zero)
     () =
   let open Uint8 in
-  if c then t.f <- t.f lor (of_int 0b0001);
-  if h then t.f <- t.f lor (of_int 0b0010);
-  if n then t.f <- t.f lor (of_int 0b0100);
-  if z then t.f <- t.f lor (of_int 0b1000)
+  if c then t.f <- t.f lor (of_int 0b0001) else t.f <- t.f land (of_int 0b1110);
+  if h then t.f <- t.f lor (of_int 0b0010) else t.f <- t.f land (of_int 0b1101);
+  if n then t.f <- t.f lor (of_int 0b0100) else t.f <- t.f land (of_int 0b1011);
+  if z then t.f <- t.f lor (of_int 0b1000) else t.f <- t.f land (of_int 0b0111)
 
 let unset_flag t flag =
   let open Uint8 in
