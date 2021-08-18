@@ -30,8 +30,6 @@ type condition =
 
 type t =
   | LD of arg * arg
-  | PUSH of Registers.rr
-  | POP of Registers.rr
   | ADD of arg * arg
   | ADC of arg * arg
   | SUB of arg * arg
@@ -70,18 +68,19 @@ type t =
   | BIT of uint8 * arg
   | SET of uint8 * arg
   | RES of uint8 * arg
+  | PUSH of Registers.rr
+  | POP of Registers.rr
   | JP of condition * arg16
   | JR of condition * uint8
   | CALL of condition * uint16
   | RST of uint16
   | RET of condition
   | RETI
+
 [@@deriving show]
 
 let show = function
   | LD (x, y)    -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
-  | PUSH rr      -> Printf.sprintf "PUSH %s" (Registers.show_rr rr)
-  | POP rr       -> Printf.sprintf "POP %s" (Registers.show_rr rr)
   | ADD (x, y)   -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
   | ADC (x, y)   -> Printf.sprintf "ADC %s, %s" (show_arg x) (show_arg y)
   | SUB (x, y)   -> Printf.sprintf "SUB %s, %s" (show_arg x) (show_arg y)
@@ -120,6 +119,8 @@ let show = function
   | BIT (n, x)   -> Printf.sprintf "BIT %s, %s" (show_uint8 n) (show_arg x)
   | SET (n, x)   -> Printf.sprintf "SET %s, %s" (show_uint8 n) (show_arg x)
   | RES (n, x)   -> Printf.sprintf "RES %s, %s" (show_uint8 n) (show_arg x)
+  | PUSH rr      -> Printf.sprintf "PUSH %s" (Registers.show_rr rr)
+  | POP rr       -> Printf.sprintf "POP %s" (Registers.show_rr rr)
   | JP (c, x) -> (
       match c with
       | None -> Printf.sprintf "JP %s" (show_arg16 x)

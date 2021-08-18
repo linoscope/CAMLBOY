@@ -97,6 +97,18 @@ let set_flag t flag =
   | Subtraction -> t.f <- t.f lor (of_int 0b0100)
   | Zero        -> t.f <- t.f lor (of_int 0b1000)
 
+let set_flags t
+    ?(c = read_flag t Carry)
+    ?(h = read_flag t Half_carry)
+    ?(n = read_flag t Subtraction)
+    ?(z = read_flag t Zero)
+    () =
+  let open Uint8 in
+  if c then t.f <- t.f lor (of_int 0b0001);
+  if h then t.f <- t.f lor (of_int 0b0010);
+  if n then t.f <- t.f lor (of_int 0b0100);
+  if z then t.f <- t.f lor (of_int 0b1000)
+
 let unset_flag t flag =
   let open Uint8 in
   match flag with
@@ -104,3 +116,5 @@ let unset_flag t flag =
   | Half_carry  -> t.f <- t.f land (of_int 0b11111101)
   | Subtraction -> t.f <- t.f land (of_int 0b11111011)
   | Zero        -> t.f <- t.f land (of_int 0b11110111)
+
+let clear_flags t = t.f <- Uint8.zero

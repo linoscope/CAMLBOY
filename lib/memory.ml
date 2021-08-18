@@ -20,6 +20,9 @@ let read_word t addr =
 let write_byte t ~addr ~data =
   Bytes.set_int8 t (Uint16.to_int addr) (Uint8.to_int data)
 
+let write_word t ~addr ~data =
+  Bytes.set_int16_le t (Uint16.to_int addr) (Uint16.to_int data)
+
 let show t =
   let buf = Buffer.create (2 * Bytes.length t) in
   Bytes.iter t ~f:(fun c -> Printf.sprintf "%02x " (Char.code c) |> Buffer.add_string buf);

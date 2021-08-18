@@ -41,4 +41,8 @@ val read_flag : t -> flag -> bool
 
 val set_flag : t -> flag -> unit
 
+val set_flags : t -> ?c:bool -> ?h:bool -> ?n:bool -> ?z:bool -> unit -> unit
+
 val unset_flag : t -> flag -> unit
+
+val clear_flags : t -> unit
