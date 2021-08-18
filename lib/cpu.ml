@@ -4,15 +4,15 @@ type t = {
   registers : Registers.t;
   mutable pc : uint16;
   mutable sp : uint16;
-  memory : Memory.t;
+  mmu : Mmu.t;
 }
 [@@deriving show]
 
-let create memory = {
+let create mmu = {
   registers = Registers.create ();
   pc = Uint16.zero;
   sp = Uint16.zero;
-  memory
+  mmu
 }
 
 (** Functions for reading/writing arguments of 8 bit load/arithmic operations
@@ -23,40 +23,40 @@ module Eight_bit_mode = struct
     | R r -> Registers.write_r t.registers r y
     | RR_indirect rr ->
       let addr = Registers.read_rr t.registers rr in
-      Memory.write_byte t.memory ~addr ~data:y
+      Mmu.write_byte t.mmu ~addr ~data:y
     | FF00_offset n ->
       let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
-      Memory.write_byte t.memory ~addr ~data:y
+      Mmu.write_byte t.mmu ~addr ~data:y
     | FF00_C ->
       let c = Registers.read_r t.registers C in
       let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
-      Memory.write_byte t.memory ~addr ~data:y
+      Mmu.write_byte t.mmu ~addr ~data:y
     | HL_inc
     | HL_dec ->
       let addr = Registers.read_rr t.registers HL in
-      Memory.write_byte t.memory ~addr ~data:y
-    | Direct addr -> Memory.write_byte t.memory ~addr ~data:y
+      Mmu.write_byte t.mmu ~addr ~data:y
+    | Direct addr -> Mmu.write_byte t.mmu ~addr ~data:y
     | Immediate _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg x)
 
   let read (x : Instruction.arg) (t : t) : uint8 =
     match x with
     | Immediate n -> n
-    | Direct addr -> Memory.read_byte t.memory addr
+    | Direct addr -> Mmu.read_byte t.mmu addr
     | R r -> Registers.read_r t.registers r
     | RR_indirect rr ->
       let addr = Registers.read_rr t.registers rr in
-      Memory.read_byte t.memory addr
+      Mmu.read_byte t.mmu addr
     | FF00_offset n ->
       let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
-      Memory.read_byte t.memory addr
+      Mmu.read_byte t.mmu addr
     | FF00_C ->
       let c = Registers.read_r t.registers C in
       let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
-      Memory.read_byte t.memory addr
+      Mmu.read_byte t.mmu addr
     | HL_inc
     | HL_dec ->
       let addr = Registers.read_rr t.registers HL in
-      Memory.read_byte t.memory addr
+      Mmu.read_byte t.mmu addr
 end
 
 (** Functions for reading/writing arguments of 16 bit load/arithmic operations
@@ -64,7 +64,7 @@ end
 module Sixteen_bit_mode = struct
   let (<--) (x : Instruction.arg16) (y : uint16) (t : t) : unit =
     match x with
-    | Direct addr -> Memory.write_word t.memory ~addr ~data:y
+    | Direct addr -> Mmu.write_word t.mmu ~addr ~data:y
     | RR rr -> Registers.write_rr t.registers rr y
     | SP -> t.sp <- y
     | Immediate _
@@ -75,7 +75,7 @@ module Sixteen_bit_mode = struct
     match x with
     | Immediate n -> n
     | Immediate8 n -> n |> Uint16.of_uint8
-    | Direct addr -> Memory.read_word t.memory addr
+    | Direct addr -> Mmu.read_word t.mmu addr
     | RR rr -> Registers.read_rr t.registers rr
     | SP -> t.sp
     | SP_offset n -> Uint16.(t.sp + of_uint8 n)
@@ -260,10 +260,10 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
   | Jump addr -> t.pc <- addr
 
 let tick t  =
-  let (inst_len, inst) = Instruction.fetch_and_decode t.memory ~pc:t.pc in
+  let (inst_len, inst) = Instruction.fetch_and_decode t.mmu ~pc:t.pc in
   execute t inst_len inst
 
 module For_tests = struct
   let execute = execute
-  let create ~memory ~registers ~sp ~pc = {registers; memory; sp; pc}
+  let create ~mmu ~registers ~sp ~pc = {registers; mmu; sp; pc}
 end

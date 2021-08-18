@@ -30,11 +30,11 @@ module Instruction_length = struct
   let l3 = 3 |> Uint16.of_int
 end
 
-let fetch_and_decode memory ~pc =
+let fetch_and_decode mmu ~pc =
   let open Instruction_length in
-  let next_byte () = Memory.read_byte memory Uint16.(succ pc) in
-  let next_word () = Memory.read_word memory Uint16.(succ pc) in
-  let op = Memory.read_byte memory pc |> Uint8.to_int in
+  let next_byte () = Mmu.read_byte mmu Uint16.(succ pc) in
+  let next_word () = Mmu.read_word mmu Uint16.(succ pc) in
+  let op = Mmu.read_byte mmu pc |> Uint8.to_int in
   match op with
   | 0x00 -> l1, NOP
   | 0x01 -> l3, LD16 (RR BC, Immediate (next_word ()))
