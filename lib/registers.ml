@@ -1,12 +1,20 @@
 open Ints
 
+let pp_f fmt f =
+  let f = Uint8.to_int f in
+  let c = if f land 0b0001 <> 0 then 1 else 0 in
+  let h = if f land 0b0010 <> 0 then 1 else 0 in
+  let n = if f land 0b0100 <> 0 then 1 else 0 in
+  let z = if f land 0b1000 <> 0 then 1 else 0 in
+  Format.fprintf fmt "(c=%d, h=%d, n=%d, z=%d)" c h n z
+
 type t = {
   mutable a : uint8;
   mutable b : uint8;
   mutable c : uint8;
   mutable d : uint8;
   mutable e : uint8;
-  mutable f : uint8;
+  mutable f : uint8 [@printer pp_f];
   mutable h : uint8;
   mutable l : uint8;
 }

@@ -8,7 +8,7 @@ let create_cpu () =
   Registers.write_r registers C (Uint8.of_int 0xCC);
   Registers.write_r registers D (Uint8.of_int 0xDD);
   Registers.write_r registers E (Uint8.of_int 0xEE);
-  Registers.write_r registers F (Uint8.of_int 0xFF);
+  Registers.write_r registers F (Uint8.of_int 0x00);
   Registers.write_r registers H (Uint8.of_int 0x00);
   Registers.write_r registers L (Uint8.of_int 0x02);
   let mmu = Mmu.create ~size:0x10 in
@@ -36,8 +36,8 @@ let%expect_test "LD B, 0xAB" =
 
   [%expect {|
     { Cpu.registers =
-      { Registers.a = 0xaa; b = 0x99; c = 0xcc; d = 0xdd; e = 0xee; f = 0xff;
-        h = 0x00; l = 0x02 };
+      { Registers.a = 0xaa; b = 0x99; c = 0xcc; d = 0xdd; e = 0xee;
+        f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x02 };
       pc = 0x0002; sp = 0x00ff;
       mmu = 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  } |}]
 
@@ -47,8 +47,8 @@ let%expect_test "LD (BC), 0x9988" =
 
   [%expect {|
     { Cpu.registers =
-      { Registers.a = 0xaa; b = 0x99; c = 0x88; d = 0xdd; e = 0xee; f = 0xff;
-        h = 0x00; l = 0x02 };
+      { Registers.a = 0xaa; b = 0x99; c = 0x88; d = 0xdd; e = 0xee;
+        f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x02 };
       pc = 0x0002; sp = 0x00ff;
       mmu = 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  } |}]
 
@@ -58,7 +58,7 @@ let%expect_test "LD (HL), B" =
 
   [%expect{|
     { Cpu.registers =
-      { Registers.a = 0xaa; b = 0xbb; c = 0xcc; d = 0xdd; e = 0xee; f = 0xff;
-        h = 0x00; l = 0x02 };
+      { Registers.a = 0xaa; b = 0xbb; c = 0xcc; d = 0xdd; e = 0xee;
+        f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x02 };
       pc = 0x0002; sp = 0x00ff;
       mmu = 00 00 bb 00 00 00 00 00 00 00 00 00 00 00 00 00  } |}]
