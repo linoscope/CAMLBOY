@@ -1,4 +1,4 @@
-open Ints
+open Uints
 
 type arg =
   | Immediate of uint8          [@printer fun fmt x -> fprintf fmt "%s" (Uint8.show x)]

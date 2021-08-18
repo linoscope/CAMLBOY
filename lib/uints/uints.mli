@@ -1,7 +1,7 @@
-module Uint8 : Ints_intf.S
+module Uint8 : Uints_intf.S
 
 module Uint16 : sig
-  include Ints_intf.S
+  include Uints_intf.S
   val of_uint8 : Uint8.t -> t
 end
 

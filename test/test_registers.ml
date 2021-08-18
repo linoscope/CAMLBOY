@@ -1,5 +1,5 @@
 include Camlboy_lib
-open Ints
+open Uints
 open StdLabels
 
 

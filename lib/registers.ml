@@ -1,4 +1,4 @@
-open Ints
+open Uints
 
 let pp_f fmt f =
   let f = Uint8.to_int f in

@@ -1,4 +1,4 @@
-open Ints
+open Uints
 
 type t = {
   registers : Registers.t;

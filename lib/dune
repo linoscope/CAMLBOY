@@ -1,4 +1,4 @@
 (library
  (name camlboy_lib)
- (libraries ints)
+ (libraries uints)
  (preprocess (pps ppx_deriving.show)))

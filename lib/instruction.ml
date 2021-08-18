@@ -1,4 +1,4 @@
-open Ints
+open Uints
 
 include Instruction_types
 

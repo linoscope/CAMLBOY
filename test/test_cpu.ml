@@ -1,5 +1,5 @@
 open Camlboy_lib
-open Ints
+open Uints
 
 let create_cpu () =
   let registers = Registers.create () in

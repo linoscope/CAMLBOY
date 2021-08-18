@@ -1,5 +1,5 @@
 include Camlboy_lib
-open Ints
+open Uints
 
 let disassemble instr_bin_file out  =
   let rom_in = open_in instr_bin_file in

@@ -1,4 +1,4 @@
-module MakeInfix (B : Ints_intf.Basics) : Ints_intf.Infix with type t := B.t = struct
+module MakeInfix (B : Uints_intf.Basics) : Uints_intf.Infix with type t := B.t = struct
   open B
   let ( + ) = add
   let ( - ) = sub
