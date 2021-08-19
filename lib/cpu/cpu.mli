@@ -14,6 +14,7 @@ module For_tests : sig
     sp:uint16 ->
     pc:uint16 ->
     halted:bool ->
+    ime:bool ->
     t
   val execute : t -> uint16 -> Instruction.t -> unit
 end

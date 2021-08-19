@@ -1,11 +1,20 @@
 open Uints
 
+type count_down =
+  | One   [@printer fun fmt _ -> fprintf fmt "1"]
+  | Zero  [@printer fun fmt _ -> fprintf fmt "0"]
+  | None  [@printer fun fmt _ -> fprintf fmt "_"]
+[@@deriving show]
+
 type t = {
   registers : Registers.t;
   mutable pc : uint16;
   mutable sp : uint16;
   mmu : Mmu.t; [@opaque]
   mutable halted : bool;
+  mutable ime : bool;           (* interrupt master enable *)
+  mutable until_enable_ime : count_down;
+  mutable until_disable_ime : count_down;
 }
 [@@deriving show]
 
@@ -15,6 +24,9 @@ let create mmu = {
   sp = Uint16.zero;
   mmu;
   halted = false;
+  ime = true;
+  until_enable_ime = None;
+  until_disable_ime = None;
 }
 
 (** Functions for reading/writing arguments of 8 bit load/arithmic operations
@@ -230,8 +242,12 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
       t.halted <- true;
       Next
     | STOP -> assert false;
-    | DI -> assert false;
-    | EI -> assert false;
+    | DI ->
+      t.until_disable_ime <- One;
+      Next
+    | EI ->
+      t.until_enable_ime <- One;
+      Next
     | RLCA ->
       let a = Registers.read_r t.registers A in
       let c = Uint8.(a land of_int 0x80 <> zero) in
@@ -356,17 +372,33 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
         Jump addr
       end else
         Next
-    | RETI  -> assert false
+    | RETI  ->
+      let addr = Mmu.read_word t.mmu t.sp in
+      t.sp <- Uint16.(t.sp + of_int 2);
+      t.ime <- true;
+      Jump addr
   in
   match next_pc with
   | Next -> t.pc <- Uint16.(t.pc + inst_len)
   | Jump addr -> t.pc <- addr
 
+let update_ime t =
+  begin match t.until_enable_ime with
+    | One -> t.until_enable_ime <- Zero
+    | Zero -> t.until_enable_ime <- None; t.ime <- true
+    | None -> ()
+  end;
+  match t.until_disable_ime with
+  | One -> t.until_disable_ime <- Zero
+  | Zero -> t.until_disable_ime <- None; t.ime <- true
+  | None -> ()
+
 let tick t  =
+  update_ime t;
   let (inst_len, inst) = Instruction.fetch_and_decode t.mmu ~pc:t.pc in
   execute t inst_len inst
 
 module For_tests = struct
   let execute = execute
-  let create ~mmu ~registers ~sp ~pc ~halted = {registers; mmu; sp; pc; halted}
+  let create ~mmu ~registers ~sp ~pc ~halted ~ime = {registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None}
 end
