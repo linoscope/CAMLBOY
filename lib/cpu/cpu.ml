@@ -297,30 +297,65 @@ let execute (t : t) (inst_len : uint16) (inst : Instruction.t) : unit =
       (x <-- n) t;
       set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x80 <> zero) ();
       Next
-    | SRA x -> ignore(x); assert false;
-    | SRL x -> ignore(x); assert false;
-    | BIT (n, x) -> ignore(x, n); assert false;
-    | SET (n, x) -> ignore(x, n); assert false;
-    | RES (n, x) -> ignore(x, n); assert false;
-    | PUSH rr -> ignore(rr); assert false;
-    | POP rr -> ignore(rr); assert false;
+    | SRA x ->
+      let x' = read x t in
+      let n = Uint8.((x' lsr 1) lor (x' land of_int 0x80)) in
+      (x <-- n) t;
+      set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x1 <> zero) ();
+      Next
+    | SRL x ->
+      let x' = read x t in
+      let n = Uint8.(x' lsr 1) in
+      (x <-- n) t;
+      set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x1 <> zero) ();
+      Next
+    | BIT (n, x) ->
+      let b = Uint8.(read x t land (one lsl to_int n) = zero) in
+      set_flags ~n:false ~h:true ~z:b ();
+      Next
+    | SET (n, x) ->
+      (x <-- Uint8.(read x t lor (one lsl to_int n))) t;
+      Next
+    | RES (n, x) ->
+      let mask = Uint8.((one lsl to_int n) lxor of_int 0b11111111) in
+      (x <-- Uint8.(read x t land mask)) t;
+      Next
+    | PUSH rr ->
+      t.sp <- Uint16.(t.sp - of_int 2);
+      Mmu.write_word t.mmu ~addr:t.sp ~data:(Registers.read_rr t.registers rr);
+      Next
+    | POP rr ->
+      Registers.write_rr t.registers rr (Mmu.read_word t.mmu t.sp);
+      t.sp <- Uint16.(t.sp + of_int 2);
+      Next
+    | JP (c, x) ->
+      if check_condition t c then
+        Jump SBM.(read x t)
+      else
+        Next
     | JR (c, x) ->
       if check_condition t c then
         Jump Uint16.(t.pc + of_uint8 x)
       else
         Next
     | CALL (c, x) ->
-      if check_condition t c then
+      if check_condition t c then begin
+        t.sp <- Uint16.(t.sp - of_int 2);
+        Mmu.write_word t.mmu ~addr:t.sp ~data:Uint16.(t.pc + inst_len);
         Jump x
-      else
+      end else
         Next
-    | JP (c, x) ->
-      if check_condition t c then
-        Jump SBM.(read x t)
-      else
+    | RST x ->
+      t.sp <- Uint16.(t.sp - of_int 2);
+      Mmu.write_word t.mmu ~addr:t.sp ~data:Uint16.(t.pc + inst_len);
+      Jump x
+    | RET c ->
+      if check_condition t c then begin
+        let addr = Mmu.read_word t.mmu t.sp in
+        t.sp <- Uint16.(t.sp + of_int 2);
+        Jump addr
+      end else
         Next
-    | RST x -> ignore(x); assert false;
-    | RET c -> ignore(c); assert false;
     | RETI  -> assert false
   in
   match next_pc with
