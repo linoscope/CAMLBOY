@@ -1,6 +1,7 @@
+open Camlboy_lib
 open Uints
 
-type t [@@deriving show]
+type t
 
 val create : size:int -> t
 

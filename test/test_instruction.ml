@@ -1,13 +1,15 @@
 include Camlboy_lib
 open Uints
 
+module Instruction = Instruction.Make(Mock_mmu)
+
 let disassemble instr_bin_file out  =
   let rom_in = open_in instr_bin_file in
   let rom_len = in_channel_length rom_in in
   let rom_bytes = really_input_string rom_in rom_len |> Bytes.of_string in
 
-  let mmu = Mmu.create ~size:0x3FF in
-  Mmu.load mmu ~src:rom_bytes ~dst_pos:Uint16.zero;
+  let mmu = Mock_mmu.create ~size:0x3FF in
+  Mock_mmu.load mmu ~src:rom_bytes ~dst_pos:Uint16.zero;
 
   let rom_len = rom_len |> Uint16.of_int in
   let rec loop pc =
