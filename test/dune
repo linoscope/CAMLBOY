@@ -3,3 +3,5 @@
  (libraries camlboy_lib)
  (inline_tests)
  (preprocess (pps ppx_jane)))
+
+(include_subdirs unqualified)

@@ -1,6 +1,9 @@
 include Camlboy_lib
 open Uints
 
+module Mmu = Mock_mmu
+module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
+
 let disassemble instr_bin_file out  =
   let rom_in = open_in instr_bin_file in
   let rom_len = in_channel_length rom_in in
@@ -14,7 +17,7 @@ let disassemble instr_bin_file out  =
     if pc == rom_len then
       ()
     else
-      let (inst_len, inst) = Instruction.fetch_and_decode mmu ~pc in
+      let (inst_len, inst) = Fetch_and_decode.f mmu ~pc in
       Instruction.show inst |> Printf.fprintf out "%s\n";
       loop Uint16.(pc + inst_len)
   in
