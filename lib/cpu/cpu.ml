@@ -394,11 +394,11 @@ module Make (Mmu : Addressable_intf.S) = struct
     | Zero -> t.until_disable_ime <- None; t.ime <- true
     | None -> ()
 
-  module Instruction = Instruction.Make(Mmu)
+  module Instruction_fetcher = Instruction_fetcher.Make(Mmu)
 
   let tick t  =
     update_ime t;
-    let (inst_len, inst) = Instruction.fetch_and_decode t.mmu ~pc:t.pc in
+    let (inst_len, inst) = Instruction_fetcher.fetch_and_decode t.mmu ~pc:t.pc in
     execute t inst_len inst
 
   module For_tests = struct
