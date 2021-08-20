@@ -30,7 +30,7 @@ module Make (Mmu : Addressable_intf.S) = struct
     let l3 = 3 |> Uint16.of_int
   end
 
-  let fetch_and_decode mmu ~pc =
+  let f mmu ~pc =
     let open Instruction_length in
     let next_byte () = Mmu.read_byte mmu Uint16.(succ pc) in
     let next_word () = Mmu.read_word mmu Uint16.(succ pc) in
