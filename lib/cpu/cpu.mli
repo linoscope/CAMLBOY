@@ -7,7 +7,6 @@ module Make (Mmu : Word_addressable_intf.S) : sig
 
   val tick : t -> unit
 
-  (** Module to expose some functions to the test  *)
   module For_tests : sig
     val create :
       mmu:Mmu.t ->
