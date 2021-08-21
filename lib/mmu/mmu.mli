@@ -2,9 +2,7 @@ module Make (Gpu : Addressable_intf.S) : sig
 
   type t
 
-  val create : gpu:Gpu.t -> t
-
-  val load_rom : t -> rom:bytes -> unit
+  val create : rom_bytes:bytes -> gpu:Gpu.t -> t
 
   include Word_addressable_intf.S with type t := t
 
