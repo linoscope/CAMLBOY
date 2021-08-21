@@ -65,4 +65,5 @@ module Make (Gpu : Addressable_intf.S) = struct
     write_byte t ~addr ~data:hi;
     write_byte t ~addr:Uint16.(succ addr) ~data:lo
 
+  let accepts _ ~addr = Uint16.(of_int 0x0000 <= addr && addr <= of_int 0xFFFF)
 end

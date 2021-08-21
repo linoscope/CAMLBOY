@@ -4,6 +4,8 @@ module MakeInfix (B : Uints_intf.Basics) : Uints_intf.Infix with type t := B.t =
   let ( - ) = sub
   let ( * ) = mul
   let ( / ) = div
+  let ( = ) = equal
+  let ( <= ) = le
   let ( mod ) = rem
   let ( land ) = logand
   let ( lor ) = logor
@@ -21,6 +23,13 @@ module Uint8 = struct
     let one = 1
 
     let compare = compare
+    let equal x y = compare x y = 0
+    let le x y =
+      match compare x y with
+      | -1
+      |  0 -> true
+      |  1 -> false
+      | _ -> assert false
     let add x y = (x + y) land max_int
     let sub x y = (x - y) land max_int
     let mul x y = (x * y) land max_int
@@ -56,6 +65,13 @@ module Uint16 = struct
     let one = 1
 
     let compare = compare
+    let equal x y = compare x y = 0
+    let le x y =
+      match compare x y with
+      | -1
+      |  0 -> true
+      |  1 -> false
+      | _ -> assert false
     let add x y = (x + y) land max_int
     let sub x y = (x - y) land max_int
     let mul x y = (x * y) land max_int
