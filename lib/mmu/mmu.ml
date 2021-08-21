@@ -6,9 +6,9 @@ module Make (Gpu : Addressable_intf.S) = struct
 
   type t = {
     rom_bank_0 : bytes;
-    ram : bytes;
+    ram : Ram.t;
     gpu : Gpu.t;
-    zero_page : bytes;
+    zero_page : Ram.t;
   }
 
   type region =
@@ -18,7 +18,8 @@ module Make (Gpu : Addressable_intf.S) = struct
     | Gpu_region
     | Zero_page
 
-  let region_of_addr = function
+  let region_of_addr addr =
+    match Uint16.to_int addr with
     | addr when 0x0000 <= addr && addr <= 0x3FFF -> Rom_bank_0
     | addr when 0xC000 <= addr && addr <= 0xDFFF -> Ram
     | addr when 0xE000 <= addr && addr <= 0xFDFF -> Shadow_ram
@@ -28,31 +29,30 @@ module Make (Gpu : Addressable_intf.S) = struct
 
   let create ~gpu = {
     rom_bank_0 = Bytes.create (0x3FFF - 0x0000);
-    ram = Bytes.create (0xDFFF - 0xC000);
+    ram = Ram.create ~start_addr:(Uint16.of_int 0xC000) ~end_addr:(Uint16.of_int 0xDFFF);
     gpu;
-    zero_page = Bytes.create (0xFFFF - 0xFF80);
+    zero_page = Ram.create ~start_addr:(Uint16.of_int 0xFF80) ~end_addr:(Uint16.of_int 0xFFFF);
   }
 
   let load_rom t ~rom  =
     Bytes.blit ~src:rom ~src_pos:0 ~dst:t.rom_bank_0 ~dst_pos:0 ~len:(Bytes.length rom)
 
   let read_byte t addr =
-    let addr = Uint16.to_int addr in
     match region_of_addr addr with
-    | Rom_bank_0       -> Bytes.get_int8 t.rom_bank_0 addr |> Uint8.of_int
-    | Ram | Shadow_ram -> Bytes.get_int8 t.ram addr |> Uint8.of_int
-    | Gpu_region       -> Gpu.read_byte t.gpu (Uint16.of_int addr)
-    | Zero_page        -> Bytes.get_int8 t.zero_page addr |> Uint8.of_int
+    | Rom_bank_0 -> Bytes.get_int8 t.rom_bank_0 (Uint16.to_int addr) |> Uint8.of_int
+    | Ram
+    | Shadow_ram -> Ram.read_byte t.ram addr
+    | Gpu_region -> Gpu.read_byte t.gpu addr
+    | Zero_page  -> Ram.read_byte t.zero_page addr
 
 
-  let write_byte t ~(addr : Uint16.t) ~data =
-    let addr = Uint16.to_int addr in
-    let data = Uint8.to_int data in
+  let write_byte t ~(addr : uint16) ~(data : uint8) =
     match region_of_addr addr with
-    | Rom_bank_0       -> Bytes.set_int8 t.rom_bank_0 addr data
-    | Ram | Shadow_ram -> Bytes.set_int8 t.ram addr data
-    | Gpu_region       -> Gpu.write_byte t.gpu ~addr:(Uint16.of_int addr) ~data:(Uint8.of_int data)
-    | Zero_page        -> Bytes.set_int8 t.zero_page addr data
+    | Rom_bank_0 -> Bytes.set_int8 t.rom_bank_0 (Uint16.to_int addr) (Uint8.to_int data)
+    | Ram
+    | Shadow_ram -> Ram.write_byte t.ram ~addr ~data
+    | Gpu_region -> Gpu.write_byte t.gpu ~addr ~data
+    | Zero_page  -> Ram.write_byte t.zero_page ~addr ~data
 
   let read_word t addr =
     Uint8.(read_byte t addr + read_byte t Uint16.(succ addr) lsl 8)
