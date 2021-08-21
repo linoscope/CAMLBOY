@@ -2,21 +2,23 @@ open Camlboy_lib
 open Uints
 open StdLabels
 
-let%expect_test "write then read" =
-  let ram = Ram.create ~start_addr:(Uint16.of_int 0xAA) ~end_addr:(Uint16.of_int 0xCC) in
+let%expect_test "load then read" =
+  let open Uint16 in
+  let rom = Rom.create ~start_addr:(of_int 0xA1) ~end_addr:(of_int 0xA5) in
+  let rom_bytes = Bytes.init 5 ~f:(fun i -> Char.chr i) in
 
-  Ram.write_byte ram ~addr:(Uint16.of_int 0xAA) ~data:(Uint8.of_int 0x11);
-  Ram.write_byte ram ~addr:(Uint16.of_int 0xBB) ~data:(Uint8.of_int 0x22);
-  Ram.write_byte ram ~addr:(Uint16.of_int 0xCC) ~data:(Uint8.of_int 0x33);
-  [
-    Ram.read_byte ram (Uint16.of_int 0xAA);
-    Ram.read_byte ram (Uint16.of_int 0xBB);
-    Ram.read_byte ram (Uint16.of_int 0xCC);
-  ]
+  Rom.load rom ~rom_bytes;
+  [Rom.read_byte rom (of_int 0xA1);
+   Rom.read_byte rom (of_int 0xA2);
+   Rom.read_byte rom (of_int 0xA3);
+   Rom.read_byte rom (of_int 0xA4);
+   Rom.read_byte rom (of_int 0xA5);]
   |> List.map ~f:Uint8.show
   |> List.iter ~f:print_endline;
 
   [%expect {|
-    0x11
-    0x22
-    0x33 |}]
+    0x00
+    0x01
+    0x02
+    0x03
+    0x04 |}]

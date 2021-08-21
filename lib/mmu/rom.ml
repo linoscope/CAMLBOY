@@ -8,7 +8,7 @@ type t = {
 }
 
 let create ~start_addr ~end_addr = {
-  bytes = Bytes.create Uint16.(to_int @@ end_addr - start_addr + one);
+  bytes = Bytes.make Uint16.(to_int @@ end_addr - start_addr + one) (Char.chr 0);
   start_addr;
   end_addr;
 }
