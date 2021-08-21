@@ -1,9 +1,11 @@
-open Uints
+module Make (Gpu : Addressable_intf.S) : sig
 
-type t [@@deriving show]
+  type t
 
-val create : size:int -> t
+  val create : gpu:Gpu.t -> t
 
-val load : t -> src:bytes -> dst_pos:uint16 -> unit
+  val load_rom : t -> rom:bytes -> unit
 
-include Addressable_intf.S with type t := t
+  include Addressable_intf.S with type t := t
+
+end

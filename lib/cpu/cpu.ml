@@ -1,6 +1,7 @@
 open Uints
 
 module Make (Mmu : Addressable_intf.S) = struct
+
   type t = {
     registers : Registers.t;
     mutable pc : uint16;
@@ -76,7 +77,6 @@ module Make (Mmu : Addressable_intf.S) = struct
         Registers.write_rr t.registers HL Uint16.(pred addr)
       | Direct addr -> Mmu.write_byte t.mmu ~addr ~data:y
       | Immediate _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg x)
-
 
     let (<--) x y t = write x y t
   end
