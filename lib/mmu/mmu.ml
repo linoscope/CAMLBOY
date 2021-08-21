@@ -9,50 +9,29 @@ module Make (Gpu : Addressable_intf.S) = struct
     zero_page : Ram.t;
   }
 
-  type region =
-    | Rom_bank_0
-    | Ram
-    | Shadow_ram
-    | Gpu_region
-    | Zero_page
-
-  let region_of_addr addr =
-    match Uint16.to_int addr with
-    | addr when 0x0000 <= addr && addr <= 0x3FFF -> Rom_bank_0
-    | addr when 0xC000 <= addr && addr <= 0xDFFF -> Ram
-    | addr when 0xE000 <= addr && addr <= 0xFDFF -> Shadow_ram
-    | addr when 0x8000 <= addr && addr <= 0x9FFF -> Gpu_region
-    | addr when 0xFF80 <= addr && addr <= 0xFFFF -> Zero_page
-    | addr -> failwith @@ Printf.sprintf "Unmapped address : 0x%04x"  addr
-
-  let create ~rom_bytes ~gpu =
-    let rom_bank_0 =
-      Rom.create ~start_addr:(Uint16.of_int 0x0000) ~end_addr:(Uint16.of_int 0x3FFF)
-    in
-    Rom.load rom_bank_0 ~rom_bytes;
-    {
-      rom_bank_0;
-      ram = Ram.create ~start_addr:(Uint16.of_int 0xC000) ~end_addr:(Uint16.of_int 0xDFFF);
-      gpu;
-      zero_page = Ram.create ~start_addr:(Uint16.of_int 0xFF80) ~end_addr:(Uint16.of_int 0xFFFF);
-    }
+  let create ~rom ~gpu = {
+    rom_bank_0 = rom;
+    ram = Ram.create ~start_addr:(Uint16.of_int 0xC000) ~end_addr:(Uint16.of_int 0xDFFF);
+    gpu;
+    zero_page = Ram.create ~start_addr:(Uint16.of_int 0xFF80) ~end_addr:(Uint16.of_int 0xFFFF);
+  }
 
   let read_byte t addr =
-    match region_of_addr addr with
-    | Rom_bank_0 -> Rom.read_byte t.rom_bank_0 addr
-    | Ram
-    | Shadow_ram -> Ram.read_byte t.ram addr
-    | Gpu_region -> Gpu.read_byte t.gpu addr
-    | Zero_page  -> Ram.read_byte t.zero_page addr
+    match addr with
+    | _ when Rom.accepts t.rom_bank_0 ~addr -> Rom.read_byte t.rom_bank_0 addr
+    | _ when Ram.accepts t.ram ~addr        -> Ram.read_byte t.ram addr
+    | _ when Gpu.accepts t.gpu ~addr        -> Gpu.read_byte t.gpu addr
+    | _ when Ram.accepts t.zero_page ~addr  -> Ram.read_byte t.zero_page addr
+    | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 
   let write_byte t ~(addr : uint16) ~(data : uint8) =
-    match region_of_addr addr with
-    | Rom_bank_0 -> Rom.write_byte t.rom_bank_0 ~addr ~data
-    | Ram
-    | Shadow_ram -> Ram.write_byte t.ram ~addr ~data
-    | Gpu_region -> Gpu.write_byte t.gpu ~addr ~data
-    | Zero_page  -> Ram.write_byte t.zero_page ~addr ~data
+    match addr with
+    | _ when Rom.accepts t.rom_bank_0 ~addr -> Rom.write_byte t.rom_bank_0 ~addr ~data
+    | _ when Ram.accepts t.ram ~addr        -> Ram.write_byte t.ram ~addr ~data
+    | _ when Gpu.accepts t.gpu ~addr        -> Gpu.write_byte t.gpu ~addr ~data
+    | _ when Ram.accepts t.zero_page ~addr  -> Ram.write_byte t.zero_page ~addr ~data
+    | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
   let read_word t addr =
     Uint8.(read_byte t addr + read_byte t Uint16.(succ addr) lsl 8)
@@ -65,5 +44,9 @@ module Make (Gpu : Addressable_intf.S) = struct
     write_byte t ~addr ~data:hi;
     write_byte t ~addr:Uint16.(succ addr) ~data:lo
 
-  let accepts _ ~addr = Uint16.(of_int 0x0000 <= addr && addr <= of_int 0xFFFF)
+  let accepts t ~addr =
+    Rom.accepts t.rom_bank_0 ~addr
+    || Ram.accepts t.ram ~addr
+    || Gpu.accepts t.gpu ~addr
+    || Ram.accepts t.zero_page ~addr
 end
