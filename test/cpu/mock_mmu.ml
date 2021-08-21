@@ -1,7 +1,6 @@
 open Camlboy_lib
 open Uints
 module Bytes = BytesLabels
-open StdLabels
 
 type t = bytes
 
