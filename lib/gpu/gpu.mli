@@ -1,1 +1,5 @@
-include Addressable_intf.S
+type t
+
+val create : unit -> t
+
+include Addressable_intf.S with type t := t

@@ -6,6 +6,6 @@ module Make (Gpu : Addressable_intf.S) : sig
 
   val load_rom : t -> rom:bytes -> unit
 
-  include Addressable_intf.S with type t := t
+  include Word_addressable_intf.S with type t := t
 
 end

@@ -1,7 +1,7 @@
 open Uints
 open Instruction
 
-module Make (Mmu : Addressable_intf.S) = struct
+module Make (Mmu : Word_addressable_intf.S) = struct
   module RST_offset = struct
     let x00 = 0x00 |> Uint16.of_int
     let x08 = 0x08 |> Uint16.of_int
