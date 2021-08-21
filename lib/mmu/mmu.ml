@@ -5,13 +5,15 @@ module Make (Gpu : Addressable_intf.S) = struct
   type t = {
     rom_bank_0 : Rom.t;
     wram : Ram.t;
+    shadow_ram : Shadow_ram.t;
     gpu : Gpu.t;
     zero_page : Ram.t;
   }
 
-  let create ~rom ~wram ~gpu ~zero_page = {
+  let create ~rom ~wram ~gpu ~zero_page ~shadow_ram = {
     rom_bank_0 = rom;
     wram;
+    shadow_ram;
     gpu;
     zero_page;
   }

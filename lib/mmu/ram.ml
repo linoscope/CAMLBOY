@@ -13,12 +13,12 @@ let create ~start_addr ~end_addr = {
   end_addr;
 }
 
-
 let read_byte t addr =
-  let addr = Uint16.to_int addr in
+  let addr = Uint16.(addr - t.start_addr) |> Uint16.to_int in
   Bytes.get_int8 t.bytes addr |> Uint8.of_int
 
 let write_byte t ~addr ~data =
-  Bytes.set_int8 t.bytes (Uint16.to_int addr) (Uint8.to_int data)
+  let addr = Uint16.(addr - t.start_addr) |> Uint16.to_int in
+  Bytes.set_int8 t.bytes addr (Uint8.to_int data)
 
 let accepts t ~addr = Uint16.(t.start_addr <= addr && addr <= t.end_addr)
