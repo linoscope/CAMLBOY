@@ -19,18 +19,18 @@ module Make (Gpu : Addressable_intf.S) = struct
   let read_byte t addr =
     match addr with
     | _ when Rom.accepts t.rom_bank_0 ~addr -> Rom.read_byte t.rom_bank_0 addr
-    | _ when Ram.accepts t.ram ~addr        -> Ram.read_byte t.ram addr
-    | _ when Gpu.accepts t.gpu ~addr        -> Gpu.read_byte t.gpu addr
-    | _ when Ram.accepts t.zero_page ~addr  -> Ram.read_byte t.zero_page addr
+    | _ when Ram.accepts t.ram        ~addr -> Ram.read_byte t.ram addr
+    | _ when Gpu.accepts t.gpu        ~addr -> Gpu.read_byte t.gpu addr
+    | _ when Ram.accepts t.zero_page  ~addr -> Ram.read_byte t.zero_page addr
     | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 
   let write_byte t ~(addr : uint16) ~(data : uint8) =
     match addr with
     | _ when Rom.accepts t.rom_bank_0 ~addr -> Rom.write_byte t.rom_bank_0 ~addr ~data
-    | _ when Ram.accepts t.ram ~addr        -> Ram.write_byte t.ram ~addr ~data
-    | _ when Gpu.accepts t.gpu ~addr        -> Gpu.write_byte t.gpu ~addr ~data
-    | _ when Ram.accepts t.zero_page ~addr  -> Ram.write_byte t.zero_page ~addr ~data
+    | _ when Ram.accepts t.ram        ~addr -> Ram.write_byte t.ram ~addr ~data
+    | _ when Gpu.accepts t.gpu        ~addr -> Gpu.write_byte t.gpu ~addr ~data
+    | _ when Ram.accepts t.zero_page  ~addr -> Ram.write_byte t.zero_page ~addr ~data
     | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
   let read_word t addr =
@@ -49,4 +49,5 @@ module Make (Gpu : Addressable_intf.S) = struct
     || Ram.accepts t.ram ~addr
     || Gpu.accepts t.gpu ~addr
     || Ram.accepts t.zero_page ~addr
+
 end
