@@ -5,6 +5,7 @@ module Make (Mmu : Word_addressable_intf.S) : sig
 
   val create : Mmu.t -> t
 
+  (** Returns machine cycle count  *)
   val tick : t -> int
 
   module For_tests : sig

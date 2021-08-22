@@ -382,12 +382,12 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         Jump addr
     in
     match next_pc, cycles with
-    | Next, (no_branch_cycles, _) ->
+    | Next, (no_branch_mcycle, _) ->
       t.pc <- Uint16.(t.pc + inst_len);
-      no_branch_cycles
-    | Jump addr, (_, branch_cycles) ->
+      no_branch_mcycle
+    | Jump addr, (_, branch_mcycle) ->
       t.pc <- addr;
-      branch_cycles
+      branch_mcycle
 
   let update_ime t =
     begin match t.until_enable_ime with
