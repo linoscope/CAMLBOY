@@ -111,7 +111,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   type next_pc = Next | Jump of uint16
 
-  let execute (t : t) (cycles : int * int) (inst_len : uint16) (inst : Instruction.t) : unit =
+  let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : Instruction.t) : unit =
     let check_condition t : Instruction.condition -> bool = function
       | None -> true
       | Z    -> Registers.read_flag t.registers Zero
@@ -404,8 +404,8 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   let tick t  =
     update_ime t;
-    let (cycles, len, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
-    execute t cycles len inst
+    let (len, cycles, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
+    execute t len cycles inst
 
   module For_tests = struct
     let execute = execute

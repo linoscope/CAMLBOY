@@ -36,7 +36,7 @@ let print_execute_result t ?(inst_len=1) inst =
   let inst_len = (Uint16.of_int inst_len) in
   let cycles = (1, 2) in
   inst
-  |> Cpu.For_tests.execute t cycles inst_len;
+  |> Cpu.For_tests.execute t inst_len cycles ;
 
   Cpu.show t
   |> print_endline
