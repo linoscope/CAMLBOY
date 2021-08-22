@@ -72,7 +72,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD (0x0a09), SP;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (5, 5)
     }
     {
     	inst = DEC BC;
@@ -102,7 +102,7 @@ let%expect_test "test all instructions" =
     {
     	inst = STOP;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (1, 1)
     }
     {
     	inst = LD DE, 0xcdab;
@@ -142,12 +142,12 @@ let%expect_test "test all instructions" =
     {
     	inst = JR 0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (3, 3)
     }
     {
     	inst = ADD HL, DE;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD A, (DE);
@@ -182,7 +182,7 @@ let%expect_test "test all instructions" =
     {
     	inst = JR NZ, 0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (2, 3)
     }
     {
     	inst = LD HL, 0xcdab;
@@ -192,7 +192,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD (HL+), A;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = INC HL;
@@ -222,12 +222,12 @@ let%expect_test "test all instructions" =
     {
     	inst = JR Z, 0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (2, 3)
     }
     {
     	inst = ADD HL, HL;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD A, (HL+);
@@ -262,7 +262,7 @@ let%expect_test "test all instructions" =
     {
     	inst = JR NC, 0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (2, 3)
     }
     {
     	inst = LD SP, 0xcdab;
@@ -272,7 +272,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD (HL-), A;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = INC SP;
@@ -282,17 +282,17 @@ let%expect_test "test all instructions" =
     {
     	inst = INC (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (3, 3)
     }
     {
     	inst = DEC (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (3, 3)
     }
     {
     	inst = LD (HL), 0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (3, 3)
     }
     {
     	inst = SCF;
@@ -302,12 +302,12 @@ let%expect_test "test all instructions" =
     {
     	inst = JR C, 0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (2, 3)
     }
     {
     	inst = ADD HL, SP;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD A, (HL-);
@@ -372,7 +372,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD B, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD B, A;
@@ -412,7 +412,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD C, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD C, A;
@@ -452,7 +452,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD D, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD D, A;
@@ -652,7 +652,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD A, A;
@@ -692,7 +692,7 @@ let%expect_test "test all instructions" =
     {
     	inst = ADD A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = ADD A, A;
@@ -732,7 +732,7 @@ let%expect_test "test all instructions" =
     {
     	inst = ADC A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = ADC A, A;
@@ -772,7 +772,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SUB A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = SUB A, A;
@@ -812,7 +812,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SBC A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = SBC A, A;
@@ -852,7 +852,7 @@ let%expect_test "test all instructions" =
     {
     	inst = AND A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = AND A, A;
@@ -892,7 +892,7 @@ let%expect_test "test all instructions" =
     {
     	inst = XOR A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = XOR A, A;
@@ -932,7 +932,7 @@ let%expect_test "test all instructions" =
     {
     	inst = OR A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = OR A, A;
@@ -972,7 +972,7 @@ let%expect_test "test all instructions" =
     {
     	inst = CP A, (HL);
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = CP A, A;
@@ -982,32 +982,32 @@ let%expect_test "test all instructions" =
     {
     	inst = RET NZ;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 5)
     }
     {
     	inst = POP BC;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (3, 3)
     }
     {
     	inst = JP NZ, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 4)
     }
     {
     	inst = JP 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (4, 4)
     }
     {
     	inst = CALL NZ, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 6)
     }
     {
     	inst = PUSH BC;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (1, 4)
     }
     {
     	inst = ADD A, 0xab;
@@ -1017,22 +1017,22 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0000;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = RET Z;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 5)
     }
     {
     	inst = RET ;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = JP Z, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 4)
     }
     {
     	inst = RLC B;
@@ -1067,7 +1067,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RLC (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RRC A;
@@ -1107,7 +1107,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RRC (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RRC A;
@@ -1147,7 +1147,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RL (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RR A;
@@ -1187,7 +1187,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RR (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RR A;
@@ -1227,7 +1227,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SLA (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SRA A;
@@ -1267,7 +1267,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SRA (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SRA A;
@@ -1307,7 +1307,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SWAP (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SRL A;
@@ -1347,7 +1347,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SRL (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SRL A;
@@ -1387,7 +1387,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x00, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x01, A;
@@ -1427,7 +1427,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x01, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x01, A;
@@ -1467,7 +1467,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x02, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x03, A;
@@ -1507,7 +1507,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x03, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x03, A;
@@ -1547,7 +1547,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x04, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x05, A;
@@ -1587,7 +1587,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x05, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x05, A;
@@ -1627,7 +1627,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x06, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x07, A;
@@ -1667,7 +1667,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0x07, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = BIT 0x07, A;
@@ -1707,7 +1707,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x00, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x01, A;
@@ -1747,7 +1747,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x01, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x01, A;
@@ -1787,7 +1787,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x02, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x03, A;
@@ -1827,7 +1827,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x03, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x03, A;
@@ -1867,7 +1867,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x04, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x05, A;
@@ -1907,7 +1907,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x05, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x05, A;
@@ -1947,7 +1947,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x06, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x07, A;
@@ -1987,7 +1987,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RES 0x07, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = RES 0x07, A;
@@ -2027,7 +2027,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x00, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x01, A;
@@ -2067,7 +2067,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x01, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x01, A;
@@ -2107,7 +2107,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x02, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x03, A;
@@ -2147,7 +2147,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x03, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x03, A;
@@ -2187,7 +2187,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x04, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x05, A;
@@ -2227,7 +2227,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x05, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x05, A;
@@ -2267,7 +2267,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x06, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x07, A;
@@ -2307,7 +2307,7 @@ let%expect_test "test all instructions" =
     {
     	inst = SET 0x07, (HL);
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = SET 0x07, A;
@@ -2317,12 +2317,12 @@ let%expect_test "test all instructions" =
     {
     	inst = CALL Z, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 6)
     }
     {
     	inst = CALL 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (6, 6)
     }
     {
     	inst = ADC A, 0xab;
@@ -2332,22 +2332,22 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0008;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = RET NC;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 5)
     }
     {
     	inst = POP DE;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (3, 3)
     }
     {
     	inst = JP NC, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 4)
     }
     {
     	inst = NOP;
@@ -2357,12 +2357,12 @@ let%expect_test "test all instructions" =
     {
     	inst = CALL NC, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 6)
     }
     {
     	inst = PUSH DE;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (1, 4)
     }
     {
     	inst = SUB A, 0xab;
@@ -2372,22 +2372,22 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0010;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = RET C;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 5)
     }
     {
     	inst = RETI;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = JP C, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 4)
     }
     {
     	inst = NOP;
@@ -2397,7 +2397,7 @@ let%expect_test "test all instructions" =
     {
     	inst = CALL C, 0xcdab;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (3, 6)
     }
     {
     	inst = NOP;
@@ -2412,22 +2412,22 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0018;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = LD (0xFF00+0xab), A;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (3, 3)
     }
     {
     	inst = POP HL;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (3, 3)
     }
     {
     	inst = LD (0xFF00+C), A;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = NOP;
@@ -2442,7 +2442,7 @@ let%expect_test "test all instructions" =
     {
     	inst = PUSH HL;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = AND A, 0xab;
@@ -2452,12 +2452,12 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0020;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = ADD SP, 0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (4, 4)
     }
     {
     	inst = JP HL;
@@ -2467,7 +2467,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD (0xcdab), A;
     	inst_len = 3;
-    	cycles = (3, 3)
+    	cycles = (4, 4)
     }
     {
     	inst = NOP;
@@ -2492,7 +2492,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0028;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = LD A, (0xFF00+0xab);
@@ -2502,7 +2502,7 @@ let%expect_test "test all instructions" =
     {
     	inst = POP AF;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (3, 3)
     }
     {
     	inst = LD A, (0xFF00+C);
@@ -2522,7 +2522,7 @@ let%expect_test "test all instructions" =
     {
     	inst = PUSH AF;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = OR A, 0xab;
@@ -2532,17 +2532,17 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0030;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     }
     {
     	inst = LD HL, SP+0xab;
     	inst_len = 2;
-    	cycles = (2, 2)
+    	cycles = (3, 3)
     }
     {
     	inst = LD SP, HL;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (2, 2)
     }
     {
     	inst = LD A, (0xcdab);
@@ -2572,7 +2572,7 @@ let%expect_test "test all instructions" =
     {
     	inst = RST 0x0038;
     	inst_len = 1;
-    	cycles = (1, 1)
+    	cycles = (4, 4)
     } |}]
 
 (* let gen_all_instrs () =
