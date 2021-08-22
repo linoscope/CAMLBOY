@@ -13,7 +13,6 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     mutable ime : bool;           (* interrupt master enable *)
     mutable until_enable_ime : count_down;
     mutable until_disable_ime : count_down;
-    mutable mcycles : int;
   }
   [@@deriving show]
 
@@ -32,7 +31,6 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     ime = true;
     until_enable_ime = None;
     until_disable_ime = None;
-    mcycles = 0;
   }
 
   (** Functions for reading/writing arguments of 8 bit load/arithmic operations
@@ -111,7 +109,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   type next_pc = Next | Jump of uint16
 
-  let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : Instruction.t) : unit =
+  let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : Instruction.t) : int =
     let check_condition t : Instruction.condition -> bool = function
       | None -> true
       | Z    -> Registers.read_flag t.registers Zero
@@ -384,12 +382,12 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         Jump addr
     in
     match next_pc, cycles with
-    | Next, (no_branch, _) ->
-      t.mcycles <- t.mcycles + no_branch;
-      t.pc <- Uint16.(t.pc + inst_len)
-    | Jump addr, (_, branch) ->
-      t.mcycles <- t.mcycles + branch;
-      t.pc <- addr
+    | Next, (no_branch_cycles, _) ->
+      t.pc <- Uint16.(t.pc + inst_len);
+      no_branch_cycles
+    | Jump addr, (_, branch_cycles) ->
+      t.pc <- addr;
+      branch_cycles
 
   let update_ime t =
     begin match t.until_enable_ime with
@@ -409,7 +407,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   module For_tests = struct
     let execute = execute
-    let create ~mmu ~registers ~sp ~pc ~halted ~ime = {registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None; mcycles = 0}
+    let create ~mmu ~registers ~sp ~pc ~halted ~ime = {registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None}
   end
 
 end

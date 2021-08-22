@@ -5,7 +5,7 @@ module Make (Mmu : Word_addressable_intf.S) : sig
 
   val create : Mmu.t -> t
 
-  val tick : t -> unit
+  val tick : t -> int
 
   module For_tests : sig
     val create :
@@ -16,6 +16,6 @@ module Make (Mmu : Word_addressable_intf.S) : sig
       halted:bool ->
       ime:bool ->
       t
-    val execute : t -> uint16 -> int * int -> Instruction.t -> unit
+    val execute : t -> uint16 -> int * int -> Instruction.t -> int
   end
 end
