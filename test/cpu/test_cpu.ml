@@ -203,17 +203,30 @@ let%expect_test "ADD A, 0xFF (half-carry + carry)" =
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _ } |}]
 
-let%expect_test "ADD SP, 0xA0" =
-  let t = create_cpu ~sp:0xAA0B () in
+let%expect_test "ADD SP, 0x01" =
+  let t = create_cpu ~sp:0xAAFF () in
 
-  ADD16 (SP, Immediate8 (Uint8.of_int 0xA0))
+  ADD16 (SP, Immediate8 (Uint8.of_int 0x01))
   |> print_execute_result t ~inst_len:2;
 
   [%expect{|
     { Cpu.Make.registers =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
-        f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
-      pc = 0x0002; sp = 0xaaab; mmu = <opaque>; halted = false; ime = true;
+        f = (c=1, h=1, n=0, z=0); h = 0x00; l = 0x00 };
+      pc = 0x0002; sp = 0xab00; mmu = <opaque>; halted = false; ime = true;
+      until_enable_ime = _; until_disable_ime = _ } |}]
+
+let%expect_test "ADD HL, BC (half carry + carry)" =
+  let t = create_cpu ~h:0xFF ~l:0x00 ~b:0x01 ~c:0x00 () in
+
+  ADD16 (RR HL, RR BC)
+  |> print_execute_result t ~inst_len:2;
+
+  [%expect{|
+    { Cpu.Make.registers =
+      { Registers.a = 0x00; b = 0x01; c = 0x00; d = 0x00; e = 0x00;
+        f = (c=1, h=1, n=0, z=1); h = 0x00; l = 0x00 };
+      pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _ } |}]
 
 let%expect_test "ADC A, 0xFF (half-carry + carry)" =

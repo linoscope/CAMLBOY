@@ -138,6 +138,19 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           ~c:Uint8.(x' > of_int 0xFF - y') ();
         (x <-- n) t;
         Next
+      | ADD16 (SP, y) ->
+        (* For "ADD SP, n" the flags are set as if the instruction was a 8 bit add.
+         * This is because we only add the lower 8 bits *)
+        let open SBM in
+        let x', y' = read SP t, read y t in
+        let n = Uint16.(x' + y') in
+        set_flags
+          ~z:false
+          ~h:Uint16.(x' land of_int 0xF + y' land of_int 0xF > of_int 0xF)
+          ~n:false
+          ~c:Uint16.(x' > of_int 0xFF - y') ();
+        (SP <-- n) t;
+        Next
       | ADD16 (x, y) ->
         let open SBM in
         let x', y' = read x t, read y t in
