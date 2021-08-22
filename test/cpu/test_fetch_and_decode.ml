@@ -17,7 +17,7 @@ let disassemble instr_bin_file out  =
     if pc == rom_len then
       ()
     else
-      let (inst_len, inst) = Fetch_and_decode.f mmu ~pc in
+      let (_, inst_len, inst) = Fetch_and_decode.f mmu ~pc in
       Instruction.show inst |> Printf.fprintf out "%s\n";
       loop Uint16.(pc + inst_len)
   in

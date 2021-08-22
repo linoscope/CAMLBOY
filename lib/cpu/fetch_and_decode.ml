@@ -2,6 +2,7 @@ open Uints
 open Instruction
 
 module Make (Mmu : Word_addressable_intf.S) = struct
+
   module RST_offset = struct
     let x00 = 0x00 |> Uint16.of_int
     let x08 = 0x08 |> Uint16.of_int
@@ -36,262 +37,262 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     let next_word () = Mmu.read_word mmu Uint16.(succ pc) in
     let op = Mmu.read_byte mmu pc |> Uint8.to_int in
     match op with
-    | 0x00 -> l1, NOP
-    | 0x01 -> l3, LD16 (RR BC, Immediate (next_word ()))
-    | 0x02 -> l1, LD (RR_indirect BC, R A)
-    | 0x03 -> l1, INC16 (RR BC)
-    | 0x04 -> l1, INC (R B)
-    | 0x05 -> l1, DEC (R B)
-    | 0x06 -> l2, LD (R B, Immediate (next_byte ()))
-    | 0x07 -> l1, RLCA
-    | 0x08 -> l3, LD16 (Direct (next_word ()), SP)
-    | 0x09 -> l1, ADD16 (RR HL, RR BC)
-    | 0x0A -> l1, LD (R A, RR_indirect BC)
-    | 0x0B -> l1, DEC16 (RR BC)
-    | 0x0C -> l1, INC (R C)
-    | 0x0D -> l1, DEC (R C)
-    | 0x0E -> l2, LD (R C, Immediate (next_byte ()))
-    | 0x0F -> l1, RRCA
-    | 0x10 -> ignore(next_byte ()); l2, STOP
-    | 0x11 -> l3, LD16 (RR DE, Immediate (next_word ()))
-    | 0x12 -> l1, LD (RR_indirect DE, R A)
-    | 0x13 -> l1, INC16 (RR DE)
-    | 0x14 -> l1, INC (R D)
-    | 0x15 -> l1, DEC (R D)
-    | 0x16 -> l2, LD (R D, Immediate (next_byte ()))
-    | 0x17 -> l1, RLA
-    | 0x18 -> l2, JR (None, (next_byte ()))
-    | 0x19 -> l1, ADD16 (RR HL, RR DE)
-    | 0x1A -> l1, LD (R A, RR_indirect DE)
-    | 0x1B -> l1, DEC16 (RR DE)
-    | 0x1C -> l1, INC (R E)
-    | 0x1D -> l1, DEC (R E)
-    | 0x1E -> l2, LD (R E, Immediate (next_byte ()))
-    | 0x1F -> l1, RRA
-    | 0x20 -> l2, JR (NZ, next_byte ())
-    | 0x21 -> l3, LD16 (RR HL, Immediate (next_word ()))
-    | 0x22 -> l1, LD (HL_inc, R A)
-    | 0x23 -> l1, INC16 (RR HL)
-    | 0x24 -> l1, INC (R H)
-    | 0x25 -> l1, DEC (R H)
-    | 0x26 -> l2, LD (R H, Immediate (next_byte ()))
-    | 0x27 -> l1, DAA
-    | 0x28 -> l2, JR (Z, next_byte ())
-    | 0x29 -> l1, ADD16 (RR HL,RR HL)
-    | 0x2A -> l1, LD (R A, HL_inc)
-    | 0x2B -> l1, DEC16 (RR HL)
-    | 0x2C -> l1, INC (R L)
-    | 0x2D -> l1, DEC (R L)
-    | 0x2E -> l2, LD (R L, Immediate (next_byte ()))
-    | 0x2F -> l1, CPL
-    | 0x30 -> l2, JR (NC, next_byte ())
-    | 0x31 -> l3, LD16 (SP, Immediate (next_word ()))
-    | 0x32 -> l1, LD (HL_dec, R A)
-    | 0x33 -> l1, INC16 SP
-    | 0x34 -> l1, INC (RR_indirect HL)
-    | 0x35 -> l1, DEC (RR_indirect HL)
-    | 0x36 -> l2, LD (RR_indirect HL, Immediate (next_byte ()))
-    | 0x37 -> l1, SCF
-    | 0x38 -> l2, JR (C, next_byte ())
-    | 0x39 -> l1, ADD16 (RR HL, SP)
-    | 0x3A -> l1, LD (R A, HL_dec)
-    | 0x3B -> l1, DEC16 SP
-    | 0x3C -> l1, INC (R A)
-    | 0x3D -> l1, DEC (R A)
-    | 0x3E -> l2, LD (R A, Immediate (next_byte ()))
-    | 0x3F -> l1, CCF
-    | 0x40 -> l1, LD (R B, R B)
-    | 0x41 -> l1, LD (R B, R C)
-    | 0x42 -> l1, LD (R B, R D)
-    | 0x43 -> l1, LD (R B, R E)
-    | 0x44 -> l1, LD (R B, R H)
-    | 0x45 -> l1, LD (R B, R F)
-    | 0x46 -> l1, LD (R B, RR_indirect HL)
-    | 0x47 -> l1, LD (R B, R A)
-    | 0x48 -> l1, LD (R C, R B)
-    | 0x49 -> l1, LD (R C, R C)
-    | 0x4A -> l1, LD (R C, R D)
-    | 0x4B -> l1, LD (R C, R E)
-    | 0x4C -> l1, LD (R C, R H)
-    | 0x4D -> l1, LD (R C, R L)
-    | 0x4E -> l1, LD (R C, RR_indirect HL)
-    | 0x4F -> l1, LD (R C, R A)
-    | 0x50 -> l1, LD (R D, R B)
-    | 0x51 -> l1, LD (R D, R C)
-    | 0x52 -> l1, LD (R D, R D)
-    | 0x53 -> l1, LD (R D, R E)
-    | 0x54 -> l1, LD (R D, R H)
-    | 0x55 -> l1, LD (R D, R L)
-    | 0x56 -> l1, LD (R D, RR_indirect HL)
-    | 0x57 -> l1, LD (R D, R A)
-    | 0x58 -> l1, LD (R E, R B)
-    | 0x59 -> l1, LD (R E, R C)
-    | 0x5A -> l1, LD (R E, R D)
-    | 0x5B -> l1, LD (R E, R E)
-    | 0x5C -> l1, LD (R E, R H)
-    | 0x5D -> l1, LD (R E, R L)
-    | 0x5E -> l1, LD (R E, RR_indirect HL)
-    | 0x5F -> l1, LD (R E, R A)
-    | 0x60 -> l1, LD (R H, R B)
-    | 0x61 -> l1, LD (R H, R C)
-    | 0x62 -> l1, LD (R H, R D)
-    | 0x63 -> l1, LD (R H, R E)
-    | 0x64 -> l1, LD (R H, R H)
-    | 0x65 -> l1, LD (R H, R L)
-    | 0x66 -> l1, LD (R H, RR_indirect HL)
-    | 0x67 -> l1, LD (R H, R A)
-    | 0x68 -> l1, LD (R L, R B)
-    | 0x69 -> l1, LD (R L, R C)
-    | 0x6A -> l1, LD (R L, R D)
-    | 0x6B -> l1, LD (R L, R E)
-    | 0x6C -> l1, LD (R L, R H)
-    | 0x6D -> l1, LD (R L, R L)
-    | 0x6E -> l1, LD (R L, R E)
-    | 0x6F -> l1, LD (R L, R A)
-    | 0x70 -> l1, LD (RR_indirect HL, R B)
-    | 0x71 -> l1, LD (RR_indirect HL, R C)
-    | 0x72 -> l1, LD (RR_indirect HL, R D)
-    | 0x73 -> l1, LD (RR_indirect HL, R E)
-    | 0x74 -> l1, LD (RR_indirect HL, R H)
-    | 0x75 -> l1, LD (RR_indirect HL, R L)
-    | 0x76 -> l1, HALT
-    | 0x77 -> l1, LD (RR_indirect HL, R A)
-    | 0x78 -> l1, LD (R A, R B)
-    | 0x79 -> l1, LD (R A, R C)
-    | 0x7A -> l1, LD (R A, R D)
-    | 0x7B -> l1, LD (R A, R E)
-    | 0x7C -> l1, LD (R A, R H)
-    | 0x7D -> l1, LD (R A, R L)
-    | 0x7E -> l1, LD (R A, RR_indirect HL)
-    | 0x7F -> l1, LD (R A, R A)
-    | 0x80 -> l1, ADD (R A, R B)
-    | 0x81 -> l1, ADD (R A, R C)
-    | 0x82 -> l1, ADD (R A, R D)
-    | 0x83 -> l1, ADD (R A, R E)
-    | 0x84 -> l1, ADD (R A, R H)
-    | 0x85 -> l1, ADD (R A, R L)
-    | 0x86 -> l1, ADD (R A, RR_indirect HL)
-    | 0x87 -> l1, ADD (R A, (R A))
-    | 0x88 -> l1, ADC (R A, R B)
-    | 0x89 -> l1, ADC (R A, R C)
-    | 0x8A -> l1, ADC (R A, R D)
-    | 0x8B -> l1, ADC (R A, R E)
-    | 0x8C -> l1, ADC (R A, R H)
-    | 0x8D -> l1, ADC (R A, R L)
-    | 0x8E -> l1, ADC (R A, RR_indirect HL)
-    | 0x8F -> l1, ADC (R A, R A)
-    | 0x90 -> l1, SUB (R A, R B)
-    | 0x91 -> l1, SUB (R A, R C)
-    | 0x92 -> l1, SUB (R A, R D)
-    | 0x93 -> l1, SUB (R A, R E)
-    | 0x94 -> l1, SUB (R A, R H)
-    | 0x95 -> l1, SUB (R A, R L)
-    | 0x96 -> l1, SUB (R A, RR_indirect HL)
-    | 0x97 -> l1, SUB (R A, R A)
-    | 0x98 -> l1, SBC (R A, R B)
-    | 0x99 -> l1, SBC (R A, R C)
-    | 0x9A -> l1, SBC (R A, R D)
-    | 0x9B -> l1, SBC (R A, R E)
-    | 0x9C -> l1, SBC (R A, R H)
-    | 0x9D -> l1, SBC (R A, R L)
-    | 0x9E -> l1, SBC (R A, RR_indirect HL)
-    | 0x9F -> l1, SBC (R A, R A)
-    | 0xA0 -> l1, AND (R A, R B)
-    | 0xA1 -> l1, AND (R A, R C)
-    | 0xA2 -> l1, AND (R A, R D)
-    | 0xA3 -> l1, AND (R A, R E)
-    | 0xA4 -> l1, AND (R A, R H)
-    | 0xA5 -> l1, AND (R A, R L)
-    | 0xA6 -> l1, AND (R A, RR_indirect HL)
-    | 0xA7 -> l1, AND (R A, R A)
-    | 0xA8 -> l1, XOR (R A, R B)
-    | 0xA9 -> l1, XOR (R A, R C)
-    | 0xAA -> l1, XOR (R A, R D)
-    | 0xAB -> l1, XOR (R A, R E)
-    | 0xAC -> l1, XOR (R A, R H)
-    | 0xAD -> l1, XOR (R A, R L)
-    | 0xAE -> l1, XOR (R A, RR_indirect HL)
-    | 0xAF -> l1, XOR (R A, R A)
-    | 0xB0 -> l1, OR (R A, R B)
-    | 0xB1 -> l1, OR (R A, R C)
-    | 0xB2 -> l1, OR (R A, R D)
-    | 0xB3 -> l1, OR (R A, R E)
-    | 0xB4 -> l1, OR (R A, R H)
-    | 0xB5 -> l1, OR (R A, R L)
-    | 0xB6 -> l1, OR (R A, RR_indirect HL)
-    | 0xB7 -> l1, OR (R A, R A)
-    | 0xB8 -> l1, CP (R A, R B)
-    | 0xB9 -> l1, CP (R A, R C)
-    | 0xBA -> l1, CP (R A, R D)
-    | 0xBB -> l1, CP (R A, R E)
-    | 0xBC -> l1, CP (R A, R H)
-    | 0xBD -> l1, CP (R A, R L)
-    | 0xBE -> l1, CP (R A, RR_indirect HL)
-    | 0xBF -> l1, CP (R A, R A)
-    | 0xC0 -> l1, RET NZ
-    | 0xC1 -> l1, POP BC
-    | 0xC2 -> l3, JP (NZ, Immediate (next_word ()))
-    | 0xC3 -> l3, JP (None, Immediate (next_word ()))
-    | 0xC4 -> l3, CALL (NZ, next_word ())
-    | 0xC5 -> l1, PUSH BC
-    | 0xC6 -> l2, ADD (R A, (Immediate (next_byte ())))
-    | 0xC7 -> l1, RST RST_offset.x00
-    | 0xC8 -> l1, RET Z
-    | 0xC9 -> l1, RET None
-    | 0xCA -> l3, JP (Z, Immediate  (next_word ()))
-    | 0xCC -> l3, CALL (Z, next_word ())
-    | 0xCD -> l3, CALL (None, next_word ())
-    | 0xCE -> l2, ADC (R A, Immediate (next_byte ()))
-    | 0xCF -> l1, RST RST_offset.x08
-    | 0xD0 -> l1, RET NC
-    | 0xD1 -> l1, POP DE
-    | 0xD2 -> l3, JP (NC, Immediate (next_word ()))
-    | 0xD3 -> l1, NOP
-    | 0xD4 -> l3, CALL (NC, next_word ())
-    | 0xD5 -> l1, PUSH DE
-    | 0xD6 -> l2, SUB (R A, Immediate (next_byte ()))
-    | 0xD7 -> l1, RST RST_offset.x10
-    | 0xD8 -> l1, RET C
-    | 0xD9 -> l1, RETI
-    | 0xDA -> l3, JP (C, Immediate (next_word ()))
-    | 0xDB -> l1, NOP
-    | 0xDC -> l3, CALL (C, next_word ())
-    | 0xDD -> l1, NOP
-    | 0xDE -> l2, SBC (R A, Immediate (next_byte ()))
-    | 0xDF -> l1, RST RST_offset.x18
-    | 0xE0 -> l2, LD (FF00_offset (next_byte ()), R A)
-    | 0xE1 -> l1, POP HL
-    | 0xE2 -> l1, LD (FF00_C, R A)
-    | 0xE3 -> l1, NOP
-    | 0xE4 -> l1, NOP
-    | 0xE5 -> l1, PUSH HL
-    | 0xE6 -> l2, AND (R A, Immediate (next_byte ()))
-    | 0xE7 -> l1, RST RST_offset.x20
-    | 0xE8 -> l2, ADD16 (SP, Immediate8 (next_byte ()))
-    | 0xE9 -> l1, JP (None, RR HL)
-    | 0xEA -> l3, LD (Direct (next_word ()), R A)
-    | 0xEB -> l1, NOP
-    | 0xEC -> l1, NOP
-    | 0xED -> l1, NOP
-    | 0xEE -> l2, XOR (R A, Immediate (next_byte ()))
-    | 0xEF -> l1, RST RST_offset.x28
-    | 0xF0 -> l2, LD (R A, FF00_offset (next_byte ()))
-    | 0xF1 -> l1, POP AF
-    | 0xF2 -> l1, LD (R A, FF00_C)
-    | 0xF3 -> l1, DI
-    | 0xF4 -> l1, NOP
-    | 0xF5 -> l1, PUSH AF
-    | 0xF6 -> l2, OR (R A, Immediate (next_byte ()))
-    | 0xF7 -> l1, RST RST_offset.x30
-    | 0xF8 -> l2, LD16 (RR HL, SP_offset (next_byte ()))
-    | 0xF9 -> l1, LD16 (SP, RR HL)
-    | 0xFA -> l3, LD (R A, Direct (next_word ()))
-    | 0xFB -> l1, EI
-    | 0xFC -> l1, NOP
-    | 0xFD -> l1, NOP
-    | 0xFE -> l2, CP (R A, Immediate (next_byte ()))
-    | 0xFF -> l1, RST RST_offset.x38
-    | 0xCB -> l2, (
+    | 0x00 -> (1, 1), l1, NOP
+    | 0x01 -> (3, 3), l3, LD16 (RR BC, Immediate (next_word ()))
+    | 0x02 -> (2, 2), l1, LD (RR_indirect BC, R A)
+    | 0x03 -> (2, 2), l1, INC16 (RR BC)
+    | 0x04 -> (1, 1), l1, INC (R B)
+    | 0x05 -> (1, 1), l1, DEC (R B)
+    | 0x06 -> (2, 2), l2, LD (R B, Immediate (next_byte ()))
+    | 0x07 -> (1, 1), l1, RLCA
+    | 0x08 -> (3, 3), l3, LD16 (Direct (next_word ()), SP)
+    | 0x09 -> (1, 1), l1, ADD16 (RR HL, RR BC)
+    | 0x0A -> (2, 2), l1, LD (R A, RR_indirect BC)
+    | 0x0B -> (2, 2), l1, DEC16 (RR BC)
+    | 0x0C -> (1, 1), l1, INC (R C)
+    | 0x0D -> (1, 1), l1, DEC (R C)
+    | 0x0E -> (2, 2), l2, LD (R C, Immediate (next_byte ()))
+    | 0x0F -> (1, 1), l1, RRCA
+    | 0x10 -> ignore(next_byte ()); (2, 2), l2, STOP
+    | 0x11 -> (3, 3), l3, LD16 (RR DE, Immediate (next_word ()))
+    | 0x12 -> (2, 2), l1, LD (RR_indirect DE, R A)
+    | 0x13 -> (2, 2), l1, INC16 (RR DE)
+    | 0x14 -> (1, 1), l1, INC (R D)
+    | 0x15 -> (1, 1), l1, DEC (R D)
+    | 0x16 -> (2, 2), l2, LD (R D, Immediate (next_byte ()))
+    | 0x17 -> (1, 1), l1, RLA
+    | 0x18 -> (2, 2), l2, JR (None, (next_byte ()))
+    | 0x19 -> (1, 1), l1, ADD16 (RR HL, RR DE)
+    | 0x1A -> (2, 2), l1, LD (R A, RR_indirect DE)
+    | 0x1B -> (2, 2), l1, DEC16 (RR DE)
+    | 0x1C -> (1, 1), l1, INC (R E)
+    | 0x1D -> (1, 1), l1, DEC (R E)
+    | 0x1E -> (2, 2), l2, LD (R E, Immediate (next_byte ()))
+    | 0x1F -> (1, 1), l1, RRA
+    | 0x20 -> (2, 2), l2, JR (NZ, next_byte ())
+    | 0x21 -> (3, 3), l3, LD16 (RR HL, Immediate (next_word ()))
+    | 0x22 -> (1, 1), l1, LD (HL_inc, R A)
+    | 0x23 -> (2, 2), l1, INC16 (RR HL)
+    | 0x24 -> (1, 1), l1, INC (R H)
+    | 0x25 -> (1, 1), l1, DEC (R H)
+    | 0x26 -> (2, 2), l2, LD (R H, Immediate (next_byte ()))
+    | 0x27 -> (1, 1), l1, DAA
+    | 0x28 -> (2, 2), l2, JR (Z, next_byte ())
+    | 0x29 -> (1, 1), l1, ADD16 (RR HL,RR HL)
+    | 0x2A -> (2, 2), l1, LD (R A, HL_inc)
+    | 0x2B -> (2, 2), l1, DEC16 (RR HL)
+    | 0x2C -> (1, 1), l1, INC (R L)
+    | 0x2D -> (1, 1), l1, DEC (R L)
+    | 0x2E -> (2, 2), l2, LD (R L, Immediate (next_byte ()))
+    | 0x2F -> (1, 1), l1, CPL
+    | 0x30 -> (2, 2), l2, JR (NC, next_byte ())
+    | 0x31 -> (3, 3), l3, LD16 (SP, Immediate (next_word ()))
+    | 0x32 -> (1, 1), l1, LD (HL_dec, R A)
+    | 0x33 -> (2, 2), l1, INC16 SP
+    | 0x34 -> (1, 1), l1, INC (RR_indirect HL)
+    | 0x35 -> (1, 1), l1, DEC (RR_indirect HL)
+    | 0x36 -> (2, 2), l2, LD (RR_indirect HL, Immediate (next_byte ()))
+    | 0x37 -> (1, 1), l1, SCF
+    | 0x38 -> (2, 2), l2, JR (C, next_byte ())
+    | 0x39 -> (1, 1), l1, ADD16 (RR HL, SP)
+    | 0x3A -> (2, 2), l1, LD (R A, HL_dec)
+    | 0x3B -> (2, 2), l1, DEC16 SP
+    | 0x3C -> (1, 1), l1, INC (R A)
+    | 0x3D -> (1, 1), l1, DEC (R A)
+    | 0x3E -> (2, 2), l2, LD (R A, Immediate (next_byte ()))
+    | 0x3F -> (1, 1), l1, CCF
+    | 0x40 -> (1, 1), l1, LD (R B, R B)
+    | 0x41 -> (1, 1), l1, LD (R B, R C)
+    | 0x42 -> (1, 1), l1, LD (R B, R D)
+    | 0x43 -> (1, 1), l1, LD (R B, R E)
+    | 0x44 -> (1, 1), l1, LD (R B, R H)
+    | 0x45 -> (1, 1), l1, LD (R B, R F)
+    | 0x46 -> (1, 1), l1, LD (R B, RR_indirect HL)
+    | 0x47 -> (1, 1), l1, LD (R B, R A)
+    | 0x48 -> (1, 1), l1, LD (R C, R B)
+    | 0x49 -> (1, 1), l1, LD (R C, R C)
+    | 0x4A -> (1, 1), l1, LD (R C, R D)
+    | 0x4B -> (1, 1), l1, LD (R C, R E)
+    | 0x4C -> (1, 1), l1, LD (R C, R H)
+    | 0x4D -> (1, 1), l1, LD (R C, R L)
+    | 0x4E -> (1, 1), l1, LD (R C, RR_indirect HL)
+    | 0x4F -> (1, 1), l1, LD (R C, R A)
+    | 0x50 -> (1, 1), l1, LD (R D, R B)
+    | 0x51 -> (1, 1), l1, LD (R D, R C)
+    | 0x52 -> (1, 1), l1, LD (R D, R D)
+    | 0x53 -> (1, 1), l1, LD (R D, R E)
+    | 0x54 -> (1, 1), l1, LD (R D, R H)
+    | 0x55 -> (1, 1), l1, LD (R D, R L)
+    | 0x56 -> (1, 1), l1, LD (R D, RR_indirect HL)
+    | 0x57 -> (1, 1), l1, LD (R D, R A)
+    | 0x58 -> (1, 1), l1, LD (R E, R B)
+    | 0x59 -> (1, 1), l1, LD (R E, R C)
+    | 0x5A -> (1, 1), l1, LD (R E, R D)
+    | 0x5B -> (1, 1), l1, LD (R E, R E)
+    | 0x5C -> (1, 1), l1, LD (R E, R H)
+    | 0x5D -> (1, 1), l1, LD (R E, R L)
+    | 0x5E -> (1, 1), l1, LD (R E, RR_indirect HL)
+    | 0x5F -> (1, 1), l1, LD (R E, R A)
+    | 0x60 -> (1, 1), l1, LD (R H, R B)
+    | 0x61 -> (1, 1), l1, LD (R H, R C)
+    | 0x62 -> (1, 1), l1, LD (R H, R D)
+    | 0x63 -> (1, 1), l1, LD (R H, R E)
+    | 0x64 -> (1, 1), l1, LD (R H, R H)
+    | 0x65 -> (1, 1), l1, LD (R H, R L)
+    | 0x66 -> (1, 1), l1, LD (R H, RR_indirect HL)
+    | 0x67 -> (1, 1), l1, LD (R H, R A)
+    | 0x68 -> (1, 1), l1, LD (R L, R B)
+    | 0x69 -> (1, 1), l1, LD (R L, R C)
+    | 0x6A -> (1, 1), l1, LD (R L, R D)
+    | 0x6B -> (1, 1), l1, LD (R L, R E)
+    | 0x6C -> (1, 1), l1, LD (R L, R H)
+    | 0x6D -> (1, 1), l1, LD (R L, R L)
+    | 0x6E -> (1, 1), l1, LD (R L, R E)
+    | 0x6F -> (1, 1), l1, LD (R L, R A)
+    | 0x70 -> (2, 2), l1, LD (RR_indirect HL, R B)
+    | 0x71 -> (2, 2), l1, LD (RR_indirect HL, R C)
+    | 0x72 -> (2, 2), l1, LD (RR_indirect HL, R D)
+    | 0x73 -> (2, 2), l1, LD (RR_indirect HL, R E)
+    | 0x74 -> (2, 2), l1, LD (RR_indirect HL, R H)
+    | 0x75 -> (2, 2), l1, LD (RR_indirect HL, R L)
+    | 0x76 -> (1, 1), l1, HALT
+    | 0x77 -> (2, 2), l1, LD (RR_indirect HL, R A)
+    | 0x78 -> (1, 1), l1, LD (R A, R B)
+    | 0x79 -> (1, 1), l1, LD (R A, R C)
+    | 0x7A -> (1, 1), l1, LD (R A, R D)
+    | 0x7B -> (1, 1), l1, LD (R A, R E)
+    | 0x7C -> (1, 1), l1, LD (R A, R H)
+    | 0x7D -> (1, 1), l1, LD (R A, R L)
+    | 0x7E -> (1, 1), l1, LD (R A, RR_indirect HL)
+    | 0x7F -> (1, 1), l1, LD (R A, R A)
+    | 0x80 -> (1, 1), l1, ADD (R A, R B)
+    | 0x81 -> (1, 1), l1, ADD (R A, R C)
+    | 0x82 -> (1, 1), l1, ADD (R A, R D)
+    | 0x83 -> (1, 1), l1, ADD (R A, R E)
+    | 0x84 -> (1, 1), l1, ADD (R A, R H)
+    | 0x85 -> (1, 1), l1, ADD (R A, R L)
+    | 0x86 -> (1, 1), l1, ADD (R A, RR_indirect HL)
+    | 0x87 -> (1, 1), l1, ADD (R A, (R A))
+    | 0x88 -> (1, 1), l1, ADC (R A, R B)
+    | 0x89 -> (1, 1), l1, ADC (R A, R C)
+    | 0x8A -> (1, 1), l1, ADC (R A, R D)
+    | 0x8B -> (1, 1), l1, ADC (R A, R E)
+    | 0x8C -> (1, 1), l1, ADC (R A, R H)
+    | 0x8D -> (1, 1), l1, ADC (R A, R L)
+    | 0x8E -> (1, 1), l1, ADC (R A, RR_indirect HL)
+    | 0x8F -> (1, 1), l1, ADC (R A, R A)
+    | 0x90 -> (1, 1), l1, SUB (R A, R B)
+    | 0x91 -> (1, 1), l1, SUB (R A, R C)
+    | 0x92 -> (1, 1), l1, SUB (R A, R D)
+    | 0x93 -> (1, 1), l1, SUB (R A, R E)
+    | 0x94 -> (1, 1), l1, SUB (R A, R H)
+    | 0x95 -> (1, 1), l1, SUB (R A, R L)
+    | 0x96 -> (1, 1), l1, SUB (R A, RR_indirect HL)
+    | 0x97 -> (1, 1), l1, SUB (R A, R A)
+    | 0x98 -> (1, 1), l1, SBC (R A, R B)
+    | 0x99 -> (1, 1), l1, SBC (R A, R C)
+    | 0x9A -> (1, 1), l1, SBC (R A, R D)
+    | 0x9B -> (1, 1), l1, SBC (R A, R E)
+    | 0x9C -> (1, 1), l1, SBC (R A, R H)
+    | 0x9D -> (1, 1), l1, SBC (R A, R L)
+    | 0x9E -> (1, 1), l1, SBC (R A, RR_indirect HL)
+    | 0x9F -> (1, 1), l1, SBC (R A, R A)
+    | 0xA0 -> (1, 1), l1, AND (R A, R B)
+    | 0xA1 -> (1, 1), l1, AND (R A, R C)
+    | 0xA2 -> (1, 1), l1, AND (R A, R D)
+    | 0xA3 -> (1, 1), l1, AND (R A, R E)
+    | 0xA4 -> (1, 1), l1, AND (R A, R H)
+    | 0xA5 -> (1, 1), l1, AND (R A, R L)
+    | 0xA6 -> (1, 1), l1, AND (R A, RR_indirect HL)
+    | 0xA7 -> (1, 1), l1, AND (R A, R A)
+    | 0xA8 -> (1, 1), l1, XOR (R A, R B)
+    | 0xA9 -> (1, 1), l1, XOR (R A, R C)
+    | 0xAA -> (1, 1), l1, XOR (R A, R D)
+    | 0xAB -> (1, 1), l1, XOR (R A, R E)
+    | 0xAC -> (1, 1), l1, XOR (R A, R H)
+    | 0xAD -> (1, 1), l1, XOR (R A, R L)
+    | 0xAE -> (1, 1), l1, XOR (R A, RR_indirect HL)
+    | 0xAF -> (1, 1), l1, XOR (R A, R A)
+    | 0xB0 -> (1, 1), l1, OR (R A, R B)
+    | 0xB1 -> (1, 1), l1, OR (R A, R C)
+    | 0xB2 -> (1, 1), l1, OR (R A, R D)
+    | 0xB3 -> (1, 1), l1, OR (R A, R E)
+    | 0xB4 -> (1, 1), l1, OR (R A, R H)
+    | 0xB5 -> (1, 1), l1, OR (R A, R L)
+    | 0xB6 -> (1, 1), l1, OR (R A, RR_indirect HL)
+    | 0xB7 -> (1, 1), l1, OR (R A, R A)
+    | 0xB8 -> (1, 1), l1, CP (R A, R B)
+    | 0xB9 -> (1, 1), l1, CP (R A, R C)
+    | 0xBA -> (1, 1), l1, CP (R A, R D)
+    | 0xBB -> (1, 1), l1, CP (R A, R E)
+    | 0xBC -> (1, 1), l1, CP (R A, R H)
+    | 0xBD -> (1, 1), l1, CP (R A, R L)
+    | 0xBE -> (1, 1), l1, CP (R A, RR_indirect HL)
+    | 0xBF -> (1, 1), l1, CP (R A, R A)
+    | 0xC0 -> (1, 1), l1, RET NZ
+    | 0xC1 -> (1, 1), l1, POP BC
+    | 0xC2 -> (3, 3), l3, JP (NZ, Immediate (next_word ()))
+    | 0xC3 -> (3, 3), l3, JP (None, Immediate (next_word ()))
+    | 0xC4 -> (3, 3), l3, CALL (NZ, next_word ())
+    | 0xC5 -> (1, 1), l1, PUSH BC
+    | 0xC6 -> (2, 2), l2, ADD (R A, (Immediate (next_byte ())))
+    | 0xC7 -> (1, 1), l1, RST RST_offset.x00
+    | 0xC8 -> (1, 1), l1, RET Z
+    | 0xC9 -> (1, 1), l1, RET None
+    | 0xCA -> (3, 3), l3, JP (Z, Immediate  (next_word ()))
+    | 0xCC -> (3, 3), l3, CALL (Z, next_word ())
+    | 0xCD -> (3, 3), l3, CALL (None, next_word ())
+    | 0xCE -> (2, 2), l2, ADC (R A, Immediate (next_byte ()))
+    | 0xCF -> (1, 1), l1, RST RST_offset.x08
+    | 0xD0 -> (1, 1), l1, RET NC
+    | 0xD1 -> (1, 1), l1, POP DE
+    | 0xD2 -> (3, 3), l3, JP (NC, Immediate (next_word ()))
+    | 0xD3 -> (1, 1), l1, NOP
+    | 0xD4 -> (3, 3), l3, CALL (NC, next_word ())
+    | 0xD5 -> (1, 1), l1, PUSH DE
+    | 0xD6 -> (2, 2), l2, SUB (R A, Immediate (next_byte ()))
+    | 0xD7 -> (1, 1), l1, RST RST_offset.x10
+    | 0xD8 -> (1, 1), l1, RET C
+    | 0xD9 -> (1, 1), l1, RETI
+    | 0xDA -> (3, 3), l3, JP (C, Immediate (next_word ()))
+    | 0xDB -> (1, 1), l1, NOP
+    | 0xDC -> (3, 3), l3, CALL (C, next_word ())
+    | 0xDD -> (1, 1), l1, NOP
+    | 0xDE -> (2, 2), l2, SBC (R A, Immediate (next_byte ()))
+    | 0xDF -> (1, 1), l1, RST RST_offset.x18
+    | 0xE0 -> (2, 2), l2, LD (FF00_offset (next_byte ()), R A)
+    | 0xE1 -> (1, 1), l1, POP HL
+    | 0xE2 -> (1, 1), l1, LD (FF00_C, R A)
+    | 0xE3 -> (1, 1), l1, NOP
+    | 0xE4 -> (1, 1), l1, NOP
+    | 0xE5 -> (1, 1), l1, PUSH HL
+    | 0xE6 -> (2, 2), l2, AND (R A, Immediate (next_byte ()))
+    | 0xE7 -> (1, 1), l1, RST RST_offset.x20
+    | 0xE8 -> (2, 2), l2, ADD16 (SP, Immediate8 (next_byte ()))
+    | 0xE9 -> (1, 1), l1, JP (None, RR HL)
+    | 0xEA -> (3, 3), l3, LD (Direct (next_word ()), R A)
+    | 0xEB -> (1, 1), l1, NOP
+    | 0xEC -> (1, 1), l1, NOP
+    | 0xED -> (1, 1), l1, NOP
+    | 0xEE -> (2, 2), l2, XOR (R A, Immediate (next_byte ()))
+    | 0xEF -> (1, 1), l1, RST RST_offset.x28
+    | 0xF0 -> (3, 3), l2, LD (R A, FF00_offset (next_byte ()))
+    | 0xF1 -> (1, 1), l1, POP AF
+    | 0xF2 -> (2, 2), l1, LD (R A, FF00_C)
+    | 0xF3 -> (1, 1), l1, DI
+    | 0xF4 -> (1, 1), l1, NOP
+    | 0xF5 -> (1, 1), l1, PUSH AF
+    | 0xF6 -> (2, 2), l2, OR (R A, Immediate (next_byte ()))
+    | 0xF7 -> (1, 1), l1, RST RST_offset.x30
+    | 0xF8 -> (2, 2), l2, LD16 (RR HL, SP_offset (next_byte ()))
+    | 0xF9 -> (1, 1), l1, LD16 (SP, RR HL)
+    | 0xFA -> (4, 4), l3, LD (R A, Direct (next_word ()))
+    | 0xFB -> (1, 1), l1, EI
+    | 0xFC -> (1, 1), l1, NOP
+    | 0xFD -> (1, 1), l1, NOP
+    | 0xFE -> (2, 2), l2, CP (R A, Immediate (next_byte ()))
+    | 0xFF -> (1, 1), l1, RST RST_offset.x38
+    | 0xCB -> (2, 2), l2, (
         let op = next_byte () |> Uint8.to_int in
         match op with
         | 0x00 -> RLC (R B)
