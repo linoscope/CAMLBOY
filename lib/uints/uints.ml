@@ -22,7 +22,8 @@ module Uint8 = struct
     let zero = 0
     let one = 1
 
-    let compare = compare
+    (* ToDo: Bench mark with polymorphic compare*)
+    let compare = Int.compare
     let equal x y = compare x y = 0
     let le x y =
       match compare x y with
@@ -64,7 +65,7 @@ module Uint16 = struct
     let zero = 0
     let one = 1
 
-    let compare = compare
+    let compare = Int.compare
     let equal x y = compare x y = 0
     let le x y =
       match compare x y with
