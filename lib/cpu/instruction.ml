@@ -1,61 +1,71 @@
 open Uints
 
-include Instruction_types
+type 'a arg =
+  | Immediate8  : uint8 -> uint8  arg
+  | Immediate16 : uint16 -> uint16 arg
+  | Direct8     : uint16 -> uint8  arg
+  | Direct16    : uint16 -> uint16 arg
+  | R           : Registers.r -> uint8  arg
+  | RR          : Registers.rr -> uint16 arg
+  | RR_indirect : Registers.rr -> uint8  arg
+  | FF00_offset : uint8 -> uint8  arg
+  | FF00_C      : uint8 arg
+  | HL_inc      : uint8 arg
+  | HL_dec      : uint8 arg
+  | SP          : uint16 arg
+  | SP_offset   : uint8 -> uint16 arg
 
-let show = function
-  | LD (x, y)    -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
-  | LD16 (x, y)  -> Printf.sprintf "LD %s, %s" (show_arg16 x) (show_arg16 y)
-  | ADD (x, y)   -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
-  | ADD16 (x, y) -> Printf.sprintf "ADD %s, %s" (show_arg16 x) (show_arg16 y)
-  | ADC (x, y)   -> Printf.sprintf "ADC %s, %s" (show_arg x) (show_arg y)
-  | SUB (x, y)   -> Printf.sprintf "SUB %s, %s" (show_arg x) (show_arg y)
-  | SBC (x, y)   -> Printf.sprintf "SBC %s, %s" (show_arg x) (show_arg y)
-  | AND (x, y)   -> Printf.sprintf "AND %s, %s" (show_arg x) (show_arg y)
-  | OR (x, y)    -> Printf.sprintf "OR %s, %s" (show_arg x) (show_arg y)
-  | XOR (x, y)   -> Printf.sprintf "XOR %s, %s" (show_arg x) (show_arg y)
-  | CP (x, y)    -> Printf.sprintf "CP %s, %s" (show_arg x) (show_arg y)
-  | INC x        -> Printf.sprintf "INC %s" (show_arg x)
-  | INC16 x      -> Printf.sprintf "INC %s" (show_arg16 x)
-  | DEC x        -> Printf.sprintf "DEC %s" (show_arg x)
-  | DEC16 x      -> Printf.sprintf "DEC %s" (show_arg16 x)
-  | SWAP x       -> Printf.sprintf "SWAP %s" (show_arg x)
-  | DAA          -> Printf.sprintf "DAA"
-  | CPL          -> Printf.sprintf "CPL"
-  | CCF          -> Printf.sprintf "CCF"
-  | SCF          -> Printf.sprintf "SCF"
-  | NOP          -> Printf.sprintf "NOP"
-  | HALT         -> Printf.sprintf "HALT"
-  | STOP         -> Printf.sprintf "STOP"
-  | DI           -> Printf.sprintf "DI"
-  | EI           -> Printf.sprintf "EI"
-  | RLCA         -> Printf.sprintf "RLCA"
-  | RLA          -> Printf.sprintf "RLA"
-  | RRCA         -> Printf.sprintf "RRCA"
-  | RRA          -> Printf.sprintf "RRA"
-  | RLC x        -> Printf.sprintf "RLC %s" (show_arg x)
-  | RL x         -> Printf.sprintf "RL %s" (show_arg x)
-  | RRC x        -> Printf.sprintf "RRC %s" (show_arg x)
-  | RR x         -> Printf.sprintf "RR %s" (show_arg x)
-  | SLA x        -> Printf.sprintf "SLA %s" (show_arg x)
-  | SRA x        -> Printf.sprintf "SRA %s" (show_arg x)
-  | SRL x        -> Printf.sprintf "SRL %s" (show_arg x)
-  | BIT (n, x)   -> Printf.sprintf "BIT %s, %s" (show_uint8 n) (show_arg x)
-  | SET (n, x)   -> Printf.sprintf "SET %s, %s" (show_uint8 n) (show_arg x)
-  | RES (n, x)   -> Printf.sprintf "RES %s, %s" (show_uint8 n) (show_arg x)
-  | PUSH rr      -> Printf.sprintf "PUSH %s" (Registers.show_rr rr)
-  | POP rr       -> Printf.sprintf "POP %s" (Registers.show_rr rr)
-  | JP (c, x) -> (
-      match c with
-      | None -> Printf.sprintf "JP %s" (show_arg16 x)
-      | NZ | Z | NC | C -> Printf.sprintf "JP %s, %s" (show_condition c) (show_arg16 x))
-  | JR (c, x) -> (
-      match c with
-      | None -> Printf.sprintf "JR %s" (show_uint8 x)
-      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (show_uint8 x))
-  | CALL (c, x) -> (
-      match c with
-      | None -> Printf.sprintf "CALL %s" (show_uint16 x)
-      | NZ | Z | NC | C -> Printf.sprintf "CALL %s, %s" (show_condition c) (show_uint16 x))
-  | RST x -> Printf.sprintf "RST %s" (show_uint16 x)
-  | RET c -> Printf.sprintf "RET %s" (show_condition c)
-  | RETI  -> Printf.sprintf "RETI"
+type condition =
+  | None
+  | NZ
+  | Z
+  | NC
+  | C
+
+type 'a t =
+  | LD    : 'a arg * 'a arg -> 'a t
+  | ADD8  : uint8 arg * uint8 arg -> 'a t
+  | ADD16 : uint16 arg * uint16 arg -> 'a t
+  | ADC   : uint8 arg * uint8 arg -> 'a t
+  | SUB   : uint8 arg * uint8 arg -> 'a t
+  | SBC   : uint8 arg * uint8 arg -> 'a t
+  | AND   : uint8 arg * uint8 arg -> 'a t
+  | OR    : uint8 arg * uint8 arg -> 'a t
+  | XOR   : uint8 arg * uint8 arg -> 'a t
+  | CP    : uint8 arg * uint8 arg -> 'a t
+  | INC   : uint8 arg -> 'a t
+  | INC16 : uint16 arg -> 'a t
+  | DEC   : uint8 arg -> 'a t
+  | DEC16 : uint16 arg -> 'a t
+  | SWAP  : uint8 arg -> 'a t
+  | DAA   : 'a t
+  | CPL   : 'a t
+  | CCF   : 'a t
+  | SCF   : 'a t
+  | NOP   : 'a t
+  | HALT  : 'a t
+  | STOP  : 'a t
+  | DI    : 'a t
+  | EI    : 'a t
+  | RLCA  : 'a t
+  | RLA   : 'a t
+  | RRCA  : 'a t
+  | RRA   : 'a t
+  | RLC   : uint8 arg -> 'a t
+  | RL    : uint8 arg -> 'a t
+  | RRC   : uint8 arg -> 'a t
+  | RR    : uint8 arg -> 'a t
+  | SLA   : uint8 arg -> 'a t
+  | SRA   : uint8 arg -> 'a t
+  | SRL   : uint8 arg -> 'a t
+  | BIT   : uint8 * uint8 arg -> 'a t
+  | SET   : uint8 * uint8 arg -> 'a t
+  | RES   : uint8 * uint8 arg -> 'a t
+  | PUSH  : Registers.rr -> 'a t
+  | POP   : Registers.rr -> 'a t
+  | JP    : condition * uint16 arg -> 'a t
+  | JR    : condition * uint8 -> 'a t
+  | CALL  : condition * uint16 -> 'a t
+  | RST   : uint16 -> 'a t
+  | RET   : condition -> 'a t
+  | RETI  : 'a t

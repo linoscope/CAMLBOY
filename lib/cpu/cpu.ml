@@ -33,37 +33,27 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     until_disable_ime = None;
   }
 
-  (** Functions for reading/writing arguments of 8 bit load/arithmic operations
-   **  such as "LD B, 0xAB" and "ADD B, 0xAB" *)
-  module Eight_bit_mode = struct
-    let read (x : Instruction.arg) (t : t) : uint8 =
-      match x with
-      | Immediate n -> n
-      | Direct addr -> Mmu.read_byte t.mmu addr
-      | R r -> Registers.read_r t.registers r
-      | RR_indirect rr ->
-        let addr = Registers.read_rr t.registers rr in
-        Mmu.read_byte t.mmu addr
-      | FF00_offset n ->
-        let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
-        Mmu.read_byte t.mmu addr
-      | FF00_C ->
-        let c = Registers.read_r t.registers C in
-        let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
-        Mmu.read_byte t.mmu addr
-      | HL_inc
-      | HL_dec ->
-        let addr = Registers.read_rr t.registers HL in
-        Mmu.read_byte t.mmu addr
 
-    let write (x : Instruction.arg) (y : uint8) (t : t) : unit =
+  type next_pc = Next | Jump of uint16
+
+  let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : _ Instruction.t) : int =
+    let read : type a. a Instruction.arg -> a = fun arg ->
+      match arg with
+      | Immediate8 n -> n
+      | Immediate16 n -> n
+      | R r -> Registers.read_r t.registers r
+      | RR rr -> Registers.read_rr t.registers rr
+      | _ -> assert false
+    in
+    let write : type a. a Instruction.arg -> a -> unit = fun x y ->
       match x with
       | R r -> Registers.write_r t.registers r y
-      | RR_indirect rr ->
-        let addr = Registers.read_rr t.registers rr in
-        Mmu.write_byte t.mmu ~addr ~data:y
+      | RR rr -> Registers.write_rr t.registers rr y
       | FF00_offset n ->
         let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
+        Mmu.write_byte t.mmu ~addr ~data:y
+      | RR_indirect rr ->
+        let addr = Registers.read_rr t.registers rr in
         Mmu.write_byte t.mmu ~addr ~data:y
       | FF00_C ->
         let c = Registers.read_r t.registers C in
@@ -77,39 +67,14 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         let addr = Registers.read_rr t.registers HL in
         Mmu.write_byte t.mmu ~addr ~data:y;
         Registers.write_rr t.registers HL Uint16.(pred addr)
-      | Direct addr -> Mmu.write_byte t.mmu ~addr ~data:y
-      | Immediate _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg x)
-
-    let (<--) x y t = write x y t
-  end
-
-  (** Functions for reading/writing arguments of 16 bit load/arithmic operations
-   **  such as "LD BC, 0xABCD" and "ADD BC, 0xABCD" *)
-  module Sixteen_bit_mode = struct
-    let read (x : Instruction.arg16) (t : t) : uint16 =
-      match x with
-      | Immediate n -> n
-      | Immediate8 n -> n |> Uint16.of_uint8
-      | Direct addr -> Mmu.read_word t.mmu addr
-      | RR rr -> Registers.read_rr t.registers rr
-      | SP -> t.sp
-      | SP_offset n -> Uint16.(t.sp + of_uint8 n)
-
-    let write (x : Instruction.arg16) (y : uint16) (t : t) : unit =
-      match x with
-      | Direct addr -> Mmu.write_word t.mmu ~addr ~data:y
-      | RR rr -> Registers.write_rr t.registers rr y
+      | Direct8 addr -> Mmu.write_byte t.mmu ~addr ~data:y
+      | Direct16 addr -> Mmu.write_word t.mmu ~addr ~data:y
       | SP -> t.sp <- y
-      | Immediate _
-      | Immediate8 _
-      | SP_offset _ -> failwith @@ Printf.sprintf "Invalid arugment: %s" (Instruction.show_arg16 x)
-
-    let (<--) x y t = write x y t
-  end
-
-  type next_pc = Next | Jump of uint16
-
-  let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : Instruction.t) : int =
+      | SP_offset _
+      | Immediate16 _
+      | Immediate8 _ -> failwith @@ Printf.sprintf "Invalid arugment"
+    in
+    let (<--) x y = write x y in
     let check_condition t : Instruction.condition -> bool = function
       | None -> true
       | Z    -> Registers.read_flag t.registers Zero
@@ -118,96 +83,88 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       | NC   -> not (Registers.read_flag t.registers Carry)
     in
     let set_flags = Registers.set_flags t.registers in
-    let open Eight_bit_mode in
-    let module SBM = Sixteen_bit_mode in
     let next_pc = match inst with
       | LD (x, y) ->
-        (x <-- read y t) t;
+        x <-- read y;
         Next
-      | LD16 (x, y)  ->
-        let open SBM in
-        (x <-- read y t) t;
-        Next
-      | ADD (x, y) ->
-        let x', y' = read x t, read y t in
+      | ADD8 (x, y) ->
+        let x', y' = read x, read y in
         let n = Uint8.(x' + y') in
         set_flags
           ~z:(n = Uint8.zero)
           ~h:Uint8.(x' land of_int 0xF + y' land of_int 0xF > of_int 0xF)
           ~n:false
           ~c:Uint8.(x' > of_int 0xFF - y') ();
-        (x <-- n) t;
+        x <-- n;
         Next
       | ADD16 (SP, y) ->
         (* For "ADD SP, n" the flags are set as if the instruction was a 8 bit add.
          * This is because we only add the lower 8 bits *)
-        let open SBM in
-        let x', y' = read SP t, read y t in
+        let x', y' = read SP, read y in
         let n = Uint16.(x' + y') in
         set_flags
           ~z:false
           ~h:Uint16.(x' land of_int 0xF + y' land of_int 0xF > of_int 0xF)
           ~n:false
           ~c:Uint16.(x' > of_int 0xFF - y') ();
-        (SP <-- n) t;
+        SP <-- n;
         Next
       | ADD16 (x, y) ->
-        let open SBM in
-        let x', y' = read x t, read y t in
+        let x', y' = read x, read y in
         let n = Uint16.(x' + y') in
         set_flags
           ~z:(n = Uint16.zero)
           ~h:Uint16.(x' land of_int 0x07FF + y' land of_int 0x07FF > of_int 0x07FF)
           ~n:false
           ~c:Uint16.(x' > of_int 0xFFFF - y') ();
-        (x <-- n) t;
+        x <-- n;
         Next
       | ADC (x, y) ->
         let c = if Registers.(read_flag t.registers Carry) then Uint8.one else Uint8.zero in
-        let x', y' = read x t, read y t in
+        let x', y' = read x, read y in
         let n = Uint8.(x' + y' + c) in
         set_flags
           ~z:(n = Uint8.zero)
           ~h:Uint8.(x' land of_int 0xF + y' land of_int 0xF + c > of_int 0xF)
           ~n:false
           ~c:((Uint8.to_int x' + Uint8.to_int y' + Uint8.to_int c) > 0xFF) ();
-        (x <-- n) t;
+        x <-- n;
         Next
       | SUB (x, y) ->
-        let x', y' = read x t, read y t in
+        let x', y' = read x, read y in
         let n = Uint8.(x' - y') in
         set_flags
           ~z:(n = Uint8.zero)
           ~h:Uint8.(x' land of_int 0xF < y' land of_int 0xF)
           ~n:true
           ~c:((Uint8.to_int x') < Uint8.to_int y') ();
-        (x <-- n) t;
+        x <-- n;
         Next
       | SBC (x, y) ->
         let c = if Registers.(read_flag t.registers Carry) then Uint8.one else Uint8.zero in
-        let x', y' = read x t, read y t in
+        let x', y' = read x, read y in
         let n = Uint8.(x' - (y' + c)) in
         set_flags
           ~z:(n = Uint8.zero)
           ~h:Uint8.(x' land of_int 0xF < y' land of_int 0xF + c)
           ~n:true
           ~c:((Uint8.to_int x') < Uint8.to_int y' + Uint8.to_int c) ();
-        (x <-- n) t;
+        x <-- n;
         Next
       | AND (x, y) ->
-        let n = Uint8.(read x t lor read y t) in
+        let n = Uint8.(read x lor read y) in
         set_flags ~z:(n = Uint8.zero) ~h:false ~n:false ~c:false ();
-        (x <-- n) t; Next
+        x <-- n; Next
       | OR (x, y) ->
-        let n = Uint8.(read x t lor read y t) in
+        let n = Uint8.(read x lor read y) in
         set_flags ~z:(n = Uint8.zero) ~h:false ~n:false ~c:false ();
-        (x <-- n) t; Next
+        x <-- n; Next
       | XOR (x, y) ->
-        let n = Uint8.(read x t lxor read y t) in
+        let n = Uint8.(read x lxor read y) in
         set_flags ~z:(n = Uint8.zero) ~h:false ~n:false ~c:false ();
-        (x <-- n) t; Next
+        x <-- n; Next
       | CP (x, y) ->
-        let x', y' = read x t, read y t in
+        let x', y' = read x, read y in
         let n = Uint8.(x' - y') in
         set_flags
           ~z:(n = Uint8.zero)
@@ -216,28 +173,26 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           ~c:((Uint8.to_int x') < Uint8.to_int y') ();
         Next
       | INC x ->
-        let x' = (read x t) in
+        let x' = (read x) in
         let n = Uint8.(succ x') in
         set_flags ~z:(n = Uint8.zero) ~h:((Uint8.to_int x'+ 1) > 0x0F) ~n:false ();
-        (x <-- n) t;
+        x <-- n;
         Next
       | INC16 x ->
-        let open SBM in
-        (x <-- Uint16.(succ @@ read x t)) t;
+        x <-- Uint16.(succ @@ read x);
         Next
       | DEC x ->
-        let x' = (read x t) in
+        let x' = (read x) in
         let n = Uint8.(pred x') in
         set_flags ~z:(n = Uint8.zero) ~h:Uint8.(x' land of_int 0x0F = of_int 0x0) ~n:true ();
-        (x <-- n) t;
+        x <-- n;
         Next
       | DEC16 x ->
-        let open SBM in
-        (x <-- Uint16.(pred @@ read x t)) t;
+        x <-- Uint16.(pred @@ read x);
         Next
       | SWAP x ->
-        let x' = read x t in
-        (x <-- Uint8.((x' lsl 4) lor (x' lsr 4))) t;
+        let x' = read x in
+        x <-- Uint8.((x' lsl 4) lor (x' lsr 4));
         Next
       | DAA -> assert false;
       | CPL ->
@@ -295,62 +250,62 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         set_flags ~n:false ~h:false ~z:false ~c:new_c ();
         Next
       | RLC x ->
-        let x' = read x t in
+        let x' = read x in
         let c = Uint8.(x' land of_int 0x80 <> zero) in
         let n = Uint8.((x' lsl 1) lor if c then one else zero) in
-        (x <-- n) t;
+        x <-- n;
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c ();
         Next
       | RL x ->
-        let x' = read x t in
+        let x' = read x in
         let old_c = Registers.read_flag t.registers Carry in
         let n = Uint8.((x' lsl 1) lor if old_c then one else zero) in
-        (x <-- n) t;
+        x <-- n;
         let new_c = Uint8.(x' land of_int 0x80 <> zero) in
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:new_c ();
         Next
       | RRC x ->
-        let x' = read x t in
+        let x' = read x in
         let c = Uint8.(x' land of_int 1 <> zero) in
         let n = Uint8.((x' lsr 1) lor if c then of_int 0x80 else zero) in
-        (x <-- n) t;
+        x <-- n;
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c ();
         Next
       | RR x ->
-        let x' = read x t in
+        let x' = read x in
         let old_c = Registers.read_flag t.registers Carry in
         let n = Uint8.((x' lsr 1) lor if old_c then of_int 0x80 else zero) in
-        (x <-- n) t;
+        x <-- n;
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x80 <> zero) ();
         Next
       | SLA x ->
-        let x' = read x t in
+        let x' = read x in
         let n = Uint8.(x' lsl 1) in
-        (x <-- n) t;
+        x <-- n;
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x80 <> zero) ();
         Next
       | SRA x ->
-        let x' = read x t in
+        let x' = read x in
         let n = Uint8.((x' lsr 1) lor (x' land of_int 0x80)) in
-        (x <-- n) t;
+        x <-- n;
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x1 <> zero) ();
         Next
       | SRL x ->
-        let x' = read x t in
+        let x' = read x in
         let n = Uint8.(x' lsr 1) in
-        (x <-- n) t;
+        x <-- n;
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x1 <> zero) ();
         Next
       | BIT (n, x) ->
-        let b = Uint8.(read x t land (one lsl to_int n) = zero) in
+        let b = Uint8.(read x land (one lsl to_int n) = zero) in
         set_flags ~n:false ~h:true ~z:b ();
         Next
       | SET (n, x) ->
-        (x <-- Uint8.(read x t lor (one lsl to_int n))) t;
+        x <-- Uint8.(read x lor (one lsl to_int n));
         Next
       | RES (n, x) ->
         let mask = Uint8.((one lsl to_int n) lxor of_int 0b11111111) in
-        (x <-- Uint8.(read x t land mask)) t;
+        x <-- Uint8.(read x land mask);
         Next
       | PUSH rr ->
         t.sp <- Uint16.(t.sp - of_int 2);
@@ -362,7 +317,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         Next
       | JP (c, x) ->
         if check_condition t c then
-          Jump SBM.(read x t)
+          Jump (read x)
         else
           Next
       | JR (c, x) ->

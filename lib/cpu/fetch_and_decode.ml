@@ -31,19 +31,23 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     let l3 = 3 |> Uint16.of_int
   end
 
-  let f mmu ~pc =
+  type _ ty = U8_ty : uint8 ty | U16_ty : uint16 ty
+
+  type any_inst = Any : 'a ty * 'a Instruction.t -> any_inst
+
+  let f mmu ~pc : uint16 * (int * int) * any_inst =
     let open Instruction_length in
     let next_byte () = Mmu.read_byte mmu Uint16.(succ pc) in
     let next_word () = Mmu.read_word mmu Uint16.(succ pc) in
     let op = Mmu.read_byte mmu pc |> Uint8.to_int in
     match op with
-    | 0x00 -> l1, (1, 1), NOP
-    | 0x01 -> l3, (3, 3), LD16 (RR BC, Immediate (next_word ()))
+    | 0x00 -> l1, (1, 1), (Any, NOP)
+    | 0x01 -> l3, (3, 3), LD (RR BC, Immediate16 (next_word ()))
     | 0x02 -> l1, (2, 2), LD (RR_indirect BC, R A)
     | 0x03 -> l1, (2, 2), INC16 (RR BC)
     | 0x04 -> l1, (1, 1), INC (R B)
     | 0x05 -> l1, (1, 1), DEC (R B)
-    | 0x06 -> l2, (2, 2), LD (R B, Immediate (next_byte ()))
+    | 0x06 -> l2, (2, 2), LD (R B, Immediate8 (next_byte ()))
     | 0x07 -> l1, (1, 1), RLCA
     | 0x08 -> l3, (5, 5), LD16 (Direct (next_word ()), SP)
     | 0x09 -> l1, (2, 2), ADD16 (RR HL, RR BC)
