@@ -17,6 +17,6 @@ module Make (Mmu : Word_addressable_intf.S) : sig
       halted:bool ->
       ime:bool ->
       t
-    val execute : t -> uint16 -> int * int -> _ Instruction.t -> int
+    val execute : t -> uint16 -> int * int -> Instruction.t -> int
   end
 end

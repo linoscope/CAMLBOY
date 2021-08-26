@@ -36,14 +36,33 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   type next_pc = Next | Jump of uint16
 
-  let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : _ Instruction.t) : int =
+  let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : Instruction.t) : int =
     let read : type a. a Instruction.arg -> a = fun arg ->
       match arg with
       | Immediate8 n -> n
       | Immediate16 n -> n
+      | Direct8 addr -> Mmu.read_byte t.mmu addr
       | R r -> Registers.read_r t.registers r
+      | RR_indirect rr ->
+        let addr = Registers.read_rr t.registers rr in
+        Mmu.read_byte t.mmu addr
+      | FF00_offset n ->
+        let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
+        Mmu.read_byte t.mmu addr
+      | FF00_C ->
+        let c = Registers.read_r t.registers C in
+        let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
+        Mmu.read_byte t.mmu addr
+      | HL_inc ->
+        let addr = Registers.read_rr t.registers HL in
+        Mmu.read_byte t.mmu addr
+      | HL_dec ->
+        let addr = Registers.read_rr t.registers HL in
+        Mmu.read_byte t.mmu addr
+      | Direct16 addr -> Mmu.read_word t.mmu addr
       | RR rr -> Registers.read_rr t.registers rr
-      | _ -> assert false
+      | SP -> t.sp
+      | SP_offset n -> Uint16.(t.sp + of_uint8 n)
     in
     let write : type a. a Instruction.arg -> a -> unit = fun x y ->
       match x with
@@ -84,7 +103,10 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     in
     let set_flags = Registers.set_flags t.registers in
     let next_pc = match inst with
-      | LD (x, y) ->
+      | LD8 (x, y) ->
+        x <-- read y;
+        Next
+      | LD16 (x, y) ->
         x <-- read y;
         Next
       | ADD8 (x, y) ->
@@ -97,10 +119,10 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           ~c:Uint8.(x' > of_int 0xFF - y') ();
         x <-- n;
         Next
-      | ADD16 (SP, y) ->
+      | ADDSP y ->
         (* For "ADD SP, n" the flags are set as if the instruction was a 8 bit add.
          * This is because we only add the lower 8 bits *)
-        let x', y' = read SP, read y in
+        let x', y' = read SP, Uint16.of_uint8 y in
         let n = Uint16.(x' + y') in
         set_flags
           ~z:false

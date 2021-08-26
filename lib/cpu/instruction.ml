@@ -22,50 +22,52 @@ type condition =
   | NC
   | C
 
-type 'a t =
-  | LD    : 'a arg * 'a arg -> 'a t
-  | ADD8  : uint8 arg * uint8 arg -> 'a t
-  | ADD16 : uint16 arg * uint16 arg -> 'a t
-  | ADC   : uint8 arg * uint8 arg -> 'a t
-  | SUB   : uint8 arg * uint8 arg -> 'a t
-  | SBC   : uint8 arg * uint8 arg -> 'a t
-  | AND   : uint8 arg * uint8 arg -> 'a t
-  | OR    : uint8 arg * uint8 arg -> 'a t
-  | XOR   : uint8 arg * uint8 arg -> 'a t
-  | CP    : uint8 arg * uint8 arg -> 'a t
-  | INC   : uint8 arg -> 'a t
-  | INC16 : uint16 arg -> 'a t
-  | DEC   : uint8 arg -> 'a t
-  | DEC16 : uint16 arg -> 'a t
-  | SWAP  : uint8 arg -> 'a t
-  | DAA   : 'a t
-  | CPL   : 'a t
-  | CCF   : 'a t
-  | SCF   : 'a t
-  | NOP   : 'a t
-  | HALT  : 'a t
-  | STOP  : 'a t
-  | DI    : 'a t
-  | EI    : 'a t
-  | RLCA  : 'a t
-  | RLA   : 'a t
-  | RRCA  : 'a t
-  | RRA   : 'a t
-  | RLC   : uint8 arg -> 'a t
-  | RL    : uint8 arg -> 'a t
-  | RRC   : uint8 arg -> 'a t
-  | RR    : uint8 arg -> 'a t
-  | SLA   : uint8 arg -> 'a t
-  | SRA   : uint8 arg -> 'a t
-  | SRL   : uint8 arg -> 'a t
-  | BIT   : uint8 * uint8 arg -> 'a t
-  | SET   : uint8 * uint8 arg -> 'a t
-  | RES   : uint8 * uint8 arg -> 'a t
-  | PUSH  : Registers.rr -> 'a t
-  | POP   : Registers.rr -> 'a t
-  | JP    : condition * uint16 arg -> 'a t
-  | JR    : condition * uint8 -> 'a t
-  | CALL  : condition * uint16 -> 'a t
-  | RST   : uint16 -> 'a t
-  | RET   : condition -> 'a t
-  | RETI  : 'a t
+type t =
+  | LD8   of uint8 arg * uint8 arg
+  | LD16  of uint16 arg * uint16 arg
+  | ADD8  of uint8 arg * uint8 arg
+  | ADD16 of uint16 arg * uint16 arg
+  | ADDSP of uint8
+  | ADC   of uint8 arg * uint8 arg
+  | SUB   of uint8 arg * uint8 arg
+  | SBC   of uint8 arg * uint8 arg
+  | AND   of uint8 arg * uint8 arg
+  | OR    of uint8 arg * uint8 arg
+  | XOR   of uint8 arg * uint8 arg
+  | CP    of uint8 arg * uint8 arg
+  | INC   of uint8 arg
+  | INC16 of uint16 arg
+  | DEC   of uint8 arg
+  | DEC16 of uint16 arg
+  | SWAP  of uint8 arg
+  | DAA
+  | CPL
+  | CCF
+  | SCF
+  | NOP
+  | HALT
+  | STOP
+  | DI
+  | EI
+  | RLCA
+  | RLA
+  | RRCA
+  | RRA
+  | RLC   of uint8 arg
+  | RL    of uint8 arg
+  | RRC   of uint8 arg
+  | RR    of uint8 arg
+  | SLA   of uint8 arg
+  | SRA   of uint8 arg
+  | SRL   of uint8 arg
+  | BIT   of uint8 * uint8 arg
+  | SET   of uint8 * uint8 arg
+  | RES   of uint8 * uint8 arg
+  | PUSH  of Registers.rr
+  | POP   of Registers.rr
+  | JP    of condition * uint16 arg
+  | JR    of condition * uint8
+  | CALL  of condition * uint16
+  | RST   of uint16
+  | RET   of condition
+  | RETI
