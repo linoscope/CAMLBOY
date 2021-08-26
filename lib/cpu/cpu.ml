@@ -2,8 +2,6 @@ open Uints
 
 module Make (Mmu : Word_addressable_intf.S) = struct
 
-  module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
-
   type t = {
     registers : Registers.t;
     mutable pc : uint16;
@@ -381,14 +379,16 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   let update_ime t =
     begin match t.until_enable_ime with
-      | One -> t.until_enable_ime <- Zero
+      | One  -> t.until_enable_ime <- Zero
       | Zero -> t.until_enable_ime <- None; t.ime <- true
       | None -> ()
     end;
     match t.until_disable_ime with
-    | One -> t.until_disable_ime <- Zero
+    | One  -> t.until_disable_ime <- Zero
     | Zero -> t.until_disable_ime <- None; t.ime <- true
     | None -> ()
+
+  module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
 
   let tick t  =
     update_ime t;

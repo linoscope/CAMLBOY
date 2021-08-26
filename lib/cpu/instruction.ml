@@ -1,19 +1,19 @@
 open Uints
 
 type 'a arg =
-  | Immediate8  : uint8 -> uint8  arg
-  | Immediate16 : uint16 -> uint16 arg
-  | Direct8     : uint16 -> uint8  arg
-  | Direct16    : uint16 -> uint16 arg
-  | R           : Registers.r -> uint8  arg
+  | Immediate8  : uint8        -> uint8  arg
+  | Immediate16 : uint16       -> uint16 arg
+  | Direct8     : uint16       -> uint8  arg
+  | Direct16    : uint16       -> uint16 arg
+  | R           : Registers.r  -> uint8  arg
   | RR          : Registers.rr -> uint16 arg
   | RR_indirect : Registers.rr -> uint8  arg
-  | FF00_offset : uint8 -> uint8  arg
+  | FF00_offset : uint8        -> uint8  arg
   | FF00_C      : uint8 arg
   | HL_inc      : uint8 arg
   | HL_dec      : uint8 arg
   | SP          : uint16 arg
-  | SP_offset   : uint8 -> uint16 arg
+  | SP_offset   : uint8        -> uint16 arg
 
 let show_arg : type a. a arg -> string = function
   | Immediate8 n   -> Uint8.show n
@@ -31,12 +31,18 @@ let show_arg : type a. a arg -> string = function
   | SP_offset n    -> Printf.sprintf "SP+%s" (Uint8.show n)
 
 type condition =
-  | None [@printer fun fmt _ -> fprintf fmt ""]
-  | NZ   [@printer fun fmt _ -> fprintf fmt "NZ"]
-  | Z    [@printer fun fmt _ -> fprintf fmt "Z"]
-  | NC   [@printer fun fmt _ -> fprintf fmt "NC"]
-  | C    [@printer fun fmt _ -> fprintf fmt "C"]
-[@@deriving show]
+  | None
+  | NZ
+  | Z
+  | NC
+  | C
+
+let show_condition = function
+  | None -> ""
+  | NZ   -> "NZ"
+  | Z    -> "Z"
+  | NC   -> "NC"
+  | C    -> "C"
 
 type t =
   | LD8   of uint8 arg * uint8 arg
