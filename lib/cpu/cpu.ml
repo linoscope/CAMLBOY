@@ -8,9 +8,9 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     registers : Registers.t;
     mutable pc : uint16;
     mutable sp : uint16;
-    mmu : Mmu.t;                  [@opaque]
+    mmu : Mmu.t; [@opaque]
     mutable halted : bool;
-    mutable ime : bool;           (* interrupt master enable *)
+    mutable ime : bool; (* interrupt master enable *)
     mutable until_enable_ime : count_down;
     mutable until_disable_ime : count_down;
   }
