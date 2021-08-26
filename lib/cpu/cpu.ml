@@ -119,6 +119,16 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           ~c:Uint8.(x' > of_int 0xFF - y') ();
         x <-- n;
         Next
+      | ADD16 (x, y) ->
+        let x', y' = read x, read y in
+        let n = Uint16.(x' + y') in
+        set_flags
+          ~z:(n = Uint16.zero)
+          ~h:Uint16.(x' land of_int 0x07FF + y' land of_int 0x07FF > of_int 0x07FF)
+          ~n:false
+          ~c:Uint16.(x' > of_int 0xFFFF - y') ();
+        x <-- n;
+        Next
       | ADDSP y ->
         (* For "ADD SP, n" the flags are set as if the instruction was a 8 bit add.
          * This is because we only add the lower 8 bits *)
@@ -130,16 +140,6 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           ~n:false
           ~c:Uint16.(x' > of_int 0xFF - y') ();
         SP <-- n;
-        Next
-      | ADD16 (x, y) ->
-        let x', y' = read x, read y in
-        let n = Uint16.(x' + y') in
-        set_flags
-          ~z:(n = Uint16.zero)
-          ~h:Uint16.(x' land of_int 0x07FF + y' land of_int 0x07FF > of_int 0x07FF)
-          ~n:false
-          ~c:Uint16.(x' > of_int 0xFFFF - y') ();
-        x <-- n;
         Next
       | ADC (x, y) ->
         let c = if Registers.(read_flag t.registers Carry) then Uint8.one else Uint8.zero in
