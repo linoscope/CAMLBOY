@@ -64,7 +64,7 @@ let%expect_test "NOP" =
 let%expect_test "LD B, 0xAB" =
   let t = create_cpu () in
 
-  LD (R B, Immediate (Uint8.of_int 0xAB))
+  LD8 (R B, Immediate8 (Uint8.of_int 0xAB))
   |> print_execute_result t ~inst_len:2;
 
   [%expect {|
@@ -74,10 +74,10 @@ let%expect_test "LD B, 0xAB" =
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _ } |}]
 
-let%expect_test "LD BC, 0xAABB" =
+let%expect_test "LD8 BC, 0xAABB" =
   let t = create_cpu () in
 
-  LD16 (RR BC, Immediate (Uint16.of_int 0x9988))
+  LD16 (RR BC, Immediate16 (Uint16.of_int 0x9988))
   |> print_execute_result t ~inst_len:3;
 
   [%expect {|
@@ -87,11 +87,11 @@ let%expect_test "LD BC, 0xAABB" =
       pc = 0x0003; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _ } |}]
 
-let%expect_test "LD (HL), B" =
+let%expect_test "LD8 (HL), B" =
   let mmu = Mmu.create ~size:0x10 in
   let t = create_cpu ~l:0x2 ~b:0xAB ~mmu () in
 
-  LD (RR_indirect HL, R B)
+  LD8 (RR_indirect HL, R B)
   |> print_execute_result t;
 
   [%expect {|
@@ -104,11 +104,11 @@ let%expect_test "LD (HL), B" =
   print_addr_content mmu 0x2;
   [%expect {|0xab|}]
 
-let%expect_test "LD (HL+), B" =
+let%expect_test "LD8 (HL+), B" =
   let mmu = Mmu.create ~size:0x10 in
   let t = create_cpu ~l:0x2 ~b:0xAB ~mmu () in
 
-  LD (HL_inc, R B)
+  LD8 (HL_inc, R B)
   |> print_execute_result t;
 
   [%expect{|
@@ -121,11 +121,11 @@ let%expect_test "LD (HL+), B" =
   print_addr_content mmu 0x2;
   [%expect {|0xab|}]
 
-let%expect_test "LD (HL-), B" =
+let%expect_test "LD8 (HL-), B" =
   let mmu = Mmu.create ~size:0x10 in
   let t = create_cpu ~l:0x2 ~b:0xAB ~mmu () in
 
-  LD (HL_dec, R B)
+  LD8 (HL_dec, R B)
   |> print_execute_result t;
 
   [%expect{|
@@ -138,7 +138,7 @@ let%expect_test "LD (HL-), B" =
   print_addr_content mmu 0x2;
   [%expect {|0xab|}]
 
-let%expect_test "LD HL, SP+0x03" =
+let%expect_test "LD8 HL, SP+0x03" =
   let t = create_cpu ~sp:0x1234 () in
 
   LD16 (RR HL, SP_offset (Uint8.of_int 0x03))
@@ -151,10 +151,10 @@ let%expect_test "LD HL, SP+0x03" =
       pc = 0x0002; sp = 0x1234; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _ } |}]
 
-let%expect_test "LD SP, 0xABCD" =
+let%expect_test "LD8 SP, 0xABCD" =
   let t = create_cpu () in
 
-  LD16 (SP, Immediate (0xabcd |> Uint16.of_int))
+  LD16 (SP, Immediate16 (0xabcd |> Uint16.of_int))
   |> print_execute_result t ~inst_len:3;
 
   [%expect{|
@@ -167,7 +167,7 @@ let%expect_test "LD SP, 0xABCD" =
 let%expect_test "ADD A, 0xA0 (no half-carry/carry)" =
   let t = create_cpu ~a:0x01 () in
 
-  ADD (R A, Immediate (Uint8.of_int 0xA0))
+  ADD8 (R A, Immediate8 (Uint8.of_int 0xA0))
   |> print_execute_result t ~inst_len:2;
 
   [%expect{|
@@ -180,7 +180,7 @@ let%expect_test "ADD A, 0xA0 (no half-carry/carry)" =
 let%expect_test "ADD A, 0x0F (half-carry)" =
   let t = create_cpu ~a:0x01 () in
 
-  ADD (R A, Immediate (Uint8.of_int 0x0F))
+  ADD8 (R A, Immediate8 (Uint8.of_int 0x0F))
   |> print_execute_result t ~inst_len:2;
 
   [%expect{|
@@ -193,7 +193,7 @@ let%expect_test "ADD A, 0x0F (half-carry)" =
 let%expect_test "ADD A, 0xFF (half-carry + carry)" =
   let t = create_cpu ~a:0x1 () in
 
-  ADD (R A, Immediate (Uint8.of_int 0xFF))
+  ADD8 (R A, Immediate8 (Uint8.of_int 0xFF))
   |> print_execute_result t;
 
   [%expect{|
@@ -206,7 +206,7 @@ let%expect_test "ADD A, 0xFF (half-carry + carry)" =
 let%expect_test "ADD SP, 0x01" =
   let t = create_cpu ~sp:0xAAFF () in
 
-  ADD16 (SP, Immediate8 (Uint8.of_int 0x01))
+  ADDSP (Uint8.of_int 0x01)
   |> print_execute_result t ~inst_len:2;
 
   [%expect{|
@@ -232,7 +232,7 @@ let%expect_test "ADD HL, BC (half carry + carry)" =
 let%expect_test "ADC A, 0xFF (half-carry + carry)" =
   let t = create_cpu ~a:0x1 ~carry:true () in
 
-  ADC (R A, Immediate (Uint8.of_int 0xFE))
+  ADC (R A, Immediate8 (Uint8.of_int 0xFE))
   |> print_execute_result t ~inst_len:2;
 
   [%expect{|
@@ -635,7 +635,7 @@ let%expect_test "POP BC" =
 let%expect_test "JP 0x0010" =
   let t = create_cpu  () in
 
-  JP (None, Immediate Uint16.(of_int 0x0010))
+  JP (None, Immediate16 Uint16.(of_int 0x0010))
   |> print_execute_result t ~inst_len:3;
 
   [%expect {|
@@ -648,7 +648,7 @@ let%expect_test "JP 0x0010" =
 let%expect_test "JP NZ, 0x0010 when z=0" =
   let t = create_cpu  ~zero:false () in
 
-  JP (NZ, Immediate Uint16.(of_int 0x0010))
+  JP (NZ, Immediate16 Uint16.(of_int 0x0010))
   |> print_execute_result t ~inst_len:3;
 
   [%expect {|
@@ -661,7 +661,7 @@ let%expect_test "JP NZ, 0x0010 when z=0" =
 let%expect_test "JP NZ, 0x0010 when z=1" =
   let t = create_cpu  ~zero:true () in
 
-  JP (NZ, Immediate Uint16.(of_int 0x0010))
+  JP (NZ, Immediate16 Uint16.(of_int 0x0010))
   |> print_execute_result t ~inst_len:3;
 
   [%expect {|
