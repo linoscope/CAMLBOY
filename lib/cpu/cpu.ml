@@ -345,7 +345,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           Next
       | JR (c, x) ->
         if check_condition t c then
-          let addr = Uint8.(x + Uint16.to_uint8 t.pc) in
+          let addr = Uint8.(x + Uint16.to_uint8 t.pc + Uint16.to_uint8 inst_len) in
           Jump (Uint16.of_uint8 addr)
         else
           Next
