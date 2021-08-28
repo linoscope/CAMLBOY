@@ -34,8 +34,8 @@ let write_byte t ~(addr : uint16) ~(data : uint8) =
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 let read_word t addr =
-  Uint8.(read_byte t addr + read_byte t Uint16.(succ addr) lsl 8)
-  |> Uint16.of_uint8
+  Uint8.to_int (read_byte t addr) + Uint8.to_int (read_byte t Uint16.(succ addr)) lsl 8
+  |> Uint16.of_int
 
 let write_word t ~addr ~(data : uint16) =
   let data = Uint16.to_int data in

@@ -50,8 +50,6 @@ module Uint8 = struct
     let pp fmt = Format.fprintf fmt "0x%02x"
   end
   include B
-  (* let show = Printf.sprintf "0x%02x"
-   * let pp fmt = Format.fprintf fmt "0x%02x" *)
 
   module Infix = MakeInfix(B)
   include Infix
@@ -97,6 +95,7 @@ module Uint16 = struct
   include Infix
 
   let of_uint8 x = x |> Uint8.to_int |> of_int
+  let to_uint8 x = x |> to_int |> Uint8.of_int
 end
 
 type uint8 = Uint8.t

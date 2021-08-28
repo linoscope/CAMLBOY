@@ -2,7 +2,9 @@ open Uints
 
 module Cpu = Cpu.Make(Mmu)
 
-type t = { cpu: Cpu.t }
+type t = {
+  cpu: Cpu.t;
+} [@@deriving show]
 
 let create () =
   let open Uint16 in

@@ -11,6 +11,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     mutable ime : bool; (* interrupt master enable *)
     mutable until_enable_ime : count_down;
     mutable until_disable_ime : count_down;
+    mutable prev_inst : Instruction.t (* for debugging purpose *)
   }
   [@@deriving show]
 
@@ -29,12 +30,14 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     ime = true;
     until_enable_ime = None;
     until_disable_ime = None;
+    prev_inst = NOP;
   }
 
 
   type next_pc = Next | Jump of uint16
 
   let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : Instruction.t) : int =
+    t.prev_inst <- inst;
     let read : type a. a Instruction.arg -> a = fun arg ->
       match arg with
       | Immediate8 n -> n
@@ -342,7 +345,8 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           Next
       | JR (c, x) ->
         if check_condition t c then
-          Jump Uint16.(t.pc + of_uint8 x)
+          let addr = Uint8.(x + Uint16.to_uint8 t.pc) in
+          Jump (Uint16.of_uint8 addr)
         else
           Next
       | CALL (c, x) ->
@@ -397,7 +401,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   module For_tests = struct
     let execute = execute
-    let create ~mmu ~registers ~sp ~pc ~halted ~ime = {registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None}
+    let create ~mmu ~registers ~sp ~pc ~halted ~ime = {registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None; prev_inst = NOP}
   end
 
 end

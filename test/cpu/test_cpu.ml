@@ -59,7 +59,7 @@ let%expect_test "NOP" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = NOP } |}]
 
 let%expect_test "LD B, 0xAB" =
   let t = create_cpu () in
@@ -72,7 +72,7 @@ let%expect_test "LD B, 0xAB" =
       { Registers.a = 0x00; b = 0xab; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD B, 0xab } |}]
 
 let%expect_test "LD8 BC, 0xAABB" =
   let t = create_cpu () in
@@ -85,7 +85,7 @@ let%expect_test "LD8 BC, 0xAABB" =
       { Registers.a = 0x00; b = 0x99; c = 0x88; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0003; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD BC, 0x9988 } |}]
 
 let%expect_test "LD8 (HL), B" =
   let mmu = Mmu.create ~size:0x10 in
@@ -99,7 +99,7 @@ let%expect_test "LD8 (HL), B" =
       { Registers.a = 0x00; b = 0xab; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x02 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}];
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD (HL), B } |}];
 
   print_addr_content mmu 0x2;
   [%expect {|0xab|}]
@@ -116,7 +116,7 @@ let%expect_test "LD8 (HL+), B" =
       { Registers.a = 0x00; b = 0xab; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x03 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}];
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD (HL+), B } |}];
 
   print_addr_content mmu 0x2;
   [%expect {|0xab|}]
@@ -133,7 +133,7 @@ let%expect_test "LD8 (HL-), B" =
       { Registers.a = 0x00; b = 0xab; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x01 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}];
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD (HL-), B } |}];
 
   print_addr_content mmu 0x2;
   [%expect {|0xab|}]
@@ -149,7 +149,7 @@ let%expect_test "LD8 HL, SP+0x03" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x12; l = 0x37 };
       pc = 0x0002; sp = 0x1234; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD HL, SP+0x03 } |}]
 
 let%expect_test "LD8 SP, 0xABCD" =
   let t = create_cpu () in
@@ -162,7 +162,7 @@ let%expect_test "LD8 SP, 0xABCD" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0003; sp = 0xabcd; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD SP, 0xabcd } |}]
 
 let%expect_test "ADD A, 0xA0 (no half-carry/carry)" =
   let t = create_cpu ~a:0x01 () in
@@ -175,7 +175,7 @@ let%expect_test "ADD A, 0xA0 (no half-carry/carry)" =
       { Registers.a = 0xa1; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = ADD A, 0xa0 } |}]
 
 let%expect_test "ADD A, 0x0F (half-carry)" =
   let t = create_cpu ~a:0x01 () in
@@ -188,7 +188,7 @@ let%expect_test "ADD A, 0x0F (half-carry)" =
       { Registers.a = 0x10; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=1, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = ADD A, 0x0f } |}]
 
 let%expect_test "ADD A, 0xFF (half-carry + carry)" =
   let t = create_cpu ~a:0x1 () in
@@ -201,7 +201,7 @@ let%expect_test "ADD A, 0xFF (half-carry + carry)" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=1, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = ADD A, 0xff } |}]
 
 let%expect_test "ADD SP, 0x01" =
   let t = create_cpu ~sp:0xAAFF () in
@@ -214,7 +214,7 @@ let%expect_test "ADD SP, 0x01" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=1, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0xab00; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = ADD SP, 0x01 } |}]
 
 let%expect_test "ADD HL, BC (half carry + carry)" =
   let t = create_cpu ~h:0xFF ~l:0x00 ~b:0x01 ~c:0x00 () in
@@ -227,7 +227,7 @@ let%expect_test "ADD HL, BC (half carry + carry)" =
       { Registers.a = 0x00; b = 0x01; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=1, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = ADD HL, BC } |}]
 
 let%expect_test "ADC A, 0xFF (half-carry + carry)" =
   let t = create_cpu ~a:0x1 ~carry:true () in
@@ -240,7 +240,7 @@ let%expect_test "ADC A, 0xFF (half-carry + carry)" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=1, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = ADC A, 0xfe } |}]
 
 let%expect_test "INC HL" =
   let t = create_cpu ~h:0xaa ~l:0xbb () in
@@ -253,7 +253,7 @@ let%expect_test "INC HL" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0xaa; l = 0xbc };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = INC HL } |}]
 
 
 let%expect_test "RLCA" =
@@ -267,7 +267,7 @@ let%expect_test "RLCA" =
       { Registers.a = 0x03; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RLCA } |}]
 
 let%expect_test "RLA" =
   let t = create_cpu ~a:0b00000001 ~carry:true () in
@@ -280,7 +280,7 @@ let%expect_test "RLA" =
       { Registers.a = 0x03; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RLA } |}]
 
 let%expect_test "RLA (always unset zero flag)" =
   let t = create_cpu ~a:0b10000000 ~zero:true ~carry:false () in
@@ -293,7 +293,7 @@ let%expect_test "RLA (always unset zero flag)" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RLA } |}]
 
 
 let%expect_test "RRCA" =
@@ -307,7 +307,7 @@ let%expect_test "RRCA" =
       { Registers.a = 0x88; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RRCA } |}]
 
 let%expect_test "RRA" =
   let t = create_cpu ~a:0b00010000 ~carry:true () in
@@ -320,7 +320,7 @@ let%expect_test "RRA" =
       { Registers.a = 0x88; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RRA } |}]
 
 let%expect_test "RRA no carry" =
   let t = create_cpu ~a:0b00010000 ~carry:false () in
@@ -333,7 +333,7 @@ let%expect_test "RRA no carry" =
       { Registers.a = 0x08; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RRA } |}]
 
 let%expect_test "RLC A" =
   let t = create_cpu ~a:0b10000001 () in
@@ -346,7 +346,7 @@ let%expect_test "RLC A" =
       { Registers.a = 0x03; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RLC A } |}]
 
 let%expect_test "RLC A (sets zero flag)" =
   let t = create_cpu ~a:0b00000000 () in
@@ -359,7 +359,7 @@ let%expect_test "RLC A (sets zero flag)" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RLC A } |}]
 
 let%expect_test "RL A" =
   let t = create_cpu ~a:0b00000001 ~carry:true () in
@@ -372,7 +372,7 @@ let%expect_test "RL A" =
       { Registers.a = 0x03; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RL A } |}]
 
 let%expect_test "RL A (sets zero flag)" =
   let t = create_cpu ~a:0b10000000 () in
@@ -385,7 +385,7 @@ let%expect_test "RL A (sets zero flag)" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RL A } |}]
 
 let%expect_test "RRC A" =
   let t = create_cpu ~a:0b00010001 () in
@@ -398,7 +398,7 @@ let%expect_test "RRC A" =
       { Registers.a = 0x88; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RRC A } |}]
 
 let%expect_test "RRC A (sets zero flag)" =
   let t = create_cpu ~a:0b00000000 () in
@@ -411,7 +411,7 @@ let%expect_test "RRC A (sets zero flag)" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RRC A } |}]
 
 let%expect_test "RR A" =
   let t = create_cpu ~a:0b00010000 ~carry:true () in
@@ -424,7 +424,7 @@ let%expect_test "RR A" =
       { Registers.a = 0x88; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RR A } |}]
 
 let%expect_test "RR A no carry" =
   let t = create_cpu ~a:0b00010000 ~carry:false () in
@@ -437,7 +437,7 @@ let%expect_test "RR A no carry" =
       { Registers.a = 0x08; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RR A } |}]
 
 let%expect_test "RR A sets zero flag" =
   let t = create_cpu ~a:0b00000001 ~carry:false () in
@@ -450,7 +450,7 @@ let%expect_test "RR A sets zero flag" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RR A } |}]
 
 let%expect_test "SLA" =
   let t = create_cpu ~a:0b10000001 () in
@@ -463,7 +463,7 @@ let%expect_test "SLA" =
       { Registers.a = 0x02; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = SLA A } |}]
 
 let%expect_test "SLA set zero flag" =
   let t = create_cpu ~a:0b10000000 () in
@@ -476,7 +476,7 @@ let%expect_test "SLA set zero flag" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = SLA A } |}]
 
 let%expect_test "SLA no carry" =
   let t = create_cpu ~a:0b00001000 () in
@@ -489,7 +489,7 @@ let%expect_test "SLA no carry" =
       { Registers.a = 0x10; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = SLA A } |}]
 
 let%expect_test "SRA" =
   let t = create_cpu ~a:0b10000001 () in
@@ -502,7 +502,7 @@ let%expect_test "SRA" =
       { Registers.a = 0xc0; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = SRA A } |}]
 
 let%expect_test "SRA zero flag" =
   let t = create_cpu ~a:0b00000000 () in
@@ -515,7 +515,7 @@ let%expect_test "SRA zero flag" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = SRA A } |}]
 
 
 let%expect_test "SRL" =
@@ -529,7 +529,7 @@ let%expect_test "SRL" =
       { Registers.a = 0x40; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = SRL A } |}]
 
 let%expect_test "BIT (0, A) when A = 0b00000001" =
   let t = create_cpu ~a:0b00000001 ~sub:true () in
@@ -542,7 +542,7 @@ let%expect_test "BIT (0, A) when A = 0b00000001" =
       { Registers.a = 0x01; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=1, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = BIT 0x00, A } |}]
 
 let%expect_test "BIT (1, A) when A = 0b00100000" =
   let t = create_cpu ~a:0b00100000 ~sub:true () in
@@ -555,7 +555,7 @@ let%expect_test "BIT (1, A) when A = 0b00100000" =
       { Registers.a = 0x20; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=1, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = BIT 0x05, A } |}]
 
 let%expect_test "SET (5, A) when A = 0b00000000" =
   let t = create_cpu ~a:0b00000000 () in
@@ -568,7 +568,7 @@ let%expect_test "SET (5, A) when A = 0b00000000" =
       { Registers.a = 0x20; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = SET 0x05, A } |}]
 
 let%expect_test "RES (4, A) when A = 0b00010011" =
   let t = create_cpu ~a:0b00010011 () in
@@ -581,7 +581,7 @@ let%expect_test "RES (4, A) when A = 0b00010011" =
       { Registers.a = 0x03; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RES 0x04, A } |}]
 
 let%expect_test "RES (4, A) when A = 0b00000011" =
   let t = create_cpu ~a:0b00000011 () in
@@ -594,7 +594,7 @@ let%expect_test "RES (4, A) when A = 0b00000011" =
       { Registers.a = 0x03; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0002; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RES 0x04, A } |}]
 
 let%expect_test "PUSH BC" =
   let mmu = Mmu.create ~size:0x10 in
@@ -608,7 +608,7 @@ let%expect_test "PUSH BC" =
       { Registers.a = 0x00; b = 0xbb; c = 0xcc; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0006; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}];
+      until_enable_ime = _; until_disable_ime = _; prev_inst = PUSH BC } |}];
 
   print_addr_content mmu 0x7;
   print_addr_content mmu 0x6;
@@ -630,7 +630,7 @@ let%expect_test "POP BC" =
       { Registers.a = 0x00; b = 0xbb; c = 0xcc; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0001; sp = 0x0008; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = POP BC } |}]
 
 let%expect_test "JP 0x0010" =
   let t = create_cpu  () in
@@ -643,7 +643,7 @@ let%expect_test "JP 0x0010" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0010; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JP 0x0010 } |}]
 
 let%expect_test "JP NZ, 0x0010 when z=0" =
   let t = create_cpu  ~zero:false () in
@@ -656,7 +656,7 @@ let%expect_test "JP NZ, 0x0010 when z=0" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0010; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JP NZ, 0x0010 } |}]
 
 let%expect_test "JP NZ, 0x0010 when z=1" =
   let t = create_cpu  ~zero:true () in
@@ -669,7 +669,7 @@ let%expect_test "JP NZ, 0x0010 when z=1" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=1); h = 0x00; l = 0x00 };
       pc = 0x0003; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JP NZ, 0x0010 } |}]
 
 let%expect_test "JP HL" =
   let t = create_cpu ~h:0xAA ~l:0xBB  () in
@@ -682,7 +682,7 @@ let%expect_test "JP HL" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0xaa; l = 0xbb };
       pc = 0xaabb; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JP HL } |}]
 
 let%expect_test "JR 0x0e" =
   let t = create_cpu ~pc:2 () in
@@ -695,7 +695,7 @@ let%expect_test "JR 0x0e" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0010; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JR 0x0e } |}]
 
 let%expect_test "JR C, 0x0e when c=1" =
   let t = create_cpu ~carry:true ~pc:2 () in
@@ -708,7 +708,7 @@ let%expect_test "JR C, 0x0e when c=1" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0010; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JR C, 0x0e } |}]
 
 let%expect_test "JR NC, 0x0e when c=1" =
   let t = create_cpu ~carry:true ~pc:2 () in
@@ -721,7 +721,7 @@ let%expect_test "JR NC, 0x0e when c=1" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=1, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0004; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JR NC, 0x0e } |}]
 
 let%expect_test "CALL 0x0010" =
   let mmu = Mmu.create ~size:0x10 in
@@ -735,7 +735,7 @@ let%expect_test "CALL 0x0010" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0010; sp = 0x0006; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}];
+      until_enable_ime = _; until_disable_ime = _; prev_inst = CALL 0x0010 } |}];
 
   print_addr_content mmu 0x7;
   print_addr_content mmu 0x6;
@@ -757,7 +757,7 @@ let%expect_test "RET" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0xbbcc; sp = 0x0008; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RET  } |}]
 
 let%expect_test "RST 0x08" =
   let mmu = Mmu.create ~size:0x10 in
@@ -771,7 +771,7 @@ let%expect_test "RST 0x08" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0008; sp = 0x0006; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _ } |}];
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RST 0x0008 } |}];
 
   print_addr_content mmu 0x7;
   print_addr_content mmu 0x6;

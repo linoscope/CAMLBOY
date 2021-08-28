@@ -1,4 +1,4 @@
-type t
+type t [@@deriving show]
 
 val create : unit -> t
 
