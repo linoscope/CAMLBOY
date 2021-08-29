@@ -18,19 +18,21 @@ let create ~rom ~wram ~gpu ~zero_page ~shadow_ram = {
 
 let read_byte t addr =
   match addr with
-  | _ when Rom.accepts t.rom_bank_0 ~addr -> Rom.read_byte t.rom_bank_0 addr
-  | _ when Ram.accepts t.wram       ~addr -> Ram.read_byte t.wram addr
-  | _ when Gpu.accepts t.gpu        ~addr -> Gpu.read_byte t.gpu addr
-  | _ when Ram.accepts t.zero_page  ~addr -> Ram.read_byte t.zero_page addr
+  | _ when Rom.accepts t.rom_bank_0 ~addr        -> Rom.read_byte t.rom_bank_0 addr
+  | _ when Ram.accepts t.wram       ~addr        -> Ram.read_byte t.wram addr
+  | _ when Gpu.accepts t.gpu        ~addr        -> Gpu.read_byte t.gpu addr
+  | _ when Ram.accepts t.zero_page  ~addr        -> Ram.read_byte t.zero_page addr
+  | _ when Shadow_ram.accepts t.shadow_ram ~addr -> Shadow_ram.read_byte t.shadow_ram addr
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 
 let write_byte t ~(addr : uint16) ~(data : uint8) =
   match addr with
-  | _ when Rom.accepts t.rom_bank_0 ~addr -> Rom.write_byte t.rom_bank_0 ~addr ~data
-  | _ when Ram.accepts t.wram       ~addr -> Ram.write_byte t.wram ~addr ~data
-  | _ when Gpu.accepts t.gpu        ~addr -> Gpu.write_byte t.gpu ~addr ~data
-  | _ when Ram.accepts t.zero_page  ~addr -> Ram.write_byte t.zero_page ~addr ~data
+  | _ when Rom.accepts t.rom_bank_0 ~addr        -> Rom.write_byte t.rom_bank_0 ~addr ~data
+  | _ when Ram.accepts t.wram       ~addr        -> Ram.write_byte t.wram ~addr ~data
+  | _ when Gpu.accepts t.gpu        ~addr        -> Gpu.write_byte t.gpu ~addr ~data
+  | _ when Ram.accepts t.zero_page  ~addr        -> Ram.write_byte t.zero_page ~addr ~data
+  | _ when Shadow_ram.accepts t.shadow_ram ~addr -> Shadow_ram.write_byte t.shadow_ram ~addr ~data
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 let read_word t addr =
@@ -49,4 +51,4 @@ let accepts t ~addr =
   || Ram.accepts t.wram ~addr
   || Gpu.accepts t.gpu ~addr
   || Ram.accepts t.zero_page ~addr
-
+  || Shadow_ram.accepts t.shadow_ram ~addr
