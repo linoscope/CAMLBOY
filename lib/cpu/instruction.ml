@@ -88,7 +88,7 @@ type t =
   | PUSH  of Registers.rr
   | POP   of Registers.rr
   | JP    of condition * uint16 arg
-  | JR    of condition * uint8
+  | JR    of condition * int8
   | CALL  of condition * uint16
   | RST   of uint16
   | RET   of condition
@@ -143,8 +143,8 @@ let show = function
       | NZ | Z | NC | C -> Printf.sprintf "JP %s, %s" (show_condition c) (show_arg x))
   | JR (c, x) -> (
       match c with
-      | None -> Printf.sprintf "JR %s" (show_uint8 x)
-      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (show_uint8 x))
+      | None -> Printf.sprintf "JR %s" (show_int8 x)
+      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (show_int8 x))
   | CALL (c, x) -> (
       match c with
       | None -> Printf.sprintf "CALL %s" (show_uint16 x)

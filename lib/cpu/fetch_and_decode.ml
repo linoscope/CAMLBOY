@@ -61,7 +61,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x15 -> l1, (1, 1), DEC (R D)
     | 0x16 -> l2, (2, 2), LD8 (R D, Immediate8 (next_byte ()))
     | 0x17 -> l1, (1, 1), RLA
-    | 0x18 -> l2, (3, 3), JR (None, (next_byte ()))
+    | 0x18 -> l2, (3, 3), JR (None, (Int8.of_byte @@ next_byte ()))
     | 0x19 -> l1, (2, 2), ADD16 (RR HL, RR DE)
     | 0x1A -> l1, (2, 2), LD8 (R A, RR_indirect DE)
     | 0x1B -> l1, (2, 2), DEC16 (RR DE)
@@ -69,7 +69,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x1D -> l1, (1, 1), DEC (R E)
     | 0x1E -> l2, (2, 2), LD8 (R E, Immediate8 (next_byte ()))
     | 0x1F -> l1, (1, 1), RRA
-    | 0x20 -> l2, (2, 3), JR (NZ, next_byte ())
+    | 0x20 -> l2, (2, 3), JR (NZ, Int8.of_byte @@ next_byte ())
     | 0x21 -> l3, (3, 3), LD16 (RR HL, Immediate16 (next_word ()))
     | 0x22 -> l1, (2, 2), LD8 (HL_inc, R A)
     | 0x23 -> l1, (2, 2), INC16 (RR HL)
@@ -77,7 +77,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x25 -> l1, (1, 1), DEC (R H)
     | 0x26 -> l2, (2, 2), LD8 (R H, Immediate8 (next_byte ()))
     | 0x27 -> l1, (1, 1), DAA
-    | 0x28 -> l2, (2, 3), JR (Z, next_byte ())
+    | 0x28 -> l2, (2, 3), JR (Z, Int8.of_byte @@ next_byte ())
     | 0x29 -> l1, (2, 2), ADD16 (RR HL,RR HL)
     | 0x2A -> l1, (2, 2), LD8 (R A, HL_inc)
     | 0x2B -> l1, (2, 2), DEC16 (RR HL)
@@ -85,7 +85,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x2D -> l1, (1, 1), DEC (R L)
     | 0x2E -> l2, (2, 2), LD8 (R L, Immediate8 (next_byte ()))
     | 0x2F -> l1, (1, 1), CPL
-    | 0x30 -> l2, (2, 3), JR (NC, next_byte ())
+    | 0x30 -> l2, (2, 3), JR (NC, Int8.of_byte @@ next_byte ())
     | 0x31 -> l3, (3, 3), LD16 (SP, Immediate16 (next_word ()))
     | 0x32 -> l1, (2, 2), LD8 (HL_dec, R A)
     | 0x33 -> l1, (2, 2), INC16 SP
@@ -93,7 +93,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x35 -> l1, (3, 3), DEC (RR_indirect HL)
     | 0x36 -> l2, (3, 3), LD8 (RR_indirect HL, Immediate8 (next_byte ()))
     | 0x37 -> l1, (1, 1), SCF
-    | 0x38 -> l2, (2, 3), JR (C, next_byte ())
+    | 0x38 -> l2, (2, 3), JR (C, Int8.of_byte @@ next_byte ())
     | 0x39 -> l1, (2, 2), ADD16 (RR HL, SP)
     | 0x3A -> l1, (2, 2), LD8 (R A, HL_dec)
     | 0x3B -> l1, (2, 2), DEC16 SP

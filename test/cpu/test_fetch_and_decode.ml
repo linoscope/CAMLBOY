@@ -140,7 +140,7 @@ let%expect_test "test all instructions" =
     	cycles = (1, 1)
     }
     {
-    	inst = JR 0xab;
+    	inst = JR -0x55;
     	inst_len = 2;
     	cycles = (3, 3)
     }
@@ -180,7 +180,7 @@ let%expect_test "test all instructions" =
     	cycles = (1, 1)
     }
     {
-    	inst = JR NZ, 0xab;
+    	inst = JR NZ, -0x55;
     	inst_len = 2;
     	cycles = (2, 3)
     }
@@ -220,7 +220,7 @@ let%expect_test "test all instructions" =
     	cycles = (1, 1)
     }
     {
-    	inst = JR Z, 0xab;
+    	inst = JR Z, -0x55;
     	inst_len = 2;
     	cycles = (2, 3)
     }
@@ -260,7 +260,7 @@ let%expect_test "test all instructions" =
     	cycles = (1, 1)
     }
     {
-    	inst = JR NC, 0xab;
+    	inst = JR NC, -0x55;
     	inst_len = 2;
     	cycles = (2, 3)
     }
@@ -300,7 +300,7 @@ let%expect_test "test all instructions" =
     	cycles = (1, 1)
     }
     {
-    	inst = JR C, 0xab;
+    	inst = JR C, -0x55;
     	inst_len = 2;
     	cycles = (2, 3)
     }

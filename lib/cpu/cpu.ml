@@ -37,7 +37,6 @@ module Make (Mmu : Word_addressable_intf.S) = struct
   type next_pc = Next | Jump of uint16
 
   let execute (t : t) (inst_len : uint16) (cycles : int * int)  (inst : Instruction.t) : int =
-    t.prev_inst <- inst;
     let read : type a. a Instruction.arg -> a = fun arg ->
       match arg with
       | Immediate8 n -> n
@@ -345,8 +344,8 @@ module Make (Mmu : Word_addressable_intf.S) = struct
           Next
       | JR (c, x) ->
         if check_condition t c then
-          let addr = Uint8.(x + Uint16.to_uint8 t.pc + Uint16.to_uint8 inst_len) in
-          Jump (Uint16.of_uint8 addr)
+          let addr = Uint16.to_int t.pc + Int8.to_int x + Uint16.to_int inst_len |> Uint16.of_int in
+          Jump addr
         else
           Next
       | CALL (c, x) ->
@@ -373,6 +372,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         t.ime <- true;
         Jump addr
     in
+    t.prev_inst <- inst;
     match next_pc, cycles with
     | Next, (not_branched_mcycle, _) ->
       t.pc <- Uint16.(t.pc + inst_len);

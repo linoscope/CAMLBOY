@@ -687,7 +687,7 @@ let%expect_test "JP HL" =
 let%expect_test "JR 0x0e" =
   let t = create_cpu ~pc:2 () in
 
-  JR (None, Uint8.(of_int 0x0c))
+  JR (None, Int8.of_byte (Uint8.of_int 0x0c))
   |> print_execute_result t ~inst_len:2;
 
   [%expect {|
@@ -700,7 +700,7 @@ let%expect_test "JR 0x0e" =
 let%expect_test "JR C, 0x0e when c=1" =
   let t = create_cpu ~carry:true ~pc:2 () in
 
-  JR (C, Uint8.(of_int 0x0c))
+  JR (C, Int8.of_int 0x0c)
   |> print_execute_result t ~inst_len:2;
 
   [%expect {|
@@ -713,7 +713,7 @@ let%expect_test "JR C, 0x0e when c=1" =
 let%expect_test "JR 0xFB when pc = 0x000A" =
   let t = create_cpu ~pc:0x000A () in
 
-  JR (None, Uint8.(of_int 0xFB))
+  JR (None, Int8.of_int 0xFB)
   |> print_execute_result t ~inst_len:2;
 
   [%expect {|
@@ -721,12 +721,12 @@ let%expect_test "JR 0xFB when pc = 0x000A" =
       { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0007; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
-      until_enable_ime = _; until_disable_ime = _; prev_inst = JR 0xfb } |}]
+      until_enable_ime = _; until_disable_ime = _; prev_inst = JR -0x05 } |}]
 
 let%expect_test "JR NC, 0x0e when c=1" =
   let t = create_cpu ~carry:true ~pc:2 () in
 
-  JR (NC, Uint8.(of_int 0x0e))
+  JR (NC, Int8.of_int 0x0e)
   |> print_execute_result t ~inst_len:2;
 
   [%expect {|

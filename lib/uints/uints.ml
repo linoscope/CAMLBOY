@@ -98,6 +98,19 @@ module Uint16 = struct
   let to_uint8 x = x |> to_int |> Uint8.of_int
 end
 
+module Int8 = struct
+  type t = int
+  let of_byte b = b
+  let of_int x = of_byte (Uint8.of_int x)
+  let to_int t = if t land (1 lsl 7) <> 0 then t - 0x100 else t
+  let show t =
+    if t land (1 lsl 7) <> 0 then
+      Printf.sprintf "-0x%02x" (Int.abs @@ t - 0x100)
+    else
+      Printf.sprintf "0x%02x" t
+  let pp fmt t = Format.fprintf fmt "%s" (show t)
+end
+
 type uint8 = Uint8.t
 let show_uint8 = Uint8.show
 let pp_uint8 = Uint8.pp
@@ -105,3 +118,7 @@ let pp_uint8 = Uint8.pp
 type uint16 = Uint16.t
 let show_uint16 = Uint16.show
 let pp_uint16 = Uint16.pp
+
+type int8 = Int8.t
+let show_int8 = Int8.show
+let pp_int8 = Int8.pp

@@ -66,7 +66,7 @@ type t =
   | PUSH  of Registers.rr
   | POP   of Registers.rr
   | JP    of condition * uint16 arg
-  | JR    of condition * uint8
+  | JR    of condition * int8
   | CALL  of condition * uint16
   | RST   of uint16
   | RET   of condition
