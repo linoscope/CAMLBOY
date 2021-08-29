@@ -8,10 +8,12 @@ end
 
 (* TODO: Properly implement Int8 *)
 module Int8 : sig
-  type t
+  type t [@@deriving show]
   val of_byte : Uint8.t -> t
   val of_int : int -> t
   val to_int : t -> int
+  val is_neg : t -> bool
+  val abs : t -> t
 end
 
 type uint8 = Uint8.t [@@deriving show]

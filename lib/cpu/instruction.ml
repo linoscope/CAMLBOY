@@ -13,7 +13,7 @@ type 'a arg =
   | HL_inc      : uint8 arg
   | HL_dec      : uint8 arg
   | SP          : uint16 arg
-  | SP_offset   : uint8        -> uint16 arg
+  | SP_offset   : int8         -> uint16 arg
 
 let show_arg : type a. a arg -> string = function
   | Immediate8 n   -> Uint8.show n
@@ -28,7 +28,11 @@ let show_arg : type a. a arg -> string = function
   | HL_inc         -> "(HL+)"
   | HL_dec         -> "(HL-)"
   | SP             -> "SP"
-  | SP_offset n    -> Printf.sprintf "SP+%s" (Uint8.show n)
+  | SP_offset n    ->
+    if Int8.is_neg n then
+      Printf.sprintf "SP-%s" Int8.(show @@ abs n)
+    else
+      Printf.sprintf "SP+%s" Int8.(show n)
 
 type condition =
   | None

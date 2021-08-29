@@ -2535,7 +2535,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = LD HL, SP+0xab;
+    	inst = LD HL, SP-0x55;
     	inst_len = 2;
     	cycles = (3, 3)
     }

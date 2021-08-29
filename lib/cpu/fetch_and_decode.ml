@@ -284,7 +284,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0xF5 -> l1, (4, 4), PUSH AF
     | 0xF6 -> l2, (2, 2), OR (R A, Immediate8 (next_byte ()))
     | 0xF7 -> l1, (4, 4), RST RST_offset.x30
-    | 0xF8 -> l2, (3, 3), LD16 (RR HL, SP_offset (next_byte ()))
+    | 0xF8 -> l2, (3, 3), LD16 (RR HL, SP_offset (Int8.of_byte @@ next_byte ()))
     | 0xF9 -> l1, (2, 2), LD16 (SP, RR HL)
     | 0xFA -> l3, (4, 4), LD8 (R A, Direct8 (next_word ()))
     | 0xFB -> l1, (1, 1), EI

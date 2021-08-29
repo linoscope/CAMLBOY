@@ -101,8 +101,14 @@ end
 module Int8 = struct
   type t = int
   let of_byte b = b
-  let of_int x = of_byte (Uint8.of_int x)
-  let to_int t = if t land (1 lsl 7) <> 0 then t - 0x100 else t
+  let of_int x =
+    if x < 0 then
+      (x land 0xFF) lor 0x8
+    else
+      (x land 0xFF)
+  let is_neg t = t land (1 lsl 7) <> 0
+  let to_int t = if is_neg t then t - 0x100 else t
+  let abs t = if is_neg t then 0x100 - t else t
   let show t =
     if t land (1 lsl 7) <> 0 then
       Printf.sprintf "-0x%02x" (Int.abs @@ t - 0x100)

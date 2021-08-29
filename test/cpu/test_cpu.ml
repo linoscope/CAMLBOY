@@ -140,7 +140,7 @@ let%expect_test "LD8 (HL-), B" =
 let%expect_test "LD8 HL, SP+0x03" =
   let t = create_cpu ~sp:0x1234 () in
 
-  LD16 (RR HL, SP_offset (Uint8.of_int 0x03))
+  LD16 (RR HL, SP_offset (Int8.of_int 0x03))
   |> print_execute_result t;
 
   [%expect{|
@@ -149,6 +149,19 @@ let%expect_test "LD8 HL, SP+0x03" =
         f = (c=0, h=0, n=0, z=0); h = 0x12; l = 0x37 };
       pc = 0x0000; sp = 0x1234; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _; prev_inst = LD HL, SP+0x03 } |}]
+
+let%expect_test "LD8 HL, SP-0x03" =
+  let t = create_cpu ~sp:0x1234 () in
+
+  LD16 (RR HL, SP_offset (Int8.of_int (-0x03)))
+  |> print_execute_result t;
+
+  [%expect{|
+    { Cpu.Make.registers =
+      { Registers.a = 0x00; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
+        f = (c=0, h=0, n=0, z=0); h = 0x12; l = 0x31 };
+      pc = 0x0000; sp = 0x1234; mmu = <opaque>; halted = false; ime = true;
+      until_enable_ime = _; until_disable_ime = _; prev_inst = LD HL, SP-0x03 } |}]
 
 let%expect_test "LD8 SP, 0xABCD" =
   let t = create_cpu () in

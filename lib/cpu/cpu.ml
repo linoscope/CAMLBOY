@@ -62,7 +62,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       | Direct16 addr -> Mmu.read_word t.mmu addr
       | RR rr -> Registers.read_rr t.registers rr
       | SP -> t.sp
-      | SP_offset n -> Uint16.(t.sp + of_uint8 n)
+      | SP_offset n -> Uint16.to_int t.sp + Int8.to_int n |> Uint16.of_int
     in
     let write : type a. a Instruction.arg -> a -> unit = fun x y ->
       match x with
