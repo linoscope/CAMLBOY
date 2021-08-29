@@ -32,11 +32,15 @@ let create_cpu
     ~halted
     ~ime
 
-let print_execute_result t inst =
+let execute_result t inst =
   let cycles = (1, 2) in
   inst
   |> Cpu.For_tests.execute t cycles
-  |> (fun x -> ignore (x : int));
+  |> (fun x -> ignore (x : int))
+
+
+let print_execute_result t inst =
+  execute_result t inst;
 
   Cpu.show t
   |> print_endline
@@ -281,7 +285,7 @@ let%expect_test "RLCA" =
       pc = 0x0000; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _; prev_inst = RLCA } |}]
 
-let%expect_test "RLA" =
+let%expect_test "RLA when c=1" =
   let t = create_cpu ~a:0b00000001 ~carry:true () in
 
   RLA
@@ -290,6 +294,19 @@ let%expect_test "RLA" =
   [%expect {|
     { Cpu.Make.registers =
       { Registers.a = 0x03; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
+        f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
+      pc = 0x0000; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
+      until_enable_ime = _; until_disable_ime = _; prev_inst = RLA } |}]
+
+let%expect_test "RLA when c=0" =
+  let t = create_cpu ~a:0b00000001 ~carry:false () in
+
+  RLA
+  |> print_execute_result t;
+
+  [%expect {|
+    { Cpu.Make.registers =
+      { Registers.a = 0x02; b = 0x00; c = 0x00; d = 0x00; e = 0x00;
         f = (c=0, h=0, n=0, z=0); h = 0x00; l = 0x00 };
       pc = 0x0000; sp = 0x0000; mmu = <opaque>; halted = false; ime = true;
       until_enable_ime = _; until_disable_ime = _; prev_inst = RLA } |}]
