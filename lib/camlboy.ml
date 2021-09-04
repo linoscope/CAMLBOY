@@ -31,12 +31,19 @@ let create () =
       ~oam:(Ram.create  ~start_addr:(of_int 0xFF00) ~end_addr:(of_int 0xFF7F))
       ~bgp:(Mmap_register.create ~addr:(of_int 0xFF47) ~type_:`RW ())
   in
+  let serial_port = Serial_port.create
+      ~sb:(Mmap_register.create ~addr:(of_int 0xFF01) ~type_:`RW ())
+      ~sc:(Mmap_register.create ~addr:(of_int 0xFF02) ~type_:`RW ())
+      ~echo_flag:true
+      ()
+  in
   let mmu = Mmu.create
       ~rom
       ~wram
       ~shadow_ram
       ~zero_page
       ~gpu
+      ~serial_port
   in
   let cpu = Cpu.create mmu in
   { cpu }

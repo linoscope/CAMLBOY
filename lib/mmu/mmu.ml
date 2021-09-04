@@ -6,14 +6,16 @@ type t = {
   shadow_ram : Shadow_ram.t;
   gpu        : Gpu.t;
   zero_page  : Ram.t;
+  serial_port : Serial_port.t;
 }
 
-let create ~rom ~wram ~gpu ~zero_page ~shadow_ram = {
+let create ~rom ~wram ~gpu ~zero_page ~shadow_ram ~serial_port = {
   rom_bank_0 = rom;
   wram;
   shadow_ram;
   gpu;
   zero_page;
+  serial_port;
 }
 
 let read_byte t addr =
@@ -51,4 +53,5 @@ let accepts t ~addr =
   || Ram.accepts t.wram ~addr
   || Gpu.accepts t.gpu ~addr
   || Ram.accepts t.zero_page ~addr
+  || Shadow_ram.accepts t.shadow_ram ~addr
   || Shadow_ram.accepts t.shadow_ram ~addr
