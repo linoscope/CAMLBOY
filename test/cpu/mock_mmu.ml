@@ -30,4 +30,4 @@ let%expect_test "read then write" =
   write_byte t ~addr:Uint16.(of_int 0x07) ~data:Uint8.(of_int 0xAA);
   read_byte t Uint16.(of_int 0x07) |> Uint8.show |> print_endline;
 
-  [%expect {| 0xaa |}]
+  [%expect {| $AA |}]

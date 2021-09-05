@@ -12,7 +12,7 @@ let%expect_test "test write and read single register" =
   v
   |> show_uint8
   |> Stdio.print_endline;
-  [%expect {| 0xab |}]
+  [%expect {| $AB |}]
 
 let%expect_test "test write and read register pair" =
   let t = Registers.create () in
@@ -23,7 +23,7 @@ let%expect_test "test write and read register pair" =
   v
   |> show_uint16
   |> Stdio.print_endline;
-  [%expect {| 0xabcd |}]
+  [%expect {| $ABCD |}]
 
 let%expect_test "test write single and read register pair" =
   let t = Registers.create () in
@@ -35,7 +35,7 @@ let%expect_test "test write single and read register pair" =
   v
   |> show_uint16
   |> Stdio.print_endline;
-  [%expect {| 0xabcd |}]
+  [%expect {| $ABCD |}]
 
 let%expect_test "set and read flag" =
   let t = Registers.create () in

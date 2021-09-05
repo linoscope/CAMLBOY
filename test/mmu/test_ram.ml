@@ -17,6 +17,6 @@ let%expect_test "write then read" =
   |> List.iter ~f:print_endline;
 
   [%expect {|
-    0x11
-    0x22
-    0x33 |}]
+    $11
+    $22
+    $33 |}]

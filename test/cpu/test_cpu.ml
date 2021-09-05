@@ -108,7 +108,7 @@ let%expect_test "LD8 (HL), B" =
     A:00 F:---- BC:ab00 DE:0000 HL:0002 SP:0000 PC:0000 |}];
 
   print_addr_content mmu 0x2;
-  [%expect {|0xab|}]
+  [%expect {|$AB|}]
 
 let%expect_test "LD8 (HL+), B" =
   let mmu = Mmu.create ~size:0x10 in
@@ -121,7 +121,7 @@ let%expect_test "LD8 (HL+), B" =
     A:00 F:---- BC:ab00 DE:0000 HL:0003 SP:0000 PC:0000 |}];
 
   print_addr_content mmu 0x2;
-  [%expect {|0xab|}]
+  [%expect {|$AB|}]
 
 let%expect_test "LD8 (HL-), B" =
   let mmu = Mmu.create ~size:0x10 in
@@ -134,7 +134,7 @@ let%expect_test "LD8 (HL-), B" =
     A:00 F:---- BC:ab00 DE:0000 HL:0001 SP:0000 PC:0000 |}];
 
   print_addr_content mmu 0x2;
-  [%expect {|0xab|}]
+  [%expect {|$AB|}]
 
 let%expect_test "LD8 A, (HL+)" =
   let mmu = Mmu.create ~size:0x10 in
@@ -528,8 +528,8 @@ let%expect_test "PUSH BC" =
   print_addr_content mmu 0x7;
   print_addr_content mmu 0x6;
   [%expect {|
-     0xbb
-     0xcc|}]
+     $BB
+     $CC|}]
 
 let%expect_test "POP BC" =
   let mmu = Mmu.create ~size:0x10 in
@@ -628,8 +628,8 @@ let%expect_test "CALL 0x0010" =
   print_addr_content mmu 0x7;
   print_addr_content mmu 0x6;
   [%expect {|
-     0xbb
-     0xcc|}]
+     $BB
+     $CC|}]
 
 let%expect_test "RET" =
   let mmu = Mmu.create ~size:0x10 in
@@ -656,5 +656,5 @@ let%expect_test "RST 0x08" =
   print_addr_content mmu 0x7;
   print_addr_content mmu 0x6;
   [%expect {|
-     0xbb
-     0xcc|}]
+     $BB
+     $CC|}]

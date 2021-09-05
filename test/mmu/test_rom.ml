@@ -17,8 +17,8 @@ let%expect_test "load then read" =
   |> List.iter ~f:print_endline;
 
   [%expect {|
-    0x00
-    0x01
-    0x02
-    0x03
-    0x04 |}]
+    $00
+    $01
+    $02
+    $03
+    $04 |}]

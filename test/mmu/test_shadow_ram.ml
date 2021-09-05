@@ -30,9 +30,9 @@ let%expect_test "write to ram and read from shadow ram" =
   |> List.iter ~f:print_endline;
 
   [%expect {|
-    0xaa
-    0xbb
-    0xcc |}]
+    $AA
+    $BB
+    $CC |}]
 
 let%expect_test "boundry test for accepts" =
   let (_, shadow_ram) = create_rams () in

@@ -46,8 +46,8 @@ module Uint8 = struct
     let of_int x = x land max_int
     external to_int : t -> int = "%identity"
 
-    let show = Printf.sprintf "0x%02x"
-    let pp fmt = Format.fprintf fmt "0x%02x"
+    let show = Printf.sprintf "$%02X"
+    let pp fmt = Format.fprintf fmt "$%02X"
   end
   include B
 
@@ -86,7 +86,7 @@ module Uint16 = struct
     let of_int x = x land max_int
     external to_int : t -> int = "%identity"
 
-    let show = Printf.sprintf "0x%04x"
+    let show = Printf.sprintf "$%04X"
     let pp fmt t = Format.fprintf fmt "%s" (show t)
   end
   include B
@@ -111,9 +111,9 @@ module Int8 = struct
   let abs t = if is_neg t then 0x100 - t else t
   let show t =
     if t land (1 lsl 7) <> 0 then
-      Printf.sprintf "-0x%02x" (Int.abs @@ t - 0x100)
+      Printf.sprintf "-$%X" (Int.abs @@ t - 0x100)
     else
-      Printf.sprintf "0x%02x" t
+      Printf.sprintf "+$%X" t
   let pp fmt t = Format.fprintf fmt "%s" (show t)
 end
 
