@@ -13,7 +13,7 @@ let () =
   Printf.printf "rom size: 0x%x\n" rom_len;
   let camlboy = Camlboy.create_with_rom ~rom_bytes in
   while true do
-    Printf.printf "%s " (Camlboy.show camlboy);
+    Printf.printf "%s" (Camlboy.show camlboy);
     Camlboy.tick camlboy;
-    Printf.printf "%s\n" (Camlboy.show_prev_inst camlboy)
+    Printf.printf " | %s\n" (Camlboy.show_prev_inst camlboy)
   done
