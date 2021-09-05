@@ -6,20 +6,23 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     registers : Registers.t;
     mutable pc : uint16;
     mutable sp : uint16;
-    mmu : Mmu.t; [@opaque]
+    mmu : Mmu.t;
     mutable halted : bool;
     mutable ime : bool; (* interrupt master enable *)
     mutable until_enable_ime : count_down;
     mutable until_disable_ime : count_down;
     mutable prev_inst : Instruction.t (* for debugging purpose *)
   }
-  [@@deriving show]
-
   and count_down =
-    | One   [@printer fun fmt _ -> fprintf fmt "1"]
-    | Zero  [@printer fun fmt _ -> fprintf fmt "0"]
-    | None  [@printer fun fmt _ -> fprintf fmt "_"]
-  [@@deriving show]
+    | One
+    | Zero
+    | None
+
+  let show t =
+    Printf.sprintf "%s SP:%04x PC:%04x"
+      (Registers.show t.registers) (t.sp |> Uint16.to_int) (t.pc |> Uint16.to_int)
+
+  let pp fmt t = Format.fprintf fmt "%s" (show t)
 
   let create mmu = {
     registers = Registers.create ();

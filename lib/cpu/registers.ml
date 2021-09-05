@@ -1,24 +1,15 @@
 open Uints
 
-let pp_f fmt f =
-  let f = Uint8.to_int f in
-  let c = if f land 0b0001 <> 0 then 1 else 0 in
-  let h = if f land 0b0010 <> 0 then 1 else 0 in
-  let n = if f land 0b0100 <> 0 then 1 else 0 in
-  let z = if f land 0b1000 <> 0 then 1 else 0 in
-  Format.fprintf fmt "(c=%d, h=%d, n=%d, z=%d)" c h n z
-
 type t = {
   mutable a : uint8;
   mutable b : uint8;
   mutable c : uint8;
   mutable d : uint8;
   mutable e : uint8;
-  mutable f : uint8 [@printer pp_f];
+  mutable f : uint8;
   mutable h : uint8;
   mutable l : uint8;
 }
-[@@deriving show]
 
 type r =
   | A [@printer fun fmt _ -> fprintf fmt "A"]
@@ -126,3 +117,22 @@ let unset_flag t flag =
   | Zero        -> t.f <- t.f land (of_int 0b11110111)
 
 let clear_flags t = t.f <- Uint8.zero
+
+let show_f f =
+  let f = Uint8.to_int f in
+  let z = if f land 0b1000 <> 0 then 'Z' else '-' in
+  let n = if f land 0b0100 <> 0 then 'N' else '-' in
+  let h = if f land 0b0010 <> 0 then 'H' else '-' in
+  let c = if f land 0b0001 <> 0 then 'C' else '-' in
+  Printf.sprintf "F:%c%c%c%c" z n h c
+
+(* A:11 F:Z-HC BC:0013 DE:00d8 HL:014d  *)
+let show t =
+  Printf.sprintf "A:%02x %s BC:%04x DE:%04x HL:%04x"
+    (read_r t A |> Uint8.to_int)
+    (show_f t.f)
+    (read_rr t BC |> Uint16.to_int)
+    (read_rr t DE |> Uint16.to_int)
+    (read_rr t HL |> Uint16.to_int)
+
+let pp fmt t = Format.fprintf fmt "%s" (show t)
