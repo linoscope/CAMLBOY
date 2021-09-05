@@ -23,8 +23,8 @@ let show_arg : type a. a arg -> string = function
   | R r            -> Registers.show_r r
   | RR rr          -> Registers.show_rr rr
   | RR_indirect rr -> Printf.sprintf "(%s)" (Registers.show_rr rr)
-  | FF00_offset n  -> Printf.sprintf "(0xFF00+%s)" (Uint8.show n)
-  | FF00_C         -> "(0xFF00+C)"
+  | FF00_offset n  -> Printf.sprintf "($FF00+%s)" (Uint8.show n)
+  | FF00_C         -> "($FF00+C)"
   | HL_inc         -> "(HL+)"
   | HL_dec         -> "(HL-)"
   | SP             -> "SP"

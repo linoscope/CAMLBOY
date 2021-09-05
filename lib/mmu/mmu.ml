@@ -27,7 +27,8 @@ module Mmu = struct
     | _ when Ram.accepts t.zero_page  ~addr        -> Ram.read_byte t.zero_page addr
     | _ when Shadow_ram.accepts t.shadow_ram ~addr -> Shadow_ram.read_byte t.shadow_ram addr
     | _ when Serial_port.accepts t.serial_port ~addr -> Serial_port.read_byte t.serial_port addr
-    | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
+    | _ -> Uint8.zero
+  (* raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr)) *)
 
 
   let write_byte t ~(addr : uint16) ~(data : uint8) =
@@ -38,7 +39,8 @@ module Mmu = struct
     | _ when Ram.accepts t.zero_page  ~addr        -> Ram.write_byte t.zero_page ~addr ~data
     | _ when Shadow_ram.accepts t.shadow_ram ~addr -> Shadow_ram.write_byte t.shadow_ram ~addr ~data
     | _ when Serial_port.accepts t.serial_port ~addr -> Serial_port.write_byte t.serial_port ~addr ~data
-    | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
+    | _ -> ()
+  (* raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr)) *)
 
   let accepts t ~addr =
     Rom.accepts t.rom_bank_0 ~addr

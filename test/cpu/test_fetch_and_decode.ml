@@ -2415,7 +2415,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = LD (0xFF00+$AB), A;
+    	inst = LD ($FF00+$AB), A;
     	inst_len = 2;
     	cycles = (3, 3)
     }
@@ -2425,7 +2425,7 @@ let%expect_test "test all instructions" =
     	cycles = (3, 3)
     }
     {
-    	inst = LD (0xFF00+C), A;
+    	inst = LD ($FF00+C), A;
     	inst_len = 1;
     	cycles = (2, 2)
     }
@@ -2495,7 +2495,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = LD A, (0xFF00+$AB);
+    	inst = LD A, ($FF00+$AB);
     	inst_len = 2;
     	cycles = (3, 3)
     }
@@ -2505,7 +2505,7 @@ let%expect_test "test all instructions" =
     	cycles = (3, 3)
     }
     {
-    	inst = LD A, (0xFF00+C);
+    	inst = LD A, ($FF00+C);
     	inst_len = 1;
     	cycles = (2, 2)
     }

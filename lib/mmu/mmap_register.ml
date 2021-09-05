@@ -30,3 +30,5 @@ let write_byte t ~addr ~data =
     failwith "invalid addr"
   else
     t.data <- data
+
+let peek t = t.data

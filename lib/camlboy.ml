@@ -10,7 +10,7 @@ let show t = Cpu.show t.cpu
 
 let show_prev_inst t = Cpu.prev_inst t.cpu |> Instruction.show
 
-let create_with_rom ~rom_bytes =
+let create_with_rom ~echo_flag ~rom_bytes =
   let open Uint16 in
   let rom = Rom.create
       ~start_addr:(of_int 0x0000)
@@ -28,17 +28,17 @@ let create_with_rom ~rom_bytes =
   in
   let zero_page = Ram.create
       ~start_addr:(of_int 0xFF80)
-      ~end_addr:(of_int 0xFFFF)
+      ~end_addr:(of_int 0xFFFE)
   in
   let gpu = Gpu.create
-      ~vram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0xFE9F))
-      ~oam:(Ram.create  ~start_addr:(of_int 0xFF00) ~end_addr:(of_int 0xFF7F))
+      ~vram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x9FFF))
+      ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
       ~bgp:(Mmap_register.create ~addr:(of_int 0xFF47) ~type_:`RW ())
   in
   let serial_port = Serial_port.create
       ~sb:(Mmap_register.create ~addr:(of_int 0xFF01) ~type_:`RW ())
       ~sc:(Mmap_register.create ~addr:(of_int 0xFF02) ~type_:`RW ())
-      ~echo_flag:true
+      ~echo_flag
       ()
   in
   let mmu = Mmu.create
@@ -66,7 +66,7 @@ let create_with_rom ~rom_bytes =
   in
   { cpu }
 
-let create () = create_with_rom ~rom_bytes:Bios.bytes
+let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
 let tick t =
   ignore (Cpu.tick t.cpu : int)
