@@ -8,8 +8,6 @@ type t = {
 
 let show t = Cpu.show t.cpu
 
-let show_prev_inst t = Cpu.prev_inst t.cpu |> Instruction.show
-
 let create_with_rom ~echo_flag ~rom_bytes =
   let open Uint16 in
   let rom = Rom.create
@@ -70,3 +68,11 @@ let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
 let tick t =
   ignore (Cpu.tick t.cpu : int)
+
+module For_tests = struct
+
+  let show_prev_inst t = Cpu.For_tests.prev_inst t.cpu |> Instruction.show
+
+  let current_pc t = Cpu.For_tests.current_pc t.cpu
+
+end

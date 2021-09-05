@@ -12,5 +12,5 @@ let () =
   while true do
     Printf.printf "%s" (Camlboy.show camlboy);
     Camlboy.tick camlboy;
-    Printf.printf " | %s\n" (Camlboy.show_prev_inst camlboy)
+    Printf.printf " | %s\n" (Camlboy.For_tests.show_prev_inst camlboy)
   done

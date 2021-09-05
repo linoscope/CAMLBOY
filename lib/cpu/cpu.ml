@@ -24,8 +24,6 @@ module Make (Mmu : Word_addressable.S) = struct
 
   let pp fmt t = Format.fprintf fmt "%s" (show t)
 
-  let prev_inst t = t.prev_inst
-
   let create mmu = {
     registers = Registers.create ();
     pc = Uint16.zero;
@@ -413,8 +411,15 @@ module Make (Mmu : Word_addressable.S) = struct
     execute t cycles inst
 
   module For_tests = struct
+
     let execute = execute
+
     let create ~mmu ~registers ~sp ~pc ~halted ~ime = {registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None; prev_inst = NOP}
+
+    let prev_inst t = t.prev_inst
+
+    let current_pc t = t.pc
+
   end
 
 end
