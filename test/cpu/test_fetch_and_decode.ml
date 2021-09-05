@@ -1,13 +1,13 @@
 include Camlboy_lib
 open Uints
+open Testing_utils
 
 module Mmu = Mock_mmu
 module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
 
 let disassemble instr_bin_file out  =
-  let rom_in = open_in instr_bin_file in
-  let rom_len = in_channel_length rom_in in
-  let rom_bytes = really_input_string rom_in rom_len |> Bytes.of_string in
+  let rom_bytes = read_rom_file instr_bin_file in
+  let rom_len = Bytes.length rom_bytes in
 
   let mmu = Mmu.create ~size:0x3FF in
   Mmu.load mmu ~src:rom_bytes ~dst_pos:Uint16.zero;
@@ -26,7 +26,7 @@ let disassemble instr_bin_file out  =
   loop Uint16.zero
 
 let%expect_test "test all instructions" =
-  disassemble "../resource/test_roms/all_instrs.bin" Stdio.stdout;
+  disassemble "../resource/test_roms/all_instrs.gb" Stdio.stdout;
 
   [%expect {|
     {

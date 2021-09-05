@@ -6,13 +6,13 @@ type t = {
   cpu: Cpu.t;
 } [@@deriving show]
 
-let create () =
+let create_with_rom ~rom_bytes =
   let open Uint16 in
   let rom = Rom.create
       ~start_addr:(of_int 0x0000)
-      ~end_addr:(of_int 0x3FFF)
+      ~end_addr:(of_int 0x7FFF)
   in
-  Rom.load rom ~rom_bytes:Bios.bytes;
+  Rom.load rom ~rom_bytes;
   let wram = Ram.create
       ~start_addr:(of_int 0xC000)
       ~end_addr:(of_int 0xDFFF) in
@@ -45,8 +45,24 @@ let create () =
       ~gpu
       ~serial_port
   in
-  let cpu = Cpu.create mmu in
+  let registers = Registers.create () in
+  Registers.write_rr registers AF (of_int 0x01b0);
+  Registers.write_rr registers BC (of_int 0x0013);
+  Registers.write_rr registers DE (of_int 0x00D8);
+  Registers.write_rr registers HL (of_int 0x014D);
+  Registers.set_flags registers ~z:true ~n:false ~h:true ~c:true ();
+  let cpu =
+    Cpu.For_tests.create
+      ~mmu
+      ~registers
+      ~sp:(of_int 0xFFFE)
+      ~pc:(of_int 0x0100)
+      ~halted:false
+      ~ime:false
+  in
   { cpu }
+
+let create () = create_with_rom ~rom_bytes:Bios.bytes
 
 let tick t =
   ignore (Cpu.tick t.cpu : int)
