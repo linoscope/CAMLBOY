@@ -111,9 +111,9 @@ module Int8 = struct
   let abs t = if is_neg t then 0x100 - t else t
   let show t =
     if t land (1 lsl 7) <> 0 then
-      Printf.sprintf "-$%X" (Int.abs @@ t - 0x100)
+      Printf.sprintf "-%d" (Int.abs @@ t - 0x100)
     else
-      Printf.sprintf "+$%X" t
+      Printf.sprintf "%d" t
   let pp fmt t = Format.fprintf fmt "%s" (show t)
 end
 

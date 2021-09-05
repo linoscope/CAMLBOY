@@ -124,15 +124,15 @@ let show_f f =
   let n = if f land 0b0100 <> 0 then 'N' else '-' in
   let h = if f land 0b0010 <> 0 then 'H' else '-' in
   let c = if f land 0b0001 <> 0 then 'C' else '-' in
-  Printf.sprintf "F:%c%c%c%c" z n h c
+  Printf.sprintf "%c%c%c%c" z n h c
 
-(* A:11 F:Z-HC BC:0013 DE:00d8 HL:014d  *)
+(* A:$11 F:Z-HC BC:$0013 DE:$00D8 $HL:014D  *)
 let show t =
-  Printf.sprintf "A:%02x %s BC:%04x DE:%04x HL:%04x"
-    (read_r t A |> Uint8.to_int)
+  Printf.sprintf "A:%s F:%s BC:%s DE:%s HL:%s"
+    (read_r t A |> Uint8.show)
     (show_f t.f)
-    (read_rr t BC |> Uint16.to_int)
-    (read_rr t DE |> Uint16.to_int)
-    (read_rr t HL |> Uint16.to_int)
+    (read_rr t BC |> Uint16.show)
+    (read_rr t DE |> Uint16.show)
+    (read_rr t HL |> Uint16.show)
 
 let pp fmt t = Format.fprintf fmt "%s" (show t)

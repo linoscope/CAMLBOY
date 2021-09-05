@@ -19,8 +19,8 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | None
 
   let show t =
-    Printf.sprintf "%s SP:%04x PC:%04x"
-      (Registers.show t.registers) (t.sp |> Uint16.to_int) (t.pc |> Uint16.to_int)
+    Printf.sprintf "%s SP:%s PC:%s"
+      (Registers.show t.registers) (t.sp |> Uint16.show) (t.pc |> Uint16.show)
 
   let pp fmt t = Format.fprintf fmt "%s" (show t)
 
