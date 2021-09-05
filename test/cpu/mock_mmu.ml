@@ -25,6 +25,8 @@ let write_word t ~addr ~data =
 
 let accepts _ ~addr:_ = true
 
+let dump t = t |> Bytes.iter ~f:(fun c -> Char.code c |> Printf.printf "%02x ")
+
 let%expect_test "read then write" =
   let t = create ~size:10 in
   write_byte t ~addr:Uint16.(of_int 0x07) ~data:Uint8.(of_int 0xAA);

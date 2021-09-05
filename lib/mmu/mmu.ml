@@ -51,5 +51,4 @@ module Mmu = struct
 end
 
 include Mmu
-
 include Word_addressable.Make (Mmu)
