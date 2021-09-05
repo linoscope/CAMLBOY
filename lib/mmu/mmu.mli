@@ -9,4 +9,4 @@ val create :
   serial_port:Serial_port.t ->
   t
 
-include Word_addressable_intf.S with type t := t
+include Word_addressable.S with type t := t
