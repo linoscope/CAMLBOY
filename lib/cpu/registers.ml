@@ -29,7 +29,11 @@ type rr =
   | HL [@printer fun fmt _ -> fprintf fmt "HL"]
 [@@deriving show]
 
-type flag = Carry | Half_carry | Subtraction | Zero
+type flag =
+  | Carry                       (* c *)
+  | Half_carry                  (* h *)
+  | Subtraction                 (* n *)
+  | Zero                        (* z *)
 
 let create () = {
   a = Uint8.zero;

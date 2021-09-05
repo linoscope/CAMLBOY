@@ -231,7 +231,26 @@ module Make (Mmu : Word_addressable.S) = struct
         x <-- Uint8.((x' lsl 4) lor (x' lsr 4));
         Next
       | DAA ->
-        Next             (* TODO: Implement *)
+        let n_flag = Registers.read_flag t.registers Subtraction in
+        let c_flag = Registers.read_flag t.registers Carry in
+        let h_flag = Registers.read_flag t.registers Half_carry in
+        let a = ref (Registers.read_r t.registers A) in
+        let open Uint8 in
+        begin match n_flag with
+          | false ->
+            if c_flag || !a > of_int 0x9F then
+              a := !a + of_int 0x60;
+            if h_flag || (!a land of_int 0x0F) > of_int 0x09 then
+              a := !a + of_int 0x06
+          | true ->
+            if c_flag then
+              a := !a - of_int 0x60;
+            if h_flag then
+              a := !a - of_int 0x06;
+        end;
+        set_flags ~h:false ~z:(!a = zero) ~c:(!a > of_int 0xFF) ();
+        Registers.write_r t.registers A !a;
+        Next
       | CPL ->
         set_flags ~n:true ~h:true ();
         Registers.read_r t.registers A
