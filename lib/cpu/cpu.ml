@@ -24,6 +24,8 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   let pp fmt t = Format.fprintf fmt "%s" (show t)
 
+  let prev_inst t = t.prev_inst
+
   let create mmu = {
     registers = Registers.create ();
     pc = Uint16.zero;
@@ -58,9 +60,11 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         Mmu.read_byte t.mmu addr
       | HL_inc ->
         let addr = Registers.read_rr t.registers HL in
+        Registers.write_rr t.registers HL Uint16.(succ addr);
         Mmu.read_byte t.mmu addr
       | HL_dec ->
         let addr = Registers.read_rr t.registers HL in
+        Registers.write_rr t.registers HL Uint16.(pred addr);
         Mmu.read_byte t.mmu addr
       | Direct16 addr -> Mmu.read_word t.mmu addr
       | RR rr -> Registers.read_rr t.registers rr
@@ -200,7 +204,10 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       | INC x ->
         let x' = (read x) in
         let n = Uint8.(succ x') in
-        set_flags ~z:(n = Uint8.zero) ~h:((Uint8.to_int x'+ 1) > 0x0F) ~n:false ();
+        set_flags
+          ~z:(n = Uint8.zero)
+          ~h:Uint8.(x' land of_int 0x0F = of_int 0x0F)
+          ~n:false ();
         x <-- n;
         Next
       | INC16 x ->
@@ -209,7 +216,10 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       | DEC x ->
         let x' = (read x) in
         let n = Uint8.(pred x') in
-        set_flags ~z:(n = Uint8.zero) ~h:Uint8.(x' land of_int 0x0F = of_int 0x0) ~n:true ();
+        set_flags
+          ~z:(n = Uint8.zero)
+          ~h:Uint8.(x' land of_int 0x0F = of_int 0x0)
+          ~n:true ();
         x <-- n;
         Next
       | DEC16 x ->

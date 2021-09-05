@@ -6,6 +6,10 @@ type t = {
   cpu: Cpu.t;
 } [@@deriving show]
 
+let show t = Cpu.show t.cpu
+
+let show_prev_inst t = Cpu.prev_inst t.cpu |> Instruction.show
+
 let create_with_rom ~rom_bytes =
   let open Uint16 in
   let rom = Rom.create

@@ -24,3 +24,10 @@ let write_word t ~addr ~data =
   Bytes.set_int16_le t (Uint16.to_int addr) (Uint16.to_int data)
 
 let accepts _ ~addr:_ = true
+
+let%expect_test "read then write" =
+  let t = create ~size:10 in
+  write_byte t ~addr:Uint16.(of_int 0x07) ~data:Uint8.(of_int 0xAA);
+  read_byte t Uint16.(of_int 0x07) |> Uint8.show |> print_endline;
+
+  [%expect {| 0xaa |}]

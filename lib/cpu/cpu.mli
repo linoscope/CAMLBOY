@@ -8,6 +8,8 @@ module Make (Mmu : Word_addressable_intf.S) : sig
   (** Returns machine cycle count  *)
   val tick : t -> int
 
+  val prev_inst : t -> Instruction.t
+
   module For_tests : sig
     val create :
       mmu:Mmu.t ->

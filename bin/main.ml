@@ -8,12 +8,12 @@ let read_rom_file (rom_file_name : string) : bytes =
   rom_bytes
 
 let () =
-  Printf.printf "cwd: %s\n" @@ Unix.getcwd ();
   let rom_bytes = read_rom_file "./resource/test_roms/blargg/cpu_instrs/individual/01-special.gb" in
   let rom_len = Bytes.length rom_bytes in
   Printf.printf "rom size: 0x%x\n" rom_len;
   let camlboy = Camlboy.create_with_rom ~rom_bytes in
   while true do
+    Printf.printf "%s " (Camlboy.show camlboy);
     Camlboy.tick camlboy;
-    Printf.printf "%s\n" (Camlboy.show camlboy);
+    Printf.printf "%s\n" (Camlboy.show_prev_inst camlboy)
   done

@@ -23,7 +23,6 @@ let create_cpu
   Registers.set_flags registers ~c:carry ~h:half_carry ~n:sub ~z:zero ();
   let zeros = Bytes.create 0x10 in
   Bytes.fill zeros 0 0x10 (Char.chr 0);
-  Mmu.load mmu ~src:zeros ~dst_pos:Uint16.zero;
   Cpu.For_tests.create
     ~mmu
     ~registers
@@ -60,6 +59,15 @@ let%expect_test "NOP" =
   [%expect {|
     A:00 F:---- BC:0000 DE:0000 HL:0000 SP:0000 PC:0000 |}]
 
+let%expect_test "LD A, 0xAB" =
+  let t = create_cpu () in
+
+  LD8 (R A, Immediate8 (Uint8.of_int 0xAB))
+  |> print_execute_result t;
+
+  [%expect {|
+    A:ab F:---- BC:0000 DE:0000 HL:0000 SP:0000 PC:0000 |}]
+
 let%expect_test "LD B, 0xAB" =
   let t = create_cpu () in
 
@@ -69,7 +77,7 @@ let%expect_test "LD B, 0xAB" =
   [%expect {|
     A:00 F:---- BC:ab00 DE:0000 HL:0000 SP:0000 PC:0000 |}]
 
-let%expect_test "LD8 BC, 0xAABB" =
+let%expect_test "LD16 BC, 0xAABB" =
   let t = create_cpu () in
 
   LD16 (RR BC, Immediate16 (Uint16.of_int 0x9988))
@@ -77,6 +85,17 @@ let%expect_test "LD8 BC, 0xAABB" =
 
   [%expect {|
     A:00 F:---- BC:9988 DE:0000 HL:0000 SP:0000 PC:0000 |}]
+
+let%expect_test "LD8 A, (HL)" =
+  let mmu = Mmu.create ~size:0x10 in
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xAB);
+  let t = create_cpu ~l:0x2 ~mmu () in
+
+  LD8 (R A, RR_indirect HL)
+  |> print_execute_result t;
+
+  [%expect {|
+    A:ab F:---- BC:0000 DE:0000 HL:0002 SP:0000 PC:0000 |}]
 
 let%expect_test "LD8 (HL), B" =
   let mmu = Mmu.create ~size:0x10 in
@@ -116,6 +135,32 @@ let%expect_test "LD8 (HL-), B" =
 
   print_addr_content mmu 0x2;
   [%expect {|0xab|}]
+
+let%expect_test "LD8 A, (HL+)" =
+  let mmu = Mmu.create ~size:0x10 in
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xBB);
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x3) ~data:Uint8.(of_int 0xCC);
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x1) ~data:Uint8.(of_int 0xDD);
+  let t = create_cpu ~l:0x2 ~mmu () in
+
+  LD8 (R A, HL_inc)
+  |> print_execute_result t;
+
+  [%expect{|
+    A:bb F:---- BC:0000 DE:0000 HL:0003 SP:0000 PC:0000 |}]
+
+let%expect_test "LD8 A, (HL-)" =
+  let mmu = Mmu.create ~size:0x10 in
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xBB);
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x3) ~data:Uint8.(of_int 0xCC);
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x1) ~data:Uint8.(of_int 0xDD);
+  let t = create_cpu ~l:0x2 ~mmu () in
+
+  LD8 (R A, HL_dec)
+  |> print_execute_result t;
+
+  [%expect{|
+    A:bb F:---- BC:0000 DE:0000 HL:0001 SP:0000 PC:0000 |}]
 
 let%expect_test "LD8 HL, SP+0x03" =
   let t = create_cpu ~sp:0x1234 () in
@@ -207,6 +252,23 @@ let%expect_test "INC HL" =
   [%expect{|
     A:00 F:---- BC:0000 DE:0000 HL:aabc SP:0000 PC:0000 |}]
 
+let%expect_test "INC A (no carry)" =
+  let t = create_cpu ~a:0x10 () in
+
+  INC (R A)
+  |> print_execute_result t;
+
+  [%expect{|
+    A:11 F:---- BC:0000 DE:0000 HL:0000 SP:0000 PC:0000 |}]
+
+let%expect_test "INC A (with carry)" =
+  let t = create_cpu ~a:0x0F () in
+
+  INC (R A)
+  |> print_execute_result t;
+
+  [%expect{|
+    A:10 F:--H- BC:0000 DE:0000 HL:0000 SP:0000 PC:0000 |}]
 
 let%expect_test "RLCA" =
   let t = create_cpu ~a:0b10000001 () in
