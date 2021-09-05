@@ -243,6 +243,15 @@ let%expect_test "ADC A, 0xFF (half-carry + carry)" =
   [%expect{|
     A:$00 F:Z-HC BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
+let%expect_test "AND A, $F0" =
+  let t = create_cpu ~a:0x00 () in
+
+  AND (R A, Immediate8 (Uint8.of_int 0xF0))
+  |> print_execute_result t;
+
+  [%expect {| A:$00 F:Z-H- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
+
+
 let%expect_test "INC HL" =
   let t = create_cpu ~h:0xaa ~l:0xbb () in
 

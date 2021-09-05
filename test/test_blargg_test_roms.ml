@@ -20,7 +20,7 @@ let%expect_test "01-special.gb" =
   [%expect {|
     01-special
 
+    256C6C48
+    DAA
 
-    POP AF
-
-    Failed #5 |}]
+    Failed #6 |}]

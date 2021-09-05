@@ -66,7 +66,9 @@ let write_r t r x = match r with
   | C -> t.c <- x
   | D -> t.d <- x
   | E -> t.e <- x
-  | F -> t.f <- x
+  | F ->
+    (* Bottom 4 bits of the flag register is always zero *)
+    t.f <- Uint8.(x land of_int 0xF0)
   | H -> t.h <- x
   | L -> t.l <- x
 
@@ -75,7 +77,10 @@ let write_rr t rr x =
   let high = (x land 0xFF00) lsr 8 |> Uint8.of_int in
   let low  =  x land 0x00FF        |> Uint8.of_int in
   match rr with
-  | AF -> t.a <- high; t.f <- low
+  | AF ->
+    t.a <- high;
+    (* Bottom 4 bits of the flag register is always zero *)
+    t.f <- Uint8.(low land of_int 0xF0)
   | BC -> t.b <- high; t.c <- low
   | DE -> t.d <- high; t.e <- low
   | HL -> t.h <- high; t.l <- low

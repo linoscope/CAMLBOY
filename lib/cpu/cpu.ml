@@ -179,17 +179,20 @@ module Make (Mmu : Word_addressable.S) = struct
         x <-- n;
         Next
       | AND (x, y) ->
-        let n = Uint8.(read x lor read y) in
-        set_flags ~z:(n = Uint8.zero) ~h:false ~n:false ~c:false ();
-        x <-- n; Next
+        let n = Uint8.(read x land read y) in
+        set_flags ~z:(n = Uint8.zero) ~h:true ~n:false ~c:false ();
+        x <-- n;
+        Next
       | OR (x, y) ->
         let n = Uint8.(read x lor read y) in
         set_flags ~z:(n = Uint8.zero) ~h:false ~n:false ~c:false ();
-        x <-- n; Next
+        x <-- n;
+        Next
       | XOR (x, y) ->
         let n = Uint8.(read x lxor read y) in
         set_flags ~z:(n = Uint8.zero) ~h:false ~n:false ~c:false ();
-        x <-- n; Next
+        x <-- n;
+        Next
       | CP (x, y) ->
         let x', y' = read x, read y in
         let n = Uint8.(x' - y') in
@@ -227,7 +230,8 @@ module Make (Mmu : Word_addressable.S) = struct
         let x' = read x in
         x <-- Uint8.((x' lsl 4) lor (x' lsr 4));
         Next
-      | DAA -> assert false;
+      | DAA ->
+        Next             (* TODO: Implement *)
       | CPL ->
         set_flags ~n:true ~h:true ();
         Registers.read_r t.registers A
