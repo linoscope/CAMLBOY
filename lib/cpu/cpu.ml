@@ -249,8 +249,10 @@ module Make (Mmu : Word_addressable.S) = struct
         let open Uint8 in
         begin match n_flag with
           | false ->
-            if c_flag || !a > of_int 0x9F then
+            if c_flag || !a > of_int 0x9F then begin
               a := !a + of_int 0x60;
+              set_flags ~c:true ()
+            end;
             if h_flag || (!a land of_int 0x0F) > of_int 0x09 then
               a := !a + of_int 0x06
           | true ->
@@ -259,7 +261,7 @@ module Make (Mmu : Word_addressable.S) = struct
             if h_flag then
               a := !a - of_int 0x06;
         end;
-        set_flags ~h:false ~z:(!a = zero) ~c:(!a > of_int 0xFF) ();
+        set_flags ~h:false ~z:(!a = zero) ();
         Registers.write_r t.registers A !a;
         Next
       | CPL ->
