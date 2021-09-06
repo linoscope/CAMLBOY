@@ -142,7 +142,7 @@ module Make (Mmu : Word_addressable.S) = struct
           ~z:false
           ~h:Uint16.(x' land of_int 0xF + y' land of_int 0xF > of_int 0xF)
           ~n:false
-          ~c:Uint16.(x' land of_int 0xFF > of_int 0xFF - (x' land of_int 0xFF)) ();
+          ~c:Uint16.(x' land of_int 0xFF > of_int 0xFF - (y' land of_int 0xFF)) ();
         SP <-- n;
         Next
       | ADC (x, y) ->
