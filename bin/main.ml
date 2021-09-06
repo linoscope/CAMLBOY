@@ -7,7 +7,7 @@ let read_rom_file (rom_file_name : string) : bytes =
   rom_bytes
 
 let () =
-  let rom_bytes = read_rom_file "./resource/test_roms/blargg/cpu_instrs/individual/03-op sp,hl.gb" in
+  let rom_bytes = read_rom_file "./resource/test_roms/blargg/cpu_instrs/individual/06-ld r,r.gb" in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~echo_flag:false in
   while true do
     Printf.printf "%s" (Camlboy.show camlboy);

@@ -365,7 +365,7 @@ let%expect_test "test all instructions" =
     	cycles = (1, 1)
     }
     {
-    	inst = LD B, F;
+    	inst = LD B, L;
     	inst_len = 1;
     	cycles = (1, 1)
     }

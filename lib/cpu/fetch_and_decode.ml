@@ -106,7 +106,7 @@ module Make (Mmu : Word_addressable.S) = struct
     | 0x42 -> l1, (1, 1), LD8 (R B, R D)
     | 0x43 -> l1, (1, 1), LD8 (R B, R E)
     | 0x44 -> l1, (1, 1), LD8 (R B, R H)
-    | 0x45 -> l1, (1, 1), LD8 (R B, R F)
+    | 0x45 -> l1, (1, 1), LD8 (R B, R L)
     | 0x46 -> l1, (2, 2), LD8 (R B, RR_indirect HL)
     | 0x47 -> l1, (1, 1), LD8 (R B, R A)
     | 0x48 -> l1, (1, 1), LD8 (R C, R B)
