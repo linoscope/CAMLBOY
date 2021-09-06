@@ -235,7 +235,11 @@ module Make (Mmu : Word_addressable.S) = struct
         Next
       | SWAP x ->
         let x' = read x in
-        x <-- Uint8.((x' lsl 4) lor (x' lsr 4));
+        let n = Uint8.((x' lsl 4) lor (x' lsr 4)) in
+        set_flags
+          ~z:(n = Uint8.zero)
+          ~h:false ~c:false ~n:false ();
+        x <-- n;
         Next
       | DAA ->
         let n_flag = Registers.read_flag t.registers Subtraction in

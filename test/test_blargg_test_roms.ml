@@ -26,7 +26,7 @@ let%expect_test "01-special.gb" =
   [%expect {|
     01-special
 
-    EC5B5B49
+    1C4B6B09
     DAA
 
     Failed #6 |}]
@@ -102,8 +102,8 @@ let%expect_test "09-op r,r.gb" =
   [%expect {|
     09-op r,r
 
-    5B 37 5B B7 5B 37 5B 80 5B 81 5B 92 5B 93 5B A4 5B A5 5B B7
-    Failed |}]
+
+    Passed |}]
 
 let%expect_test "10-bit ops.gb" =
   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/10-bit ops.gb";
@@ -120,9 +120,14 @@ let%expect_test "11-op a,(hl).gb" =
   [%expect {|
     11-op a,(hl)
 
-    5B B6 37
+    27
     Failed |}]
 
-(*  A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$C7B2 | JP $DEF8
- * -A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEF8 | RLC A
- * +A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEF8 | RRC A *)
+(*  PC:$CB1F *)
+(*  A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEF8 | SWAP B
+ * -A:$00 F:Z--- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEFA | NOP
+ * +A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEFA | NOP *)
+
+(*  A:$00 F:ZNHC BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEF8 | SWAP B
+ * -A:$00 F:Z--- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEFA | NOP
+ * +A:$00 F:ZNHC BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEFA | NOP *)
