@@ -105,15 +105,14 @@ let%expect_test "09-op r,r.gb" =
     5B 37 5B B7 5B 37 5B 80 5B 81 5B 92 5B 93 5B A4 5B A5 5B B7
     Failed |}]
 
-(*
- A:$CE F:---C BC:$7FFF DE:$FF21 HL:$0880 SP:$DFE9 PC:$C070 | RRA
--A:$E7 F:---- BC:$7FFF DE:$FF21 HL:$0880 SP:$DFE9 PC:$C071 | JR NC, 16
-+A:$E7 F:---C BC:$7FFF DE:$FF21 HL:$0880 SP:$DFE9 PC:$C071 | JR NC, 16
- *  *)
-(* let%expect_test "10-bit ops.gb" =
- *   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/10-bit ops.gb";
- *
- *   [%expect {||}] *)
+let%expect_test "10-bit ops.gb" =
+  run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/10-bit ops.gb";
+
+  [%expect {|
+    10-bit ops
+
+
+    Passed |}]
 
 let%expect_test "11-op a,(hl).gb" =
   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/11-op a,(hl).gb";
