@@ -268,7 +268,7 @@ module Make (Mmu : Word_addressable.S) = struct
     | 0xE5 -> l1, (4, 4), PUSH HL
     | 0xE6 -> l2, (2, 2), AND (R A, Immediate8 (next_byte ()))
     | 0xE7 -> l1, (4, 4), RST RST_offset.x20
-    | 0xE8 -> l2, (4, 4), ADDSP (next_byte ())
+    | 0xE8 -> l2, (4, 4), ADDSP (next_byte () |> Int8.of_byte)
     | 0xE9 -> l1, (1, 1), JP (None, RR HL)
     | 0xEA -> l3, (4, 4), LD8 (Direct8 (next_word ()), R A)
     | 0xEB -> l1, (1, 1), NOP

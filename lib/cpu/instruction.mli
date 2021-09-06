@@ -27,7 +27,7 @@ type t =
   | LD16  of uint16 arg * uint16 arg
   | ADD8  of uint8 arg * uint8 arg
   | ADD16 of uint16 arg * uint16 arg
-  | ADDSP of uint8
+  | ADDSP of int8
   | ADC   of uint8 arg * uint8 arg
   | SUB   of uint8 arg * uint8 arg
   | SBC   of uint8 arg * uint8 arg

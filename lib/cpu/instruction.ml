@@ -53,7 +53,7 @@ type t =
   | LD16  of uint16 arg * uint16 arg
   | ADD8  of uint8 arg * uint8 arg
   | ADD16 of uint16 arg * uint16 arg
-  | ADDSP of uint8
+  | ADDSP of int8
   | ADC   of uint8 arg * uint8 arg
   | SUB   of uint8 arg * uint8 arg
   | SBC   of uint8 arg * uint8 arg
@@ -103,7 +103,7 @@ let show = function
   | LD16 (x, y)  -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
   | ADD8 (x, y)  -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
   | ADD16 (x, y) -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
-  | ADDSP y      -> Printf.sprintf "ADD SP, %s" (show_uint8 y)
+  | ADDSP y      -> Printf.sprintf "ADD SP, %s" (show_int8 y)
   | ADC (x, y)   -> Printf.sprintf "ADC %s, %s" (show_arg x) (show_arg y)
   | SUB (x, y)   -> Printf.sprintf "SUB %s, %s" (show_arg x) (show_arg y)
   | SBC (x, y)   -> Printf.sprintf "SBC %s, %s" (show_arg x) (show_arg y)

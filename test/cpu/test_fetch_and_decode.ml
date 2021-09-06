@@ -2455,7 +2455,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = ADD SP, $AB;
+    	inst = ADD SP, -85;
     	inst_len = 2;
     	cycles = (4, 4)
     }

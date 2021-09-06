@@ -136,13 +136,21 @@ module Make (Mmu : Word_addressable.S) = struct
       | ADDSP y ->
         (* For "ADD SP, n" the flags are set as if the instruction was a 8 bit add.
          * This is because we only add the lower 8 bits *)
-        let x', y' = read SP, Uint16.of_uint8 y in
-        let n = Uint16.(x' + y') in
-        set_flags
-          ~z:false
-          ~h:Uint16.(x' land of_int 0xF + y' land of_int 0xF > of_int 0xF)
-          ~n:false
-          ~c:Uint16.(x' land of_int 0xFF > of_int 0xFF - (y' land of_int 0xFF)) ();
+        let x' = read SP |> Uint16.to_int in
+        let y' = y |> Int8.to_int in
+        let n = x' + y' |> Uint16.of_int in
+        if y' >= 0 then
+          set_flags
+            ~z:false
+            ~h:(x' land 0xF + y' land 0xF > 0xF)
+            ~n:false
+            ~c:(x' land 0xFF + y' land 0xFF > 0xFF) ()
+        else
+          set_flags
+            ~z:false
+            ~h:(x' land 0xF - y' land 0xF < 0)
+            ~n:false
+            ~c:(x' land 0xFF - y' land 0xFF < 0) ();
         SP <-- n;
         Next
       | ADC (x, y) ->
