@@ -1070,7 +1070,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = RRC A;
+    	inst = RLC A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1150,7 +1150,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = RR A;
+    	inst = RL A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1230,7 +1230,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = SRA A;
+    	inst = SLA A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1310,7 +1310,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = SRL A;
+    	inst = SWAP A;
     	inst_len = 2;
     	cycles = (2, 2)
     }

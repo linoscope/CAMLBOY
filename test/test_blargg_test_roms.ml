@@ -75,8 +75,8 @@ let%expect_test "06-ld r,r.gb" =
   [%expect {|
     06-ld r,r
 
-    25
-    Failed |}]
+
+    Passed |}]
 
 let%expect_test "07-jr,jp,call,ret,rst.gb" =
   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb";
@@ -123,18 +123,6 @@ let%expect_test "11-op a,(hl).gb" =
     5B B6 37
     Failed |}]
 
-(*  A:$08 F:Z--- BC:$00FF DE:$CC29 HL:$4C10 SP:$DFE9 PC:$C91A | ADD HL, HL
- *  A:$08 F:Z-H- BC:$00FF DE:$CC29 HL:$9820 SP:$DFE9 PC:$C91B | LD DE, $D81B
- *  A:$08 F:Z-H- BC:$00FF DE:$D81B HL:$9820 SP:$DFE9 PC:$C91E | DEC E
- * @@ -202396,896 +217059,3839 @@
- *  A:$12 F:-N-C BC:$3456 DE:$789A HL:$C60D SP:$DFF5 PC:$C6DD | LD HL, $DEF4
- *  A:$12 F:-N-C BC:$3456 DE:$789A HL:$DEF4 SP:$DFF5 PC:$C6E0 | POP AF
- *  A:$BC F:---- BC:$3456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$C6E1 | JP $DEF8
- * -A:$BC F:---- BC:$3456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEF8 | LD B, L
- * -A:$BC F:---- BC:$F456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEF9 | NOP
- * -A:$BC F:---- BC:$F456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEFA | NOP
- * -A:$BC F:---- BC:$F456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEFB | JP $C6E4
- * -A:$BC F:---- BC:$F456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$C6E4 | CALL $C50F+A:$BC F:---- BC:$3456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEF8 | LD B, F
- * +A:$BC F:---- BC:$3456 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEF8 | LD B, F
- * +A:$BC F:---- BC:$0056 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEF9 | NOP
- * +A:$BC F:---- BC:$0056 DE:$789A HL:$DEF4 SP:$DFF7 PC:$DEFA | NOP *)
+(*  A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$C7B2 | JP $DEF8
+ * -A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEF8 | RLC A
+ * +A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEF8 | RRC A *)
