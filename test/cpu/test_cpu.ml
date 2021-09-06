@@ -343,6 +343,15 @@ let%expect_test "RRA no carry" =
   [%expect {|
     A:$08 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
+let%expect_test "RRA sets carry" =
+  let t = create_cpu ~a:0b00010001 ~carry:false () in
+
+  RRA
+  |> print_execute_result t;
+
+  [%expect {|
+    A:$08 F:---C BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
+
 let%expect_test "RLC A" =
   let t = create_cpu ~a:0b10000001 () in
 
@@ -370,7 +379,7 @@ let%expect_test "RL A" =
   [%expect {|
     A:$03 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
-let%expect_test "RL A (sets zero flag)" =
+let%expect_test "RL A (sets zero flag and carry flag)" =
   let t = create_cpu ~a:0b10000000 () in
 
   RL (R A)
@@ -415,14 +424,14 @@ let%expect_test "RR A no carry" =
   [%expect {|
     A:$08 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
-let%expect_test "RR A sets zero flag" =
+let%expect_test "RR A sets zero flag and carry flag" =
   let t = create_cpu ~a:0b00000001 ~carry:false () in
 
   RR (R A)
   |> print_execute_result t;
 
   [%expect {|
-    A:$00 F:Z--- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
+    A:$00 F:Z--C BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
 let%expect_test "SLA" =
   let t = create_cpu ~a:0b10000001 () in

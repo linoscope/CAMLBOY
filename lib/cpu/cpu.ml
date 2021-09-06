@@ -302,7 +302,7 @@ module Make (Mmu : Word_addressable.S) = struct
         let old_c = Registers.read_flag t.registers Carry in
         let n = Uint8.((a lsr 1) lor if old_c then of_int 0x80 else zero) in
         Registers.write_r t.registers A n;
-        let new_c = Uint8.(a land of_int 0x80 <> zero) in
+        let new_c = Uint8.(a land of_int 0x1 <> zero) in
         set_flags ~n:false ~h:false ~z:false ~c:new_c ();
         Next
       | RLC x ->
@@ -332,7 +332,7 @@ module Make (Mmu : Word_addressable.S) = struct
         let old_c = Registers.read_flag t.registers Carry in
         let n = Uint8.((x' lsr 1) lor if old_c then of_int 0x80 else zero) in
         x <-- n;
-        set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x80 <> zero) ();
+        set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x1 <> zero) ();
         Next
       | SLA x ->
         let x' = read x in
