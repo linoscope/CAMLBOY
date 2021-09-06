@@ -40,6 +40,7 @@ module Make (Mmu : Word_addressable.S) = struct
   type next_pc = Next | Jump of uint16
 
   let execute (t : t) (cycles : int * int)  (inst : Instruction.t) : int =
+    let set_flags = Registers.set_flags t.registers in
     let read : type a. a Instruction.arg -> a = fun arg ->
       match arg with
       | Immediate8 n -> n
@@ -67,7 +68,15 @@ module Make (Mmu : Word_addressable.S) = struct
       | Direct16 addr -> Mmu.read_word t.mmu addr
       | RR rr -> Registers.read_rr t.registers rr
       | SP -> t.sp
-      | SP_offset n -> Uint16.to_int t.sp + Int8.to_int n |> Uint16.of_int
+      | SP_offset n ->
+        let sp = t.sp |> Uint16.to_int in
+        let n = n |> Int8.to_int in
+        set_flags
+          ~z:false
+          ~h:(sp land 0xF + n land 0xF > 0xF)
+          ~n:false
+          ~c:(sp land 0xFF + n land 0xFF > 0xFF) ();
+        sp + n |> Uint16.of_int
     in
     let write : type a. a Instruction.arg -> a -> unit = fun x y ->
       match x with
@@ -106,7 +115,6 @@ module Make (Mmu : Word_addressable.S) = struct
       | C    -> Registers.read_flag t.registers Carry
       | NC   -> not (Registers.read_flag t.registers Carry)
     in
-    let set_flags = Registers.set_flags t.registers in
     let next_pc = match inst with
       | LD8 (x, y) ->
         x <-- read y;
@@ -138,20 +146,12 @@ module Make (Mmu : Word_addressable.S) = struct
          * This is because we only add the lower 8 bits *)
         let x' = read SP |> Uint16.to_int in
         let y' = y |> Int8.to_int in
-        let n = x' + y' |> Uint16.of_int in
-        if y' >= 0 then
-          set_flags
-            ~z:false
-            ~h:(x' land 0xF + y' land 0xF > 0xF)
-            ~n:false
-            ~c:(x' land 0xFF + y' land 0xFF > 0xFF) ()
-        else
-          set_flags
-            ~z:false
-            ~h:(x' land 0xF - y' land 0xF < 0)
-            ~n:false
-            ~c:(x' land 0xFF - y' land 0xFF < 0) ();
-        SP <-- n;
+        set_flags
+          ~z:false
+          ~h:(x' land 0xF + y' land 0xF > 0xF)
+          ~n:false
+          ~c:(x' land 0xFF + y' land 0xFF > 0xFF) ();
+        SP <-- (x' + y'|> Uint16.of_int);
         Next
       | ADC (x, y) ->
         let c = if Registers.(read_flag t.registers Carry) then Uint8.one else Uint8.zero in

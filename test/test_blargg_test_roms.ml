@@ -48,8 +48,8 @@ let%expect_test "03-op sp,hl.gb" =
   [%expect {|
     03-op sp,hl
 
-    48 C8 C8
-    Failed |}]
+
+    Passed |}]
 
 let%expect_test "04-op r,imm.gb" =
   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/04-op r,imm.gb";
@@ -125,3 +125,11 @@ let%expect_test "11-op a,(hl).gb" =
 (*  A:$12 F:---- BC:$5691 DE:$9ABC HL:$0000 SP:$0000 PC:$C63F | JP $DEF8
  * -A:$12 F:---- BC:$5691 DE:$9ABC HL:$0000 SP:$0000 PC:$DEF8 | ADD SP, -1
  * +A:$12 F:---- BC:$5691 DE:$9ABC HL:$0000 SP:$0000 PC:$DEF8 | ADD SP, $FF *)
+
+(*  A:$12 F:---- BC:$5691 DE:$9ABC HL:$0000 SP:$0000 PC:$DEF8 | ADD SP, -1
+ * -A:$12 F:---- BC:$5691 DE:$9ABC HL:$0000 SP:$FFFF PC:$DEFA | NOP
+ * +A:$12 F:--HC BC:$5691 DE:$9ABC HL:$0000 SP:$FFFF PC:$DEFA | NOP *)
+
+(*  A:$12 F:---- BC:$5691 DE:$9ABC HL:$0000 SP:$000F PC:$DEF8 | LD HL, SP+1
+ * -A:$12 F:--H- BC:$5691 DE:$9ABC HL:$0010 SP:$000F PC:$DEFA | NOP
+ * +A:$12 F:---- BC:$5691 DE:$9ABC HL:$0010 SP:$000F PC:$DEFA | NOP *)
