@@ -549,7 +549,7 @@ let%expect_test "SRL" =
 let%expect_test "BIT (0, A) when A = 0b00000001 (test on 1 bit)" =
   let t = create_cpu ~a:0b00000001 ~sub:true () in
 
-  BIT (Uint8.of_int 0, R A)
+  BIT (0, R A)
   |> print_execute_result t;
 
   [%expect {|
@@ -558,7 +558,7 @@ let%expect_test "BIT (0, A) when A = 0b00000001 (test on 1 bit)" =
 let%expect_test "BIT (5, A) when A = 0b00100000 (test on 1 bit)" =
   let t = create_cpu ~a:0b00100000 ~sub:true () in
 
-  BIT (Uint8.of_int 5, R A)
+  BIT (5, R A)
   |> print_execute_result t;
 
   [%expect {|
@@ -567,7 +567,7 @@ let%expect_test "BIT (5, A) when A = 0b00100000 (test on 1 bit)" =
 let%expect_test "SET (5, A) when A = 0b00000000" =
   let t = create_cpu ~a:0b00000000 () in
 
-  SET (Uint8.of_int 5, R A)
+  SET (5, R A)
   |> print_execute_result t;
 
   [%expect {|
@@ -576,7 +576,7 @@ let%expect_test "SET (5, A) when A = 0b00000000" =
 let%expect_test "RES (4, A) when A = 0b00010011" =
   let t = create_cpu ~a:0b00010011 () in
 
-  RES (Uint8.of_int 4, R A)
+  RES (4, R A)
   |> print_execute_result t;
 
   [%expect {|
@@ -585,7 +585,7 @@ let%expect_test "RES (4, A) when A = 0b00010011" =
 let%expect_test "RES (4, A) when A = 0b00000011" =
   let t = create_cpu ~a:0b00000011 () in
 
-  RES (Uint8.of_int 4, R A)
+  RES (4, R A)
   |> print_execute_result t;
 
   [%expect {|

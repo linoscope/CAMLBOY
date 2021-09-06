@@ -86,9 +86,9 @@ type t =
   | SLA   of uint8 arg
   | SRA   of uint8 arg
   | SRL   of uint8 arg
-  | BIT   of uint8 * uint8 arg
-  | SET   of uint8 * uint8 arg
-  | RES   of uint8 * uint8 arg
+  | BIT   of int * uint8 arg
+  | SET   of int * uint8 arg
+  | RES   of int * uint8 arg
   | PUSH  of Registers.rr
   | POP   of Registers.rr
   | JP    of condition * uint16 arg
@@ -136,9 +136,9 @@ let show = function
   | SLA x        -> Printf.sprintf "SLA %s" (show_arg x)
   | SRA x        -> Printf.sprintf "SRA %s" (show_arg x)
   | SRL x        -> Printf.sprintf "SRL %s" (show_arg x)
-  | BIT (n, x)   -> Printf.sprintf "BIT %s, %s" (show_uint8 n) (show_arg x)
-  | SET (n, x)   -> Printf.sprintf "SET %s, %s" (show_uint8 n) (show_arg x)
-  | RES (n, x)   -> Printf.sprintf "RES %s, %s" (show_uint8 n) (show_arg x)
+  | BIT (n, x)   -> Printf.sprintf "BIT %d, %s" n (show_arg x)
+  | SET (n, x)   -> Printf.sprintf "SET %d, %s" n (show_arg x)
+  | RES (n, x)   -> Printf.sprintf "RES %d, %s" n (show_arg x)
   | PUSH rr      -> Printf.sprintf "PUSH %s" (Registers.show_rr rr)
   | POP rr       -> Printf.sprintf "POP %s" (Registers.show_rr rr)
   | JP (c, x) -> (

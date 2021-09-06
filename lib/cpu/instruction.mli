@@ -60,9 +60,9 @@ type t =
   | SLA   of uint8 arg
   | SRA   of uint8 arg
   | SRL   of uint8 arg
-  | BIT   of uint8 * uint8 arg
-  | SET   of uint8 * uint8 arg
-  | RES   of uint8 * uint8 arg
+  | BIT   of int * uint8 arg
+  | SET   of int * uint8 arg
+  | RES   of int * uint8 arg
   | PUSH  of Registers.rr
   | POP   of Registers.rr
   | JP    of condition * uint16 arg

@@ -1355,962 +1355,962 @@ let%expect_test "test all instructions" =
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $00, B;
+    	inst = BIT 0, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $00, C;
+    	inst = BIT 0, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $00, D;
+    	inst = BIT 0, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $00, E;
+    	inst = BIT 0, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $00, H;
+    	inst = BIT 0, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $00, L;
+    	inst = BIT 0, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $00, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = BIT $00, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $01, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $01, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $01, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $01, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $01, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $01, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $01, (HL);
+    	inst = BIT 0, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $01, A;
+    	inst = BIT 0, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $02, B;
+    	inst = BIT 1, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $02, C;
+    	inst = BIT 1, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $02, D;
+    	inst = BIT 1, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $02, E;
+    	inst = BIT 1, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $02, H;
+    	inst = BIT 1, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $02, L;
+    	inst = BIT 1, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $02, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = BIT $02, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $03, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $03, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $03, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $03, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $03, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $03, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $03, (HL);
+    	inst = BIT 1, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $03, A;
+    	inst = BIT 1, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $04, B;
+    	inst = BIT 2, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $04, C;
+    	inst = BIT 2, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $04, D;
+    	inst = BIT 2, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $04, E;
+    	inst = BIT 2, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $04, H;
+    	inst = BIT 2, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $04, L;
+    	inst = BIT 2, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $04, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = BIT $04, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $05, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $05, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $05, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $05, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $05, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $05, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $05, (HL);
+    	inst = BIT 2, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $05, A;
+    	inst = BIT 2, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $06, B;
+    	inst = BIT 3, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $06, C;
+    	inst = BIT 3, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $06, D;
+    	inst = BIT 3, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $06, E;
+    	inst = BIT 3, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $06, H;
+    	inst = BIT 3, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $06, L;
+    	inst = BIT 3, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = BIT $06, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = BIT $06, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $07, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $07, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $07, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $07, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $07, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $07, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = BIT $07, (HL);
+    	inst = BIT 3, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $07, A;
+    	inst = BIT 3, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $00, B;
+    	inst = BIT 4, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $00, C;
+    	inst = BIT 4, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $00, D;
+    	inst = BIT 4, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $00, E;
+    	inst = BIT 4, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $00, H;
+    	inst = BIT 4, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $00, L;
+    	inst = BIT 4, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $00, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = RES $00, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $01, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $01, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $01, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $01, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $01, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $01, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $01, (HL);
+    	inst = BIT 4, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = RES $01, A;
+    	inst = BIT 4, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $02, B;
+    	inst = BIT 5, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $02, C;
+    	inst = BIT 5, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $02, D;
+    	inst = BIT 5, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $02, E;
+    	inst = BIT 5, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $02, H;
+    	inst = BIT 5, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $02, L;
+    	inst = BIT 5, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $02, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = RES $02, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $03, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $03, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $03, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $03, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $03, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $03, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $03, (HL);
+    	inst = BIT 5, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = RES $03, A;
+    	inst = BIT 5, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $04, B;
+    	inst = BIT 6, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $04, C;
+    	inst = BIT 6, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $04, D;
+    	inst = BIT 6, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $04, E;
+    	inst = BIT 6, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $04, H;
+    	inst = BIT 6, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $04, L;
+    	inst = BIT 6, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $04, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = RES $04, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $05, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $05, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $05, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $05, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $05, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $05, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $05, (HL);
+    	inst = BIT 6, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = RES $05, A;
+    	inst = BIT 6, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $06, B;
+    	inst = BIT 7, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $06, C;
+    	inst = BIT 7, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $06, D;
+    	inst = BIT 7, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $06, E;
+    	inst = BIT 7, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $06, H;
+    	inst = BIT 7, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $06, L;
+    	inst = BIT 7, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = RES $06, (HL);
-    	inst_len = 2;
-    	cycles = (4, 4)
-    }
-    {
-    	inst = RES $06, A;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $07, B;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $07, C;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $07, D;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $07, E;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $07, H;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $07, L;
-    	inst_len = 2;
-    	cycles = (2, 2)
-    }
-    {
-    	inst = RES $07, (HL);
+    	inst = BIT 7, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = RES $07, A;
+    	inst = BIT 7, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $00, B;
+    	inst = RES 0, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $00, C;
+    	inst = RES 0, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $00, D;
+    	inst = RES 0, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $00, E;
+    	inst = RES 0, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $00, H;
+    	inst = RES 0, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $00, L;
+    	inst = RES 0, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $00, (HL);
+    	inst = RES 0, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $00, A;
+    	inst = RES 0, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $01, B;
+    	inst = RES 1, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $01, C;
+    	inst = RES 1, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $01, D;
+    	inst = RES 1, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $01, E;
+    	inst = RES 1, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $01, H;
+    	inst = RES 1, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $01, L;
+    	inst = RES 1, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $01, (HL);
+    	inst = RES 1, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $01, A;
+    	inst = RES 1, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $02, B;
+    	inst = RES 2, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $02, C;
+    	inst = RES 2, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $02, D;
+    	inst = RES 2, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $02, E;
+    	inst = RES 2, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $02, H;
+    	inst = RES 2, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $02, L;
+    	inst = RES 2, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $02, (HL);
+    	inst = RES 2, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $02, A;
+    	inst = RES 2, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $03, B;
+    	inst = RES 3, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $03, C;
+    	inst = RES 3, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $03, D;
+    	inst = RES 3, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $03, E;
+    	inst = RES 3, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $03, H;
+    	inst = RES 3, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $03, L;
+    	inst = RES 3, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $03, (HL);
+    	inst = RES 3, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $03, A;
+    	inst = RES 3, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $04, B;
+    	inst = RES 4, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $04, C;
+    	inst = RES 4, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $04, D;
+    	inst = RES 4, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $04, E;
+    	inst = RES 4, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $04, H;
+    	inst = RES 4, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $04, L;
+    	inst = RES 4, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $04, (HL);
+    	inst = RES 4, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $04, A;
+    	inst = RES 4, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $05, B;
+    	inst = RES 5, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $05, C;
+    	inst = RES 5, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $05, D;
+    	inst = RES 5, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $05, E;
+    	inst = RES 5, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $05, H;
+    	inst = RES 5, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $05, L;
+    	inst = RES 5, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $05, (HL);
+    	inst = RES 5, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $05, A;
+    	inst = RES 5, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $06, B;
+    	inst = RES 6, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $06, C;
+    	inst = RES 6, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $06, D;
+    	inst = RES 6, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $06, E;
+    	inst = RES 6, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $06, H;
+    	inst = RES 6, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $06, L;
+    	inst = RES 6, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $06, (HL);
+    	inst = RES 6, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $06, A;
+    	inst = RES 6, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $07, B;
+    	inst = RES 7, B;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $07, C;
+    	inst = RES 7, C;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $07, D;
+    	inst = RES 7, D;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $07, E;
+    	inst = RES 7, E;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $07, H;
+    	inst = RES 7, H;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $07, L;
+    	inst = RES 7, L;
     	inst_len = 2;
     	cycles = (2, 2)
     }
     {
-    	inst = SET $07, (HL);
+    	inst = RES 7, (HL);
     	inst_len = 2;
     	cycles = (4, 4)
     }
     {
-    	inst = SET $07, A;
+    	inst = RES 7, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 0, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 0, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 0, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 0, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 0, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 0, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 0, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 0, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 1, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 1, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 1, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 1, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 1, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 1, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 1, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 1, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 2, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 2, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 2, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 2, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 2, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 2, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 2, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 2, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 3, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 3, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 3, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 3, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 3, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 3, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 3, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 3, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 4, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 4, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 4, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 4, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 4, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 4, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 4, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 4, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 5, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 5, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 5, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 5, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 5, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 5, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 5, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 5, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 6, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 6, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 6, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 6, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 6, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 6, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 6, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 6, A;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 7, B;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 7, C;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 7, D;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 7, E;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 7, H;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 7, L;
+    	inst_len = 2;
+    	cycles = (2, 2)
+    }
+    {
+    	inst = SET 7, (HL);
+    	inst_len = 2;
+    	cycles = (4, 4)
+    }
+    {
+    	inst = SET 7, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }

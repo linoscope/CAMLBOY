@@ -364,14 +364,14 @@ module Make (Mmu : Word_addressable.S) = struct
         set_flags ~n:false ~h:false ~z:Uint8.(n = zero) ~c:Uint8.(x' land of_int 0x1 <> zero) ();
         Next
       | BIT (n, x) ->
-        let b = Uint8.(read x land (one lsl to_int n) = zero) in
+        let b = Uint8.(read x land (one lsl n) = zero) in
         set_flags ~n:false ~h:true ~z:b ();
         Next
       | SET (n, x) ->
-        x <-- Uint8.(read x lor (one lsl to_int n));
+        x <-- Uint8.(read x lor (one lsl n));
         Next
       | RES (n, x) ->
-        let mask = Uint8.((one lsl to_int n) lxor of_int 0b11111111) in
+        let mask = Uint8.((one lsl n) lxor of_int 0b11111111) in
         x <-- Uint8.(read x land mask);
         Next
       | PUSH rr ->

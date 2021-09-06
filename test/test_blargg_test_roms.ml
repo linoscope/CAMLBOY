@@ -123,7 +123,7 @@ let%expect_test "11-op a,(hl).gb" =
     27
     Failed |}]
 
-(*  PC:$CB1F *)
+(*  PC\:\$CB1F *)
 (*  A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEF8 | SWAP B
  * -A:$00 F:Z--- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEFA | NOP
  * +A:$00 F:---- BC:$0001 DE:$1F7F HL:$0F10 SP:$DFF1 PC:$DEFA | NOP *)
