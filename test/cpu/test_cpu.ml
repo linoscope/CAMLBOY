@@ -234,6 +234,15 @@ let%expect_test "ADD HL, BC (half carry + carry)" =
   [%expect{|
     A:$00 F:--HC BC:$0100 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
+let%expect_test "ADD HL, HL (no carries)" =
+  let t = create_cpu ~h:0x26 ~l:0x18 ~zero:true () in
+
+  ADD16 (RR HL, RR HL)
+  |> print_execute_result t;
+
+  [%expect{|
+    A:$00 F:Z--- BC:$0000 DE:$0000 HL:$4C30 SP:$0000 PC:$0000 |}]
+
 let%expect_test "ADC A, 0xFF (half-carry + carry)" =
   let t = create_cpu ~a:0x1 ~carry:true () in
 

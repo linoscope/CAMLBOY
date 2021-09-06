@@ -128,7 +128,7 @@ module Make (Mmu : Word_addressable.S) = struct
         let x', y' = read x, read y in
         let n = Uint16.(x' + y') in
         set_flags
-          ~h:Uint16.(x' land of_int 0x07FF + y' land of_int 0x07FF > of_int 0x07FF)
+          ~h:Uint16.(x' land of_int 0x0FFF + y' land of_int 0x0FFF > of_int 0x0FFF)
           ~n:false
           ~c:Uint16.(x' > of_int 0xFFFF - y') ();
         x <-- n;

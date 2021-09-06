@@ -147,7 +147,7 @@ module Make (Mmu : Word_addressable.S) = struct
     | 0x6B -> l1, (1, 1), LD8 (R L, R E)
     | 0x6C -> l1, (1, 1), LD8 (R L, R H)
     | 0x6D -> l1, (1, 1), LD8 (R L, R L)
-    | 0x6E -> l1, (1, 1), LD8 (R L, R E)
+    | 0x6E -> l1, (1, 1), LD8 (R L, RR_indirect HL)
     | 0x6F -> l1, (1, 1), LD8 (R L, R A)
     | 0x70 -> l1, (2, 2), LD8 (RR_indirect HL, R B)
     | 0x71 -> l1, (2, 2), LD8 (RR_indirect HL, R C)
