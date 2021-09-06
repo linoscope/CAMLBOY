@@ -71,7 +71,7 @@ let tick t =
 
 module For_tests = struct
 
-  let show_prev_inst t = Cpu.For_tests.prev_inst t.cpu |> Instruction.show
+  let prev_inst t = Cpu.For_tests.prev_inst t.cpu
 
   let current_pc t = Cpu.For_tests.current_pc t.cpu
 

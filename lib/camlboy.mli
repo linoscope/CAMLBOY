@@ -10,7 +10,7 @@ val tick : t -> unit
 
 module For_tests : sig
 
-  val show_prev_inst : t -> string
+  val prev_inst : t -> Instruction.t
 
   val current_pc : t -> uint16
 
