@@ -216,7 +216,7 @@ let%expect_test "ADD A, 0xFF (half-carry + carry)" =
   [%expect{|
     A:$00 F:Z-HC BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
-let%expect_test "ADD SP, 0x01" =
+let%expect_test "ADD SP, 0x01 (both carry and half carry)" =
   let t = create_cpu ~sp:0xAAFF () in
 
   ADDSP (Uint8.of_int 0x01)
@@ -224,6 +224,15 @@ let%expect_test "ADD SP, 0x01" =
 
   [%expect{|
     A:$00 F:--HC BC:$0000 DE:$0000 HL:$0000 SP:$AB00 PC:$0000 |}]
+
+let%expect_test "ADD SP, 0x01 (no carries)" =
+  let t = create_cpu ~sp:0x0100 () in
+
+  ADDSP (Uint8.of_int 0x01)
+  |> print_execute_result t;
+
+  [%expect{|
+    A:$00 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0101 PC:$0000 |}]
 
 let%expect_test "ADD HL, BC (half carry + carry)" =
   let t = create_cpu ~h:0xFF ~l:0x00 ~b:0x01 ~c:0x00 () in
