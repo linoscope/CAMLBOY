@@ -1390,7 +1390,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $01, A;
+    	inst = BIT $00, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1470,7 +1470,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $03, A;
+    	inst = BIT $02, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1550,7 +1550,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $05, A;
+    	inst = BIT $04, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1630,7 +1630,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = BIT $07, A;
+    	inst = BIT $06, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1710,7 +1710,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = RES $01, A;
+    	inst = RES $00, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1790,7 +1790,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = RES $03, A;
+    	inst = RES $02, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1870,7 +1870,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = RES $05, A;
+    	inst = RES $04, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -1950,7 +1950,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = RES $07, A;
+    	inst = RES $06, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -2030,7 +2030,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = SET $01, A;
+    	inst = SET $00, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -2110,7 +2110,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = SET $03, A;
+    	inst = SET $02, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -2190,7 +2190,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = SET $05, A;
+    	inst = SET $04, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }
@@ -2270,7 +2270,7 @@ let%expect_test "test all instructions" =
     	cycles = (4, 4)
     }
     {
-    	inst = SET $07, A;
+    	inst = SET $06, A;
     	inst_len = 2;
     	cycles = (2, 2)
     }

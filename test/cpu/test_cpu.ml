@@ -488,7 +488,7 @@ let%expect_test "SRL" =
   [%expect {|
     A:$40 F:---C BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
-let%expect_test "BIT (0, A) when A = 0b00000001" =
+let%expect_test "BIT (0, A) when A = 0b00000001 (test on 1 bit)" =
   let t = create_cpu ~a:0b00000001 ~sub:true () in
 
   BIT (Uint8.of_int 0, R A)
@@ -497,7 +497,7 @@ let%expect_test "BIT (0, A) when A = 0b00000001" =
   [%expect {|
     A:$01 F:--H- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
-let%expect_test "BIT (1, A) when A = 0b00100000" =
+let%expect_test "BIT (5, A) when A = 0b00100000 (test on 1 bit)" =
   let t = create_cpu ~a:0b00100000 ~sub:true () in
 
   BIT (Uint8.of_int 5, R A)
