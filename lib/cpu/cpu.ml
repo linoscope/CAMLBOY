@@ -249,7 +249,7 @@ module Make (Mmu : Word_addressable.S) = struct
         let open Uint8 in
         begin match n_flag with
           | false ->
-            if c_flag || !a > of_int 0x9F then begin
+            if c_flag || !a > of_int 0x99 then begin
               a := !a + of_int 0x60;
               set_flags ~c:true ()
             end;

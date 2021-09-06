@@ -743,3 +743,12 @@ let%expect_test "DAA" =
 
   [%expect {|
     A:$50 F:---C BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
+
+let%expect_test "DAA" =
+  let t = create_cpu ~a:0x9A () in
+
+  DAA
+  |> print_execute_result t;
+
+  [%expect {|
+    A:$00 F:Z--C BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]

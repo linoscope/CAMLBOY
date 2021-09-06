@@ -26,10 +26,8 @@ let%expect_test "01-special.gb" =
   [%expect {|
     01-special
 
-    A107B825
-    DAA
 
-    Failed #6 |}]
+    Passed |}]
 
 let%expect_test "02-interrupts.gb" =
   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb";
