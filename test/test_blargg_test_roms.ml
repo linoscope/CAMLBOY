@@ -26,7 +26,7 @@ let%expect_test "01-special.gb" =
   [%expect {|
     01-special
 
-    24B700C8
+    3680DA81
     DAA
 
     Failed #6 |}]
@@ -102,5 +102,24 @@ let%expect_test "09-op r,r.gb" =
   [%expect {|
     09-op r,r
 
-    00 7F B7 FF 80 81 92 93 A4 A5 B7 C8 C9 DA DB EC ED FF 00 01 12 13 24 25 37 48 49 5A 5B 6C 6D 7F 80 81 92 93 A4 A5 B7 C8 C9 DA DB EC ED FF 00 01 12 13 24 25 37 48 49 5A 5B 6C 6D 7F 25 6D A5 ED 25 6D ED 24 6C A4 EC 24 6C EC 37 B7 7F FF 5B 00 5B 01 5B 12 5B 13 5B 24 5B 25 5B 37 5B 48 5B 49 5B 5A 5B 5B 5B 6C 5B 6D 5B 7F 5B 80 5B 81 5B 92 5B 93 5B A4 5B A5 5B B7 5B C8 5B C9 5B DA 5B DB 5B EC 5B ED 5B FF 5B 00 5B 01 5B 12 5B 13 5B 24 5B 25 5B 37 5B 48 5B 49 5B 5A 5B 5B 5B 6C 5B 6D 5B 7F 5B 80 5B 81 5B 92 5B 93 5B A4 5B A5 5B B7 5B C8 5B C9 5B DA 5B DB 5B EC 5B ED 5B FF
+    00 7F B7 FF 80 81 92 93 A4 A5 B7 C8 C9 DA DB EC ED FF 00 01 12 13 24 25 37 48 49 5A 5B 6C 6D 7F 80 81 92 93 A4 A5 B7 C8 C9 DA DB EC ED FF 00 01 12 13 24 25 37 48 49 5A 5B 6C 6D 7F 25 6D A5 ED 25 6D ED 24 6C A4 EC 24 6C EC 37 B7 7F FF 5B 00 5B 01 5B 12 5B 13 5B 24 5B 25 5B 37 5B 48 5B 49 5B 5A 5B 5B 5B 6C 5B 6D 5B 7F 5B 80 5B 81 5B 92 5B 93 5B A4 5B A5 5B B7 5B C8 5B C9 5B DA 5B DB 5B EC 5B ED 5B FF 5B 01 5B 12 5B 13 5B 24 5B 37 5B 48 5B 49 5B 5A 5B 5B 5B 6C 5B 6D 5B 7F 5B 80 5B 81 5B 92 5B 93 5B A4 5B A5 5B B7 5B C8 5B C9 5B DA 5B DB 5B EC 5B ED 5B FF
+    Failed |}]
+
+(*
+ A:$CE F:---C BC:$7FFF DE:$FF21 HL:$0880 SP:$DFE9 PC:$C070 | RRA
+-A:$E7 F:---- BC:$7FFF DE:$FF21 HL:$0880 SP:$DFE9 PC:$C071 | JR NC, 16
++A:$E7 F:---C BC:$7FFF DE:$FF21 HL:$0880 SP:$DFE9 PC:$C071 | JR NC, 16
+ *  *)
+(* let%expect_test "10-bit ops.gb" =
+ *   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/10-bit ops.gb";
+ *
+ *   [%expect {||}] *)
+
+let%expect_test "11-op a,(hl).gb" =
+  run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/11-op a,(hl).gb";
+
+  [%expect {|
+    11-op a,(hl)
+
+    5A DA 12 92 5A DA 12 92 B6 FE 36 7E B6 FE 36 7E A5 A4 5B 36 5B 7E 5B B6 5B FE 5B 36 5B 7E 5B B6 5B FE 5B 36 5B 7E 5B B6 5B FE 5B 36 5B 7E 5B B6 5B FE 5B 36 5B 7E 5B B6 5B FE 5B 36 5B 7E 5B B6 5B FE 5B 36 5B 7E 5B B6 5B FE 5B 36 5B 7E 5B B6 5B FE 37
     Failed |}]

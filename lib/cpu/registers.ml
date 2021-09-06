@@ -92,18 +92,18 @@ let write_rr t rr x =
 let read_flag t flag =
   let f = t.f |> Uint8.to_int in
   match flag with
-  | Carry       -> f land 0b0001 <> 0
-  | Half_carry  -> f land 0b0010 <> 0
-  | Subtraction -> f land 0b0100 <> 0
-  | Zero        -> f land 0b1000 <> 0
+  | Carry       -> f land 0b00010000 <> 0
+  | Half_carry  -> f land 0b00100000 <> 0
+  | Subtraction -> f land 0b01000000 <> 0
+  | Zero        -> f land 0b10000000 <> 0
 
 let set_flag t flag =
   let open Uint8 in
   match flag with
-  | Carry       -> t.f <- t.f lor (of_int 0b0001)
-  | Half_carry  -> t.f <- t.f lor (of_int 0b0010)
-  | Subtraction -> t.f <- t.f lor (of_int 0b0100)
-  | Zero        -> t.f <- t.f lor (of_int 0b1000)
+  | Carry       -> t.f <- t.f lor (of_int 0b00010000)
+  | Half_carry  -> t.f <- t.f lor (of_int 0b00100000)
+  | Subtraction -> t.f <- t.f lor (of_int 0b01000000)
+  | Zero        -> t.f <- t.f lor (of_int 0b10000000)
 
 let set_flags t
     ?(c = read_flag t Carry)
@@ -112,27 +112,27 @@ let set_flags t
     ?(z = read_flag t Zero)
     () =
   let open Uint8 in
-  if c then t.f <- t.f lor (of_int 0b0001) else t.f <- t.f land (of_int 0b1110);
-  if h then t.f <- t.f lor (of_int 0b0010) else t.f <- t.f land (of_int 0b1101);
-  if n then t.f <- t.f lor (of_int 0b0100) else t.f <- t.f land (of_int 0b1011);
-  if z then t.f <- t.f lor (of_int 0b1000) else t.f <- t.f land (of_int 0b0111)
+  if c then t.f <- t.f lor (of_int 0b00010000) else t.f <- t.f land (of_int 0b11100000);
+  if h then t.f <- t.f lor (of_int 0b00100000) else t.f <- t.f land (of_int 0b11010000);
+  if n then t.f <- t.f lor (of_int 0b01000000) else t.f <- t.f land (of_int 0b10110000);
+  if z then t.f <- t.f lor (of_int 0b10000000) else t.f <- t.f land (of_int 0b01110000)
 
 let unset_flag t flag =
   let open Uint8 in
   match flag with
-  | Carry       -> t.f <- t.f land (of_int 0b11111110)
-  | Half_carry  -> t.f <- t.f land (of_int 0b11111101)
-  | Subtraction -> t.f <- t.f land (of_int 0b11111011)
-  | Zero        -> t.f <- t.f land (of_int 0b11110111)
+  | Carry       -> t.f <- t.f land (of_int 0b11101111)
+  | Half_carry  -> t.f <- t.f land (of_int 0b11011111)
+  | Subtraction -> t.f <- t.f land (of_int 0b10111111)
+  | Zero        -> t.f <- t.f land (of_int 0b01111111)
 
 let clear_flags t = t.f <- Uint8.zero
 
 let show_f f =
   let f = Uint8.to_int f in
-  let z = if f land 0b1000 <> 0 then 'Z' else '-' in
-  let n = if f land 0b0100 <> 0 then 'N' else '-' in
-  let h = if f land 0b0010 <> 0 then 'H' else '-' in
-  let c = if f land 0b0001 <> 0 then 'C' else '-' in
+  let z = if f land 0b10000000 <> 0 then 'Z' else '-' in
+  let n = if f land 0b01000000 <> 0 then 'N' else '-' in
+  let h = if f land 0b00100000 <> 0 then 'H' else '-' in
+  let c = if f land 0b00010000 <> 0 then 'C' else '-' in
   Printf.sprintf "%c%c%c%c" z n h c
 
 (* A:$11 F:Z-HC BC:$0013 DE:$00D8 $HL:014D  *)
@@ -145,3 +145,4 @@ let show t =
     (read_rr t HL |> Uint16.show)
 
 let pp fmt t = Format.fprintf fmt "%s" (show t)
+
