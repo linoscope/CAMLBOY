@@ -48,7 +48,7 @@ let%expect_test "03-op sp,hl.gb" =
   [%expect {|
     03-op sp,hl
 
-    C9 48 48 C8 C8
+    48 48 C8 C8
     Failed |}]
 
 let%expect_test "04-op r,imm.gb" =
@@ -66,8 +66,8 @@ let%expect_test "05-op rp.gb" =
   [%expect {|
     05-op rp
 
-    49 C9 49
-    Failed |}]
+
+    Passed |}]
 
 let%expect_test "06-ld r,r.gb" =
   run_test_rom "../resource/test_roms/blargg/cpu_instrs/individual/06-ld r,r.gb";
@@ -123,3 +123,20 @@ let%expect_test "11-op a,(hl).gb" =
 
     5B B6 37
     Failed |}]
+(*  A:$CB F:---- BC:$0001 DE:$0810 HL:$DCB0 SP:$DFEB PC:$C52D | POP HL
+ * -A:$CB F:---- BC:$0001 DE:$0810 HL:$0120 SP:$DFED PC:$C52E | LD A, L
+ * +A:$CB F:---- BC:$0001 DE:$0810 HL:$01A0 SP:$DFED PC:$C52E | LD A, L *)
+
+(*  A:$01 F:---- BC:$0001 DE:$0810 HL:$0204 SP:$DFF1 PC:$C818 | JP $DEF8
+ * -A:$01 F:---- BC:$0001 DE:$0810 HL:$0204 SP:$DFF1 PC:$DEF8 | BIT 0, A
+ * -A:$01 F:--H- BC:$0001 DE:$0810 HL:$0204 SP:$DFF1 PC:$DEFA | NOP
+ * +A:$01 F:---- BC:$0001 DE:$0810 HL:$0204 SP:$DFF1 PC:$DEF8 | BIT $01, A
+ * +A:$01 F:Z-H- BC:$0001 DE:$0810 HL:$0204 SP:$DFF1 PC:$DEFA | NOP *)
+
+(*  A:$18 F:ZN-- BC:$FFF0 DE:$0102 HL:$2618 SP:$DFEF PC:$CC11 | ADD HL, HL
+ * -A:$18 F:Z--- BC:$FFF0 DE:$0102 HL:$4C30 SP:$DFEF PC:$CC12 | ADD HL, HL
+ * -A:$18 F:Z-H- BC:$FFF0 DE:$0102 HL:$9860 SP:$DFEF PC:$CC13 | LD DE, $D81B
+ * -A:$18 F:Z-H- BC:$FFF0 DE:$D81B HL:$9860 SP:$DFEF PC:$CC16 | DEC E
+ * +A:$18 F:--H- BC:$FFF0 DE:$0102 HL:$4C30 SP:$DFEF PC:$CC12 | ADD HL, HL
+ * +A:$18 F:--H- BC:$FFF0 DE:$0102 HL:$9860 SP:$DFEF PC:$CC13 | LD DE, $D81B
+ * +A:$18 F:--H- BC:$FFF0 DE:$D81B HL:$9860 SP:$DFEF PC:$CC16 | DEC E *)
