@@ -18,9 +18,9 @@ type t = {
 
 let show t =
   let open Bool in
-  Printf.sprintf "ie:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d), if:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d)"
-    (to_int t.vblank.enabled) (to_int t.lcd_stat.enabled) (to_int t.timer.enabled) (to_int t.serial_port.enabled)
-    (to_int t.vblank.requested) (to_int t.lcd_stat.requested) (to_int t.timer.requested) (to_int t.serial_port.requested)
+  Printf.sprintf "ie:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d, joypad:%d), if:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d, joypad:%d)"
+    (to_int t.vblank.enabled) (to_int t.lcd_stat.enabled) (to_int t.timer.enabled) (to_int t.serial_port.enabled) (to_int t.joypad.enabled)
+    (to_int t.vblank.requested) (to_int t.lcd_stat.requested) (to_int t.timer.requested) (to_int t.serial_port.requested) (to_int t.joypad.requested)
 
 let pp fmt t = Format.fprintf fmt "%s" (show t)
 
@@ -67,7 +67,7 @@ let next t =
 
 let accepts t ~addr = Uint16.(t.ie_addr = addr || t.if_addr = addr)
 
-let byte_of_bools (b4, b3, b2, b1, b0) : uint8 =
+let byte_of_bools (b0, b1, b2, b3, b4) : uint8 =
   (if b0 then 0b00001 else 0)
   lor (if b1 then 0b00010 else 0)
   lor (if b2 then 0b00100 else 0)
