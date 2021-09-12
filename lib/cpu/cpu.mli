@@ -3,7 +3,7 @@ open Uints
 module Make (Mmu : Word_addressable.S) : sig
   type t [@@deriving show]
 
-  val create : Mmu.t -> t
+  val create : Mmu.t -> Interrupt_controller.t -> t
 
   (** Returns machine cycle count  *)
   val tick : t -> int
@@ -12,6 +12,7 @@ module Make (Mmu : Word_addressable.S) : sig
 
     val create :
       mmu:Mmu.t ->
+      ic:Interrupt_controller.t ->
       registers:Registers.t ->
       sp:uint16 ->
       pc:uint16 ->

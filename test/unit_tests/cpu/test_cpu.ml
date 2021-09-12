@@ -25,6 +25,7 @@ let create_cpu
   Bytes.fill zeros 0 0x10 (Char.chr 0);
   Cpu.For_tests.create
     ~mmu
+    ~ic:(Interrupt_controller.create ~ie_addr:Uint16.(of_int 0xF) ~if_addr:Uint16.(of_int 0xE))
     ~registers
     ~pc:(Uint16.of_int pc)
     ~sp:(Uint16.of_int sp)

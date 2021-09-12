@@ -11,7 +11,8 @@ module Make (Mmu : Word_addressable.S) = struct
     mutable ime : bool; (* interrupt master enable *)
     mutable until_enable_ime : count_down;
     mutable until_disable_ime : count_down;
-    mutable prev_inst : Instruction.t (* for debugging purpose *)
+    mutable prev_inst : Instruction.t; (* for debugging purpose *)
+    ic : Interrupt_controller.t;
   }
   and count_down =
     | One
@@ -24,7 +25,7 @@ module Make (Mmu : Word_addressable.S) = struct
 
   let pp fmt t = Format.fprintf fmt "%s" (show t)
 
-  let create mmu = {
+  let create mmu ic = {
     registers = Registers.create ();
     pc = Uint16.zero;
     sp = Uint16.zero;
@@ -34,6 +35,7 @@ module Make (Mmu : Word_addressable.S) = struct
     until_enable_ime = None;
     until_disable_ime = None;
     prev_inst = NOP;
+    ic;
   }
 
 
@@ -427,30 +429,64 @@ module Make (Mmu : Word_addressable.S) = struct
       t.pc <- addr;
       branched_mcycle
 
-  let update_ime t =
-    begin match t.until_enable_ime with
-      | One  -> t.until_enable_ime <- Zero
-      | Zero -> t.until_enable_ime <- None; t.ime <- true
-      | None -> ()
-    end;
-    match t.until_disable_ime with
-    | One  -> t.until_disable_ime <- Zero
-    | Zero -> t.until_disable_ime <- None; t.ime <- true
-    | None -> ()
-
   module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
 
   let tick t  =
+    let update_ime t =
+      begin match t.until_enable_ime with
+        | One  -> t.until_enable_ime <- Zero
+        | Zero -> t.until_enable_ime <- None; t.ime <- true
+        | None -> ()
+      end;
+      match t.until_disable_ime with
+      | One  -> t.until_disable_ime <- Zero
+      | Zero -> t.until_disable_ime <- None; t.ime <- true
+      | None -> ()
+    in
+    let fetch_decode_execute t =
+      if t.halted then
+        0
+      else
+        let (len, cycles, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
+        t.pc <- Uint16.(t.pc + len);
+        execute t cycles inst
+    in
+    let handle_interrupt t : int =
+      match Interrupt_controller.next t.ic with
+      | None ->
+        0
+      | Some type_ ->
+        t.halted <- false;
+        if t.ime then
+          0
+        else begin
+          t.ime <- false;
+          Interrupt_controller.clear t.ic type_;
+          let jump addr =
+            t.sp <- Uint16.(t.sp - of_int 2);
+            Mmu.write_word t.mmu ~addr:t.sp ~data:t.pc;
+            t.pc <- addr;
+            5
+          in
+          match type_ with
+          | VBlank      -> jump Uint16.(of_int 0x40)
+          | LCD_stat    -> jump Uint16.(of_int 0x48)
+          | Timer       -> jump Uint16.(of_int 0x50)
+          | Serial_port -> jump Uint16.(of_int 0x58)
+          | Joypad      -> jump Uint16.(of_int 0x60)
+        end
+    in
     update_ime t;
-    let (len, cycles, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
-    t.pc <- Uint16.(t.pc + len);
-    execute t cycles inst
+    let inst_cycles = fetch_decode_execute t in
+    let interrupt_cycles = handle_interrupt t in
+    inst_cycles + interrupt_cycles
 
   module For_tests = struct
 
     let execute = execute
 
-    let create ~mmu ~registers ~sp ~pc ~halted ~ime = {registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None; prev_inst = NOP}
+    let create ~mmu ~ic ~registers ~sp ~pc ~halted ~ime =
+      { registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None; prev_inst = NOP; ic }
 
     let prev_inst t = t.prev_inst
 

@@ -39,6 +39,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~echo_flag
       ()
   in
+  let ic = Interrupt_controller.create ~ie_addr:(of_int 0xFFFF) ~if_addr:(of_int 0xFF0F) in
   let mmu = Mmu.create
       ~rom
       ~wram
@@ -46,6 +47,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~zero_page
       ~gpu
       ~serial_port
+      ~ic
   in
   let registers = Registers.create () in
   Registers.write_rr registers AF (of_int 0x01b0);
@@ -56,6 +58,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
   let cpu =
     Cpu.For_tests.create
       ~mmu
+      ~ic
       ~registers
       ~sp:(of_int 0xFFFE)
       ~pc:(of_int 0x0100)
