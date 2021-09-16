@@ -76,13 +76,15 @@ let byte_of_bools (b0, b1, b2, b3, b4) : uint8 =
   |> Uint8.of_int
 
 let read_byte t addr =
-  let open Uint16 in
-  if addr = t.ie_addr then
+  if Uint16.(addr = t.ie_addr) then
     byte_of_bools
       (t.vblank.enabled, t.lcd_stat.enabled, t.timer.enabled, t.serial_port.enabled, t.joypad.enabled)
-  else if addr = t.if_addr then
-    byte_of_bools
-      (t.vblank.requested, t.lcd_stat.requested, t.timer.enabled, t.serial_port.requested, t.joypad.requested)
+  else if Uint16.(addr = t.if_addr) then
+    let open Uint8 in
+    (* unused bits always return 1 *)
+    of_int 0b11100000 lor
+    (byte_of_bools
+       (t.vblank.requested, t.lcd_stat.requested, t.timer.requested, t.serial_port.requested, t.joypad.requested))
   else
     assert false
 

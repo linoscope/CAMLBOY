@@ -26,11 +26,12 @@ let%expect_test "request" =
 let%expect_test "clear" =
   let t = create () in
 
+  Interrupt_controller.request t Timer;
   Interrupt_controller.request t VBlank;
-  Interrupt_controller.clear t VBlank;
+  Interrupt_controller.clear t Timer;
 
   t |> Interrupt_controller.show |> Printf.printf "%s";
-  [%expect {| ie:(vblank:1, lcd_stat:1, timer:1, serial_port:1, joypad:1), if:(vblank:0, lcd_stat:0, timer:0, serial_port:0, joypad:0) |}]
+  [%expect {| ie:(vblank:1, lcd_stat:1, timer:1, serial_port:1, joypad:1), if:(vblank:1, lcd_stat:0, timer:0, serial_port:0, joypad:0) |}]
 
 let%expect_test "next returns None when nothing is requested" =
   let t = create () in
@@ -69,4 +70,14 @@ let%expect_test "read byte" =
   let byte = Interrupt_controller.read_byte t if_addr in
 
   byte |> Uint8.show |> Printf.printf "%s";
-  [%expect {|$05|}]
+  [%expect {|$E5|}]
+
+let%expect_test "write byte, clear, then read byte" =
+  let t = create () in
+
+  Interrupt_controller.write_byte t ~addr:if_addr ~data:Uint8.(of_int 0x4);
+  Interrupt_controller.clear t Timer;
+  let byte = Interrupt_controller.read_byte t if_addr in
+
+  byte |> Uint8.show |> Printf.printf "%s";
+  [%expect {|$E0|}]

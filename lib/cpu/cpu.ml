@@ -440,7 +440,7 @@ module Make (Mmu : Word_addressable.S) = struct
       end;
       match t.until_disable_ime with
       | One  -> t.until_disable_ime <- Zero
-      | Zero -> t.until_disable_ime <- None; t.ime <- true
+      | Zero -> t.until_disable_ime <- None; t.ime <- false
       | None -> ()
     in
     let fetch_decode_execute t =
@@ -457,23 +457,22 @@ module Make (Mmu : Word_addressable.S) = struct
         0
       | Some type_ ->
         t.halted <- false;
-        if t.ime then
+        if not t.ime then
           0
         else begin
           t.ime <- false;
           Interrupt_controller.clear t.ic type_;
-          let jump addr =
-            t.sp <- Uint16.(t.sp - of_int 2);
-            Mmu.write_word t.mmu ~addr:t.sp ~data:t.pc;
-            t.pc <- addr;
-            5
+          let addr =  match type_ with
+            | VBlank      -> Uint16.(of_int 0x40)
+            | LCD_stat    -> Uint16.(of_int 0x48)
+            | Timer       -> Uint16.(of_int 0x50)
+            | Serial_port -> Uint16.(of_int 0x58)
+            | Joypad      -> Uint16.(of_int 0x60)
           in
-          match type_ with
-          | VBlank      -> jump Uint16.(of_int 0x40)
-          | LCD_stat    -> jump Uint16.(of_int 0x48)
-          | Timer       -> jump Uint16.(of_int 0x50)
-          | Serial_port -> jump Uint16.(of_int 0x58)
-          | Joypad      -> jump Uint16.(of_int 0x60)
+          t.sp <- Uint16.(t.sp - of_int 2);
+          Mmu.write_word t.mmu ~addr:t.sp ~data:t.pc;
+          t.pc <- addr;
+          5
         end
     in
     update_ime t;
