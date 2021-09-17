@@ -38,10 +38,10 @@ let%expect_test "boundry test for accepts" =
   let (_, shadow_ram) = create_rams () in
 
   [
-    Shadow_ram.accepts shadow_ram ~addr:(Uint16.of_int 0xDFFF);
-    Shadow_ram.accepts shadow_ram ~addr:(Uint16.of_int 0xE000);
-    Shadow_ram.accepts shadow_ram ~addr:(Uint16.of_int 0xFDFF);
-    Shadow_ram.accepts shadow_ram ~addr:(Uint16.of_int 0xFE01);
+    Shadow_ram.accepts shadow_ram (Uint16.of_int 0xDFFF);
+    Shadow_ram.accepts shadow_ram (Uint16.of_int 0xE000);
+    Shadow_ram.accepts shadow_ram (Uint16.of_int 0xFDFF);
+    Shadow_ram.accepts shadow_ram (Uint16.of_int 0xFE01);
   ]
   |> List.iter ~f:(fun b -> Printf.printf "%b " b);
 

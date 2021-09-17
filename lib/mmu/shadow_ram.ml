@@ -14,11 +14,11 @@ let create ~target ~target_start ~shadow_start ~shadow_end = {
   shadow_end;
 }
 
-let accepts t ~addr =
+let accepts t addr =
   Uint16.(t.shadow_start <= addr && addr <= t.shadow_end)
 
 let read_byte t addr =
-  if not @@ accepts t ~addr then
+  if not @@ accepts t addr then
     raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
   else begin
     let open Uint16 in

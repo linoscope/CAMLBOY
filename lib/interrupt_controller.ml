@@ -65,7 +65,7 @@ let next t =
   else if t.joypad.enabled && t.joypad.requested then Some Joypad
   else None
 
-let accepts t ~addr = Uint16.(t.ie_addr = addr || t.if_addr = addr)
+let accepts t addr = Uint16.(t.ie_addr = addr || t.if_addr = addr)
 
 let byte_of_bools (b0, b1, b2, b3, b4) : uint8 =
   (if b0 then 0b00001 else 0)

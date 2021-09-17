@@ -23,7 +23,7 @@ let write_byte t ~addr ~data =
 let write_word t ~addr ~data =
   Bytes.set_int16_le t (Uint16.to_int addr) (Uint16.to_int data)
 
-let accepts _ ~addr:_ = true
+let accepts _ _ = true
 
 let dump t = t |> Bytes.iter ~f:(fun c -> Char.code c |> Printf.printf "%02x ")
 

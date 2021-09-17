@@ -8,6 +8,6 @@ module type S = sig
 
   val write_byte : t -> addr:uint16 -> data:uint8 -> unit
 
-  val accepts : t -> addr:uint16 -> bool
+  val accepts : t -> uint16 -> bool
 
 end

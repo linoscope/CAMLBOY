@@ -21,4 +21,4 @@ let write_byte t ~addr ~data =
   let offset = Uint16.(addr - t.start_addr) |> Uint16.to_int in
   Bytes.set_int8 t.bytes offset (Uint8.to_int data)
 
-let accepts t ~addr = Uint16.(t.start_addr <= addr && addr <= t.end_addr)
+let accepts t addr = Uint16.(t.start_addr <= addr && addr <= t.end_addr)

@@ -25,4 +25,4 @@ let write_byte _ ~addr ~data =
   Printf.sprintf "Write to ROM not allowed. addr:%s, data:%s"
     (Uint16.show addr) (Uint8.show data)
 
-let accepts t ~addr = Uint16.(t.start_addr <= addr && addr <= t.end_addr)
+let accepts t addr = Uint16.(t.start_addr <= addr && addr <= t.end_addr)

@@ -13,12 +13,12 @@ let create ~addr ~type_ ?(default = Uint8.zero) () =
   | `R  -> {addr; data = default; can_read = true; can_write = false}
   | `W  -> {addr; data = default; can_read = false; can_write = true}
 
-let accepts t ~addr = Uint16.(addr = t.addr)
+let accepts t addr = Uint16.(addr = t.addr)
 
 let read_byte t addr =
   if not @@ t.can_read then
     failwith "cannot read"
-  else if not @@ accepts t ~addr then
+  else if not @@ accepts t addr then
     failwith "invalid addr"
   else
     t.data
@@ -26,7 +26,7 @@ let read_byte t addr =
 let write_byte t ~addr ~data =
   if not @@ t.can_read then
     failwith "cannot write"
-  else if not @@ accepts t ~addr then
+  else if not @@ accepts t addr then
     failwith "invalid addr"
   else
     t.data <- data
