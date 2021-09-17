@@ -39,7 +39,9 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~echo_flag
       ()
   in
-  let ic = Interrupt_controller.create ~ie_addr:(of_int 0xFFFF) ~if_addr:(of_int 0xFF0F) in
+  let ic = Interrupt_controller.create
+      ~ie_addr:(of_int 0xFFFF)
+      ~if_addr:(of_int 0xFF0F) in
   let mmu = Mmu.create
       ~rom
       ~wram
@@ -55,8 +57,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
   Registers.write_rr registers DE (of_int 0x00D8);
   Registers.write_rr registers HL (of_int 0x014D);
   Registers.set_flags registers ~z:true ~n:false ~h:true ~c:true ();
-  let cpu =
-    Cpu.For_tests.create
+  let cpu = Cpu.For_tests.create
       ~mmu
       ~ic
       ~registers
@@ -70,12 +71,10 @@ let create_with_rom ~echo_flag ~rom_bytes =
 let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
 let tick t =
-  ignore (Cpu.tick t.cpu : int)
+  ignore (Cpu.run_instruction t.cpu : int)
 
 module For_tests = struct
 
   let prev_inst t = Cpu.For_tests.prev_inst t.cpu
-
-  let current_pc t = Cpu.For_tests.current_pc t.cpu
 
 end

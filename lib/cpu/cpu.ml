@@ -14,6 +14,7 @@ module Make (Mmu : Word_addressable.S) = struct
     mutable prev_inst : Instruction.t; (* for debugging purpose *)
     ic : Interrupt_controller.t;
   }
+
   and count_down =
     | One
     | Zero
@@ -431,7 +432,7 @@ module Make (Mmu : Word_addressable.S) = struct
 
   module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
 
-  let tick t  =
+  let run_instruction t  =
     let update_ime t =
       begin match t.until_enable_ime with
         | One  -> t.until_enable_ime <- Zero
@@ -488,8 +489,6 @@ module Make (Mmu : Word_addressable.S) = struct
       { registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None; prev_inst = NOP; ic }
 
     let prev_inst t = t.prev_inst
-
-    let current_pc t = t.pc
 
   end
 

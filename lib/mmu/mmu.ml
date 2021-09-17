@@ -1,6 +1,7 @@
 open Uints
 
 module Mmu = struct
+
   type t = {
     rom_bank_0 : Rom.t;
     wram       : Ram.t;
@@ -55,6 +56,7 @@ module Mmu = struct
     || Shadow_ram.accepts t.shadow_ram ~addr
     || Serial_port.accepts t.serial_port ~addr
     || Interrupt_controller.accepts t.ic ~addr
+
 end
 
 include Mmu

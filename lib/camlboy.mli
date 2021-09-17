@@ -1,5 +1,3 @@
-open Uints
-
 type t [@@deriving show]
 
 val create : echo_flag:bool -> t
@@ -11,7 +9,5 @@ val tick : t -> unit
 module For_tests : sig
 
   val prev_inst : t -> Instruction.t
-
-  val current_pc : t -> uint16
 
 end
