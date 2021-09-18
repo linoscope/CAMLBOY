@@ -5,6 +5,7 @@ module Cpu = Cpu.Make(Mmu)
 type t = {
   cpu : Cpu.t;
   timer : Timer.t; [@opaque]
+  gpu : Gpu.t; [@opaque]
 } [@@deriving show]
 
 let show t = Cpu.show t.cpu
@@ -33,6 +34,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~vram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x9FFF))
       ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
       ~bgp:(Mmap_register.create ~addr:(of_int 0xFF47) ~type_:`RW ())
+      ~ly_addr:(of_int 0xFF44)
   in
   let serial_port = Serial_port.create
       ~sb:(Mmap_register.create ~addr:(of_int 0xFF01) ~type_:`RW ())
@@ -76,13 +78,14 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~halted:false
       ~ime:false
   in
-  { cpu; timer }
+  { cpu; timer; gpu }
 
 let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
 let run_instruction t =
   let mcycles = Cpu.run_instruction t.cpu in
-  Timer.run t.timer ~mcycles
+  Timer.run t.timer ~mcycles;
+  Gpu.run t.gpu ~mcycles
 
 module For_tests = struct
 
