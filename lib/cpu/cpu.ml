@@ -42,7 +42,7 @@ module Make (Mmu : Word_addressable.S) = struct
 
   type next_pc = Next | Jump of uint16
 
-  let execute (t : t) (cycles : int * int)  (inst : Instruction.t) : int =
+  let execute (t : t) (mcycles : int * int)  (inst : Instruction.t) : int =
     let set_flags = Registers.set_flags t.registers in
     let read : type a. a Instruction.arg -> a = fun arg ->
       match arg with
@@ -423,7 +423,7 @@ module Make (Mmu : Word_addressable.S) = struct
         Jump addr
     in
     t.prev_inst <- inst;
-    match next_pc, cycles with
+    match next_pc, mcycles with
     | Next, (not_branched_mcycle, _) ->
       not_branched_mcycle
     | Jump addr, (_, branched_mcycle) ->
@@ -448,9 +448,9 @@ module Make (Mmu : Word_addressable.S) = struct
       if t.halted then
         4
       else
-        let (len, cycles, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
+        let (len, mcycles, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
         t.pc <- Uint16.(t.pc + len);
-        execute t cycles inst
+        execute t mcycles inst
     in
     let handle_interrupt t : int =
       match Interrupt_controller.next t.ic with
@@ -477,9 +477,9 @@ module Make (Mmu : Word_addressable.S) = struct
         end
     in
     update_ime t;
-    let inst_cycles = fetch_decode_execute t in
-    let interrupt_cycles = handle_interrupt t in
-    inst_cycles + interrupt_cycles
+    let inst_mcycles = fetch_decode_execute t in
+    let interrupt_mcycles = handle_interrupt t in
+    inst_mcycles + interrupt_mcycles
 
   module For_tests = struct
 

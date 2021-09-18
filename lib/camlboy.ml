@@ -81,8 +81,8 @@ let create_with_rom ~echo_flag ~rom_bytes =
 let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
 let run_instruction t =
-  let cycles = Cpu.run_instruction t.cpu in
-  Timer.run t.timer ~cycles
+  let mcycles = Cpu.run_instruction t.cpu in
+  Timer.run t.timer ~mcycles
 
 module For_tests = struct
 

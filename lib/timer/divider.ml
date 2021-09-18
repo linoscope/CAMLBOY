@@ -6,15 +6,15 @@ let mcycle_per_count = 4
 type t = {
   addr : uint16;
   mutable count : int;
-  mutable uncounted_cycles : int;
+  mutable uncounted_mcycles : int;
 }
 
-let create addr = { addr; count = 0; uncounted_cycles = 0 }
+let create addr = { addr; count = 0; uncounted_mcycles = 0 }
 
-let run t ~cycles =
-  t.uncounted_cycles <- t.uncounted_cycles + cycles;
-  if t.uncounted_cycles >= mcycle_per_count then begin
-    t.uncounted_cycles <- t.uncounted_cycles - mcycle_per_count;
+let run t ~mcycles =
+  t.uncounted_mcycles <- t.uncounted_mcycles + mcycles;
+  if t.uncounted_mcycles >= mcycle_per_count then begin
+    t.uncounted_mcycles <- t.uncounted_mcycles - mcycle_per_count;
     t.count <- t.count + 1;
     if t.count >= 0xFF then begin
       t.count <- 0

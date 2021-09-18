@@ -5,7 +5,7 @@ module Make (Mmu : Word_addressable.S) : sig
 
   val create : Mmu.t -> Interrupt_controller.t -> t
 
-  (** Returns machine cycle count  *)
+  (** Returns machine cycle (mcycle) count  *)
   val run_instruction : t -> int
 
   module For_tests : sig

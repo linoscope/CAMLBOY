@@ -4,7 +4,7 @@ module Speed : sig
   type t
   val of_byte : uint8 -> t
   val to_byte : t -> uint8
-  val cycle_per_count : t -> int
+  val mcycle_per_count : t -> int
 end = struct
   type t = int (* cpu mclock / timer mclock *)
 
@@ -31,7 +31,7 @@ end = struct
 
   let to_byte t = t |> Uint8.of_int
 
-  external cycle_per_count : t -> int = "%identity"
+  external mcycle_per_count : t -> int = "%identity"
 end
 
 type t = {
@@ -40,7 +40,7 @@ type t = {
   tac_addr : uint16;
   ic : Interrupt_controller.t;
   mutable count : int;
-  mutable uncounted_cycles : int;
+  mutable uncounted_mcycles : int;
   mutable modulo : int;
   mutable is_running : bool;
   mutable speed : Speed.t;
@@ -52,18 +52,18 @@ let create ~tima_addr ~tma_addr ~tac_addr ~ic = {
   tac_addr;
   ic;
   count = 0;
-  uncounted_cycles = 0;
+  uncounted_mcycles = 0;
   modulo = 0;
   is_running = true;
   speed = Speed.of_byte Uint8.zero;
 }
 
-let run t ~cycles =
+let run t ~mcycles =
   if t.is_running then begin
-    t.uncounted_cycles <- t.uncounted_cycles + cycles;
-    let cycle_per_count = Speed.cycle_per_count t.speed in
-    while t.uncounted_cycles >= cycle_per_count do
-      t.uncounted_cycles <- t.uncounted_cycles - cycle_per_count;
+    t.uncounted_mcycles <- t.uncounted_mcycles + mcycles;
+    let mcycle_per_count = Speed.mcycle_per_count t.speed in
+    while t.uncounted_mcycles >= mcycle_per_count do
+      t.uncounted_mcycles <- t.uncounted_mcycles - mcycle_per_count;
       t.count <- t.count + 1;
       if t.count >= 0xFF then begin
         Interrupt_controller.request t.ic Timer;

@@ -4,7 +4,7 @@ open Uints
 
 type t
 
-val run : t -> cycles:int -> unit
+val run : t -> mcycles:int -> unit
 
 val create : uint16 -> t
 

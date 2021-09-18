@@ -35,7 +35,6 @@ module Mmu = struct
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.read_byte t.ic addr
     | _ when Timer.accepts t.timer addr             -> Timer.read_byte t.timer addr
     | _ -> Uint8.zero
-  (* raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr)) *)
 
 
   let write_byte t ~(addr : uint16) ~(data : uint8) =
@@ -49,7 +48,6 @@ module Mmu = struct
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.write_byte t.ic ~addr ~data
     | _ when Timer.accepts t.timer  addr            -> Timer.write_byte t.timer ~addr ~data
     | _ -> ()
-  (* raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr)) *)
 
   let accepts t addr =
     Rom.accepts t.rom_bank_0 addr

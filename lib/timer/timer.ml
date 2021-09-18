@@ -8,9 +8,9 @@ let create ~div_addr ~tima_addr ~tma_addr ~tac_addr ~ic = {
   timer_counter = Timer_counter.create ~tima_addr ~tma_addr ~tac_addr ~ic;
 }
 
-let run t ~cycles =
-  t.divider |> Divider.run ~cycles;
-  t.timer_counter |> Timer_counter.run ~cycles
+let run t ~mcycles =
+  t.divider |> Divider.run ~mcycles;
+  t.timer_counter |> Timer_counter.run ~mcycles
 
 let accepts t addr =
   Divider.accepts t.divider addr

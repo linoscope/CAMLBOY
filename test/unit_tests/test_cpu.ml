@@ -33,9 +33,9 @@ let create_cpu
     ~ime
 
 let execute_result t inst =
-  let cycles = (1, 2) in
+  let mcycles = (1, 2) in
   inst
-  |> Cpu.For_tests.execute t cycles
+  |> Cpu.For_tests.execute t mcycles
   |> (fun x -> ignore (x : int))
 
 
