@@ -118,3 +118,14 @@ let%expect_test "11-op a,(hl).gb" =
 
 
     Passed |}]
+
+let%expect_test "instr_timing.gb" =
+  run_test_rom "../../resource/test_roms/blargg/instr_timing/instr_timing.gb";
+
+  [%expect {|
+    instr_timing
+
+
+    Timer doesn't  work properly
+
+    Failed #2 |}]

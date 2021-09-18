@@ -62,14 +62,14 @@ let run t ~cycles =
   if t.is_running then begin
     t.uncounted_cycles <- t.uncounted_cycles + cycles;
     let cycle_per_count = Speed.cycle_per_count t.speed in
-    if t.uncounted_cycles >= cycle_per_count then begin
+    while t.uncounted_cycles >= cycle_per_count do
       t.uncounted_cycles <- t.uncounted_cycles - cycle_per_count;
       t.count <- t.count + 1;
       if t.count >= 0xFF then begin
         Interrupt_controller.request t.ic Timer;
         t.count <- t.modulo
       end
-    end
+    done
   end
 
 let accepts t addr =
