@@ -1,3 +1,5 @@
+(** Interface for components in which we can read/write bytes  *)
+
 open Uints
 
 module type S = sig
