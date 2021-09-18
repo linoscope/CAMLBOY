@@ -30,12 +30,6 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~start_addr:(of_int 0xFF80)
       ~end_addr:(of_int 0xFFFE)
   in
-  let gpu = Gpu.create
-      ~vram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x9FFF))
-      ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
-      ~bgp:(Mmap_register.create ~addr:(of_int 0xFF47) ~type_:`RW ())
-      ~ly_addr:(of_int 0xFF44)
-  in
   let serial_port = Serial_port.create
       ~sb:(Mmap_register.create ~addr:(of_int 0xFF01) ~type_:`RW ())
       ~sc:(Mmap_register.create ~addr:(of_int 0xFF02) ~type_:`RW ())
@@ -45,6 +39,13 @@ let create_with_rom ~echo_flag ~rom_bytes =
   let ic = Interrupt_controller.create
       ~ie_addr:(of_int 0xFFFF)
       ~if_addr:(of_int 0xFF0F)
+  in
+  let gpu = Gpu.create
+      ~vram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x9FFF))
+      ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
+      ~bgp:(Mmap_register.create ~addr:(of_int 0xFF47) ~type_:`RW ())
+      ~ly_addr:(of_int 0xFF44)
+      ~ic
   in
   let timer = Timer.create
       ~div_addr:(of_int 0xFF04)

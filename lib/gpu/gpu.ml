@@ -6,8 +6,9 @@ type t = {
   bgp : Mmap_register.t; (* BG palette data *)
   mutable mode : mode;
   mutable mode_mcycles : int; (* number of mycycles consumed in current mode *)
-  ly_addr : uint16;           (* Address to access ly value  *)
+  ly_addr : uint16;           (* Address to access ly value *)
   mutable ly : int;           (* LCD Y Coordinate  *)
+  ic : Interrupt_controller.t
 }
 
 and mode =
@@ -16,7 +17,7 @@ and mode =
   | HBlank
   | VBlank
 
-let create ~vram ~oam ~bgp ~ly_addr = {
+let create ~vram ~oam ~bgp ~ly_addr ~ic = {
   vram;
   oam;
   bgp;
@@ -24,6 +25,7 @@ let create ~vram ~oam ~bgp ~ly_addr = {
   mode_mcycles = 0;
   ly_addr;
   ly = 0;
+  ic;
 }
 
 let oam_read_mcycles = 20
@@ -48,6 +50,7 @@ let run t ~mcycles =
       t.ly <- t.ly + 1;
       if t.ly = 143 then begin
         t |> transition_to VBlank;
+        Interrupt_controller.request t.ic VBlank;
         (* TODO: copy image data to screen buffer (); *)
       end else
         t |> transition_to Oam_read
@@ -76,6 +79,5 @@ let write_byte t ~addr ~data =
   | _ when Mmap_register.accepts t.bgp addr -> Mmap_register.write_byte t.bgp ~addr ~data
   | _ when Uint16.(addr = t.ly_addr) -> () (* LY is read only *)
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
-
 
 let accepts t addr = Ram.accepts t.vram addr || Ram.accepts t.oam addr || Uint16.(addr = t.ly_addr)
