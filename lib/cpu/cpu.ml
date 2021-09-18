@@ -446,7 +446,7 @@ module Make (Mmu : Word_addressable.S) = struct
     in
     let fetch_decode_execute t =
       if t.halted then
-        0
+        4
       else
         let (len, cycles, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
         t.pc <- Uint16.(t.pc + len);

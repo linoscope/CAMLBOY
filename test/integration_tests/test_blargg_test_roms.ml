@@ -35,9 +35,7 @@ let%expect_test "02-interrupts.gb" =
     02-interrupts
 
 
-    Timer doesn't work
-
-    Failed #4 |}]
+    Passed |}]
 
 let%expect_test "03-op sp,hl.gb" =
   run_test_rom "../../resource/test_roms/blargg/cpu_instrs/individual/03-op sp,hl.gb";

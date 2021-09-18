@@ -8,6 +8,7 @@ val create :
   shadow_ram:Shadow_ram.t ->
   serial_port:Serial_port.t ->
   ic:Interrupt_controller.t ->
+  timer:Timer.t ->
   t
 
 include Word_addressable.S with type t := t

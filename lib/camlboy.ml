@@ -3,7 +3,8 @@ open Uints
 module Cpu = Cpu.Make(Mmu)
 
 type t = {
-  cpu: Cpu.t;
+  cpu : Cpu.t;
+  timer : Timer.t; [@opaque]
 } [@@deriving show]
 
 let show t = Cpu.show t.cpu
@@ -41,7 +42,15 @@ let create_with_rom ~echo_flag ~rom_bytes =
   in
   let ic = Interrupt_controller.create
       ~ie_addr:(of_int 0xFFFF)
-      ~if_addr:(of_int 0xFF0F) in
+      ~if_addr:(of_int 0xFF0F)
+  in
+  let timer = Timer.create
+      ~div_addr:(of_int 0xFF04)
+      ~tima_addr:(of_int 0xFF05)
+      ~tma_addr:(of_int 0xFF06)
+      ~tac_addr:(of_int 0xFF07)
+      ~ic
+  in
   let mmu = Mmu.create
       ~rom
       ~wram
@@ -50,6 +59,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~gpu
       ~serial_port
       ~ic
+      ~timer
   in
   let registers = Registers.create () in
   Registers.write_rr registers AF (of_int 0x01b0);
@@ -66,12 +76,13 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~halted:false
       ~ime:false
   in
-  { cpu }
+  { cpu; timer }
 
 let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
 let tick t =
-  ignore (Cpu.run_instruction t.cpu : int)
+  let cycles = Cpu.run_instruction t.cpu in
+  Timer.run t.timer ~cycles
 
 module For_tests = struct
 
