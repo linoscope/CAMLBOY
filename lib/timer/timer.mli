@@ -10,6 +10,6 @@ val create :
   -> ic:Interrupt_controller.t
   -> t
 
-include Synced_intf.S with type t := t
+include Runnable_intf.S with type t := t
 
 include Addressable_intf.S with type t := t

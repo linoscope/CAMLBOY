@@ -1,4 +1,4 @@
-(** Interface for components that need to be synced with the CPU mcycle  *)
+(** Interface for components that run while kept sync with the CPU's machine cycle  *)
 
 module type S = sig
 
