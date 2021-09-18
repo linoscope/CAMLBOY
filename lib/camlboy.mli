@@ -4,7 +4,7 @@ val create : echo_flag:bool -> t
 
 val create_with_rom : echo_flag:bool -> rom_bytes:bytes -> t
 
-val tick : t -> unit
+val run_instruction : t -> unit
 
 module For_tests : sig
 

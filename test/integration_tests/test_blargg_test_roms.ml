@@ -12,7 +12,7 @@ let run_test_rom file =
   let rom_bytes = Read_rom_file.f file  in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~echo_flag:true in
   let rec loop () =
-    Camlboy.tick camlboy;
+    Camlboy.run_instruction camlboy;
     if is_infinite_loop (Camlboy.For_tests.prev_inst camlboy) then
       ()
     else
