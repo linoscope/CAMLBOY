@@ -29,8 +29,8 @@ val get_lyc_eq_ly_flag : t -> bool
 
 val set_lyc_eq_ly_flag : t -> bool -> unit
 
-val get_gpu_mode : t -> Gpu.mode
+val get_gpu_mode : t -> Gpu_mode.t
 
-val set_gpu_mode : t -> Gpu.mode -> unit
+val set_gpu_mode : t -> Gpu_mode.t -> unit
 
 include Addressable_intf.S with type t := t

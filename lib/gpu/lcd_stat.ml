@@ -13,7 +13,7 @@ type t = {
   mutable vblank_int_enabled    : bool;
   mutable hblank_int_enabled    : bool;
   mutable lyc_eq_ly_flag        : bool;
-  mutable gpu_mode              : Gpu.mode;
+  mutable gpu_mode              : Gpu_mode.t;
 }
 
 let create ~addr = {
@@ -23,7 +23,7 @@ let create ~addr = {
   vblank_int_enabled    = false;
   hblank_int_enabled    = false;
   lyc_eq_ly_flag        = false;
-  gpu_mode              = Gpu.OAM_search;
+  gpu_mode              = OAM_search;
 }
 
 let is_enabled t = function

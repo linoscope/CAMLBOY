@@ -43,7 +43,9 @@ let create_with_rom ~echo_flag ~rom_bytes =
   let gpu = Gpu.create
       ~vram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x9FFF))
       ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
-      ~bgp:(Mmap_register.create ~addr:(of_int 0xFF47) ~type_:`RW ())
+      ~bgp:(Pallete.create ~addr:(of_int 0xFF47))
+      ~lcd_control:(Lcd_control.create ~addr:(of_int 0xFF40))
+      ~lcd_stat:(Lcd_stat.create ~addr:(of_int 0xFF41))
       ~ly_addr:(of_int 0xFF44)
       ~ic
   in
