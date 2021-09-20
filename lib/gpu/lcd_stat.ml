@@ -1,11 +1,5 @@
 open Uints
 
-type stat_interupt_source =
-  | LYC_eq_LY
-  | OAM
-  | VBlank
-  | HBlank
-
 type t = {
   addr : uint16;
   mutable lyc_eq_ly_int_enabled : bool;
@@ -15,6 +9,12 @@ type t = {
   mutable lyc_eq_ly_flag        : bool;
   mutable gpu_mode              : Gpu_mode.t;
 }
+
+type stat_interupt_source =
+  | LYC_eq_LY
+  | OAM
+  | VBlank
+  | HBlank
 
 let create ~addr = {
   addr;

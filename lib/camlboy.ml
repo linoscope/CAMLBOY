@@ -46,7 +46,14 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~bgp:(Pallete.create ~addr:(of_int 0xFF47))
       ~lcd_control:(Lcd_control.create ~addr:(of_int 0xFF40))
       ~lcd_stat:(Lcd_stat.create ~addr:(of_int 0xFF41))
-      ~ly_addr:(of_int 0xFF44)
+      ~lcd_position:(
+        Lcd_position.create
+          ~scy_addr:(of_int 0xFF42)
+          ~scx_addr:(of_int 0xFF43)
+          ~ly_addr:(of_int 0xFF44)
+          ~lyc_addr:(of_int 0xFF45)
+          ~wy_addr:(of_int 0xFF4A)
+          ~wx_addr:(of_int 0xFF4B))
       ~ic
   in
   let timer = Timer.create

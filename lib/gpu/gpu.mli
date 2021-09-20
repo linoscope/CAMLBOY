@@ -1,5 +1,3 @@
-open Uints
-
 type t
 
 val create :
@@ -8,7 +6,7 @@ val create :
   -> bgp:Pallete.t
   -> lcd_stat:Lcd_stat.t
   -> lcd_control:Lcd_control.t
-  -> ly_addr:uint16
+  -> lcd_position:Lcd_position.t
   -> ic:Interrupt_controller.t
   -> t
 

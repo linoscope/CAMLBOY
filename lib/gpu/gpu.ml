@@ -6,21 +6,19 @@ type t = {
   bgp : Pallete.t;      (* BG palette data *)
   lcd_stat : Lcd_stat.t;
   lcd_control : Lcd_control.t;
+  lcd_position : Lcd_position.t;
   mutable mcycles_in_mode : int; (* number of mycycles consumed in current mode *)
-  ly_addr : uint16;           (* Address to access ly value *)
-  mutable ly : int;           (* LCD Y Coordinate *)
   ic : Interrupt_controller.t
 }
 
-let create ~vram ~oam ~bgp ~lcd_stat ~lcd_control ~ly_addr ~ic = {
+let create ~vram ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~ic = {
   vram;
   oam;
   bgp;
   lcd_stat;
   lcd_control;
+  lcd_position;
   mcycles_in_mode = 0;
-  ly_addr;
-  ly = 0;
   ic;
 }
 
@@ -36,6 +34,8 @@ let run t ~mcycles =
     t.mcycles_in_mode <- 0;
     Lcd_stat.set_gpu_mode t.lcd_stat mode
   in
+  let get_ly () = Lcd_position.get_ly t.lcd_position in
+  let set_ly x  = Lcd_position.set_ly t.lcd_position x in
   match Lcd_stat.get_gpu_mode t.lcd_stat with
   | OAM_search ->
     if t.mcycles_in_mode >= oam_read_mcycles then
@@ -47,8 +47,8 @@ let run t ~mcycles =
     end
   | HBlank ->
     if t.mcycles_in_mode >= hblank_mcycles then begin
-      t.ly <- t.ly + 1;
-      if t.ly = 143 then begin
+      set_ly (get_ly () + 1);
+      if get_ly () = 143 then begin
         transition_to VBlank t;
         Interrupt_controller.request t.ic VBlank;
         (* TODO: copy image data to screen buffer (); *)
@@ -57,21 +57,20 @@ let run t ~mcycles =
     end
   | VBlank ->
     if t.mcycles_in_mode mod one_line_mcycle = 0 then begin
-      t.ly <- t.ly + 1;
+      set_ly (get_ly () + 1);
       if t.mcycles_in_mode >= vblank_mcycles then begin
-        t.ly <- 0;
+        set_ly 0;
         transition_to OAM_search t
       end
     end
 
-let accepts t addr = Ram.accepts t.vram addr || Ram.accepts t.oam addr || Uint16.(addr = t.ly_addr)
+let accepts t addr = Ram.accepts t.vram addr || Ram.accepts t.oam addr
 
 let read_byte t addr =
   match addr with
   | _ when Ram.accepts t.vram addr    -> Ram.read_byte t.vram addr
   | _ when Ram.accepts t.oam  addr    -> Ram.read_byte t.oam addr
   | _ when Pallete.accepts t.bgp addr -> Pallete.read_byte t.bgp addr
-  | _ when Uint16.(addr = t.ly_addr)  -> t.ly |> Uint8.of_int
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 let write_byte t ~addr ~data =
@@ -79,5 +78,4 @@ let write_byte t ~addr ~data =
   | _ when Ram.accepts t.vram addr    -> Ram.write_byte t.vram ~addr ~data
   | _ when Ram.accepts t.oam  addr    -> Ram.write_byte t.oam  ~addr ~data
   | _ when Pallete.accepts t.bgp addr -> Pallete.write_byte t.bgp ~addr ~data
-  | _ when Uint16.(addr = t.ly_addr)  -> () (* LY is read only *)
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
