@@ -4,16 +4,16 @@ open Uints
 let%expect_test "test set 1, index 0, index 0" =
   let open Uint16 in
   let t = Tile_data.create
-      ~tile_set_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
-      ~set1_start_addr:(of_int 0x8000)
-      ~set2_start_addr:(of_int 0x9000)
+      ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
+      ~area0_start_addr:(of_int 0x8000)
+      ~area1_start_addr:(of_int 0x9000)
   in
 
   (* (0x8000): [0, 1, 0, 0, 1, 1, 1, 0]
      (0x8001): [1, 0, 0, 0, 1, 0, 1, 1] *)
   t |> Tile_data.write_byte ~addr:(of_int 0x8000) ~data:(Uint8.of_int 0b01001110);
   t |> Tile_data.write_byte ~addr:(of_int 0x8001) ~data:(Uint8.of_int 0b10001011);
-  let color_ids = t |> Tile_data.get_row_pixels ~set:Set1 ~index:0 ~row:0 in
+  let color_ids = t |> Tile_data.get_row_pixels ~area:Area0 ~index:0 ~row:0 in
 
   color_ids
   |> List.map (Color_id.to_int)
@@ -24,16 +24,16 @@ let%expect_test "test set 1, index 0, index 0" =
 let%expect_test "test set 2, index 0, first row" =
   let open Uint16 in
   let t = Tile_data.create
-      ~tile_set_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
-      ~set1_start_addr:(of_int 0x8000)
-      ~set2_start_addr:(of_int 0x9000)
+      ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
+      ~area0_start_addr:(of_int 0x8000)
+      ~area1_start_addr:(of_int 0x9000)
   in
 
   (* (0x9000): [0, 1, 0, 0, 1, 1, 1, 0]
      (0x9001): [1, 0, 0, 0, 1, 0, 1, 1] *)
   t |> Tile_data.write_byte ~addr:(of_int 0x9000) ~data:(Uint8.of_int 0b01001110);
   t |> Tile_data.write_byte ~addr:(of_int 0x9001) ~data:(Uint8.of_int 0b10001011);
-  let color_ids = t |> Tile_data.get_row_pixels ~set:Set2 ~index:0 ~row:0 in
+  let color_ids = t |> Tile_data.get_row_pixels ~area:Area1 ~index:0 ~row:0 in
 
   color_ids
   |> List.map (Color_id.to_int)
@@ -44,16 +44,16 @@ let%expect_test "test set 2, index 0, first row" =
 let%expect_test "test set 2, index -128, first row" =
   let open Uint16 in
   let t = Tile_data.create
-      ~tile_set_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
-      ~set1_start_addr:(of_int 0x8000)
-      ~set2_start_addr:(of_int 0x9000)
+      ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
+      ~area0_start_addr:(of_int 0x8000)
+      ~area1_start_addr:(of_int 0x9000)
   in
 
   (* (0x8800): [0, 1, 0, 0, 1, 1, 1, 0]
      (0x8801): [1, 0, 0, 0, 1, 0, 1, 1] *)
   t |> Tile_data.write_byte ~addr:(of_int 0x8800) ~data:(Uint8.of_int 0b01001110);
   t |> Tile_data.write_byte ~addr:(of_int 0x8801) ~data:(Uint8.of_int 0b10001011);
-  let color_ids = t |> Tile_data.get_row_pixels ~set:Set2 ~index:(-128) ~row:0 in
+  let color_ids = t |> Tile_data.get_row_pixels ~area:Area1 ~index:(-128) ~row:0 in
 
   color_ids
   |> List.map (Color_id.to_int)
@@ -64,9 +64,9 @@ let%expect_test "test set 2, index -128, first row" =
 let%expect_test "test full tile" =
   let open Uint16 in
   let t = Tile_data.create
-      ~tile_set_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
-      ~set1_start_addr:(of_int 0x8000)
-      ~set2_start_addr:(of_int 0x9000)
+      ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
+      ~area0_start_addr:(of_int 0x8000)
+      ~area1_start_addr:(of_int 0x9000)
   in
 
   (* Tile:                                     Image:
@@ -105,7 +105,7 @@ let%expect_test "test full tile" =
   t |> Tile_data.write_byte ~addr:(of_int 0x801F) ~data:(Uint8.of_int 0b00000000);
 
   for row = 0 to 7 do
-    let color_ids = t |> Tile_data.get_row_pixels ~set:Set1 ~index:1 ~row in
+    let color_ids = t |> Tile_data.get_row_pixels ~area:Area0 ~index:1 ~row in
     color_ids
     |> List.map (Color_id.to_int)
     |> List.iter (print_int);

@@ -12,8 +12,8 @@ type t = {
 }
 
 and mode =
-  | Oam_search      (* Search OAM for sprites that should be rendered on the current scanline *)
-  | Pixel_transfer  (* Transfer pixes to LCD *)
+  | OAM_search
+  | Pixel_transfer
   | HBlank
   | VBlank
 
@@ -21,7 +21,7 @@ let create ~vram ~oam ~bgp ~ly_addr ~ic = {
   vram;
   oam;
   bgp;
-  mode = Oam_search;
+  mode = OAM_search;
   mode_mcycles = 0;
   ly_addr;
   ly = 0;
@@ -38,32 +38,34 @@ let run t ~mcycles =
   t.mode_mcycles <- t.mode_mcycles + mcycles;
   let transition_to mode t = t.mode_mcycles <- 0; t.mode <- mode in
   match t.mode with
-  | Oam_search ->
+  | OAM_search ->
     if t.mode_mcycles >= oam_read_mcycles then
-      t |> transition_to Pixel_transfer
+      transition_to Pixel_transfer t
   | Pixel_transfer ->
     if t.mode_mcycles >= draw_mcycles then begin
-      t |> transition_to HBlank;
+      transition_to HBlank t;
       (* TODO: render_scanline (); *)
     end
   | HBlank ->
     if t.mode_mcycles >= hblank_mcycles then begin
       t.ly <- t.ly + 1;
       if t.ly = 143 then begin
-        t |> transition_to VBlank;
+        transition_to VBlank t;
         Interrupt_controller.request t.ic VBlank;
         (* TODO: copy image data to screen buffer (); *)
       end else
-        t |> transition_to Oam_search
+        transition_to OAM_search t
     end
   | VBlank ->
     if t.mode_mcycles mod one_line_mcycle = 0 then begin
       t.ly <- t.ly + 1;
       if t.mode_mcycles >= vblank_mcycles then begin
         t.ly <- 0;
-        t |> transition_to Oam_search
+        transition_to OAM_search t
       end
     end
+
+let accepts t addr = Ram.accepts t.vram addr || Ram.accepts t.oam addr || Uint16.(addr = t.ly_addr)
 
 let read_byte t addr =
   match addr with
@@ -80,5 +82,3 @@ let write_byte t ~addr ~data =
   | _ when Mmap_register.accepts t.bgp addr -> Mmap_register.write_byte t.bgp ~addr ~data
   | _ when Uint16.(addr = t.ly_addr) -> () (* LY is read only *)
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
-
-let accepts t addr = Ram.accepts t.vram addr || Ram.accepts t.oam addr || Uint16.(addr = t.ly_addr)
