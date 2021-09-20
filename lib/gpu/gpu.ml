@@ -1,19 +1,19 @@
 open Uints
 
 type t = {
-  vram : Ram.t;
+  vram : Ram.t;               (* Tile data and tile map for the background*)
   oam : Ram.t;
-  bgp : Mmap_register.t; (* BG palette data *)
+  bgp : Mmap_register.t;      (* BG palette data *)
   mutable mode : mode;
   mutable mode_mcycles : int; (* number of mycycles consumed in current mode *)
   ly_addr : uint16;           (* Address to access ly value *)
-  mutable ly : int;           (* LCD Y Coordinate  *)
+  mutable ly : int;           (* LCD Y Coordinate *)
   ic : Interrupt_controller.t
 }
 
 and mode =
-  | Oam_read (* Search OAM for sprites that should be rendered on the current scanline *)
-  | Draw     (* Draw scanline *)
+  | Oam_search      (* Search OAM for sprites that should be rendered on the current scanline *)
+  | Pixel_transfer  (* Transfer pixes to LCD *)
   | HBlank
   | VBlank
 
@@ -21,7 +21,7 @@ let create ~vram ~oam ~bgp ~ly_addr ~ic = {
   vram;
   oam;
   bgp;
-  mode = Oam_read;
+  mode = Oam_search;
   mode_mcycles = 0;
   ly_addr;
   ly = 0;
@@ -38,9 +38,10 @@ let run t ~mcycles =
   t.mode_mcycles <- t.mode_mcycles + mcycles;
   let transition_to mode t = t.mode_mcycles <- 0; t.mode <- mode in
   match t.mode with
-  | Oam_read ->
-    if t.mode_mcycles >= oam_read_mcycles then t |> transition_to Draw
-  | Draw ->
+  | Oam_search ->
+    if t.mode_mcycles >= oam_read_mcycles then
+      t |> transition_to Pixel_transfer
+  | Pixel_transfer ->
     if t.mode_mcycles >= draw_mcycles then begin
       t |> transition_to HBlank;
       (* TODO: render_scanline (); *)
@@ -53,14 +54,14 @@ let run t ~mcycles =
         Interrupt_controller.request t.ic VBlank;
         (* TODO: copy image data to screen buffer (); *)
       end else
-        t |> transition_to Oam_read
+        t |> transition_to Oam_search
     end
   | VBlank ->
     if t.mode_mcycles mod one_line_mcycle = 0 then begin
       t.ly <- t.ly + 1;
       if t.mode_mcycles >= vblank_mcycles then begin
         t.ly <- 0;
-        t |> transition_to Oam_read
+        t |> transition_to Oam_search
       end
     end
 
