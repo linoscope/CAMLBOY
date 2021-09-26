@@ -17,12 +17,12 @@ let create ~tile_map_ram ~area0_start_addr ~area1_start_addr = {
 }
 
 let get_tile t ~area ~i ~j =
-  let offset = match area with
+  let start_addr = match area with
     | Area0 -> t.area0_start_addr
     | Area1 -> t.area1_start_addr
   in
-  let index = i * 32 + j |> Uint16.of_int in
-  Ram.read_byte t.ram Uint16.(offset + index) |> Uint8.to_int
+  let offset = i * 32 + j |> Uint16.of_int in
+  Ram.read_byte t.ram Uint16.(start_addr + offset) |> Uint8.to_int
 
 let accepts t = Ram.accepts t.ram
 
