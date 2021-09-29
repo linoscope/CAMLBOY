@@ -4,12 +4,12 @@ type t = {
   td : Tile_data.t;
   tm : Tile_map.t;
   oam : Ram.t;
-  bgp : Pallete.t;      (* BG palette data *)
+  bgp : Pallete.t; (* BG palette data *)
   ls : Lcd_stat.t;
   lc : Lcd_control.t;
   lp : Lcd_position.t;
+  ic : Interrupt_controller.t;
   mutable mcycles_in_mode : int; (* number of mycycles consumed in current mode *)
-  ic : Interrupt_controller.t
 }
 
 let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~ic = {
@@ -84,9 +84,24 @@ let accepts t addr =
 
 let read_byte t addr =
   match addr with
-  | _ when Tile_data.accepts t.td addr    -> Tile_data.read_byte t.td addr
-  | _ when Tile_map.accepts t.tm addr     -> Tile_map.read_byte t.tm addr
-  | _ when Ram.accepts t.oam  addr        -> Ram.read_byte t.oam addr
+  | _ when Tile_data.accepts t.td addr    -> (
+      (* VRAM is not accessable during pixel transfer *)
+      match Lcd_stat.get_gpu_mode t.ls with
+      | Pixel_transfer -> Uint8.of_int 0xFF
+      | OAM_search | HBlank | VBlank -> Tile_data.read_byte t.td addr
+    )
+  | _ when Tile_map.accepts t.tm addr     -> (
+      (* VRAM is not accessable during pixel transfer *)
+      match Lcd_stat.get_gpu_mode t.ls with
+      | Pixel_transfer -> Uint8.of_int 0xFF
+      | OAM_search | HBlank | VBlank -> Tile_map.read_byte t.tm addr
+    )
+  | _ when Ram.accepts t.oam  addr        -> (
+      (* VRAM is not accessable during pixel transfer and OAM search *)
+      match Lcd_stat.get_gpu_mode t.ls with
+      | Pixel_transfer | OAM_search -> Uint8.of_int 0xFF
+      | HBlank | VBlank -> Ram.read_byte t.oam addr
+    )
   | _ when Pallete.accepts t.bgp addr     -> Pallete.read_byte t.bgp addr
   | _ when Lcd_stat.accepts t.ls addr     -> Lcd_stat.read_byte t.ls addr
   | _ when Lcd_control.accepts t.lc addr  -> Lcd_control.read_byte t.lc addr
@@ -95,14 +110,28 @@ let read_byte t addr =
 
 let write_byte t ~addr ~data =
   match addr with
-  | _ when Tile_data.accepts t.td addr -> Tile_data.write_byte t.td ~addr ~data
-  | _ when Tile_map.accepts t.tm addr  -> Tile_map.write_byte t.tm ~addr ~data
-  | _ when Ram.accepts t.oam  addr     -> Ram.write_byte t.oam  ~addr ~data
+  | _ when Tile_data.accepts t.td addr -> (
+      (* VRAM is not accessable during pixel transfer *)
+      match Lcd_stat.get_gpu_mode t.ls with
+      | Pixel_transfer -> ()
+      | OAM_search | HBlank | VBlank -> Tile_data.write_byte t.td ~addr ~data
+    )
+  | _ when Tile_map.accepts t.tm addr  -> (
+      (* VRAM is not accessable during pixel transfer *)
+      match Lcd_stat.get_gpu_mode t.ls with
+      | Pixel_transfer -> ()
+      | OAM_search | HBlank | VBlank -> Tile_map.write_byte t.tm ~addr ~data
+    )
+  | _ when Ram.accepts t.oam  addr     -> (
+      (* VRAM is not accessable during pixel transfer and OAM search *)
+      match Lcd_stat.get_gpu_mode t.ls with
+      | Pixel_transfer | OAM_search -> ()
+      | HBlank | VBlank -> Ram.write_byte t.oam  ~addr ~data
+    )
   | _ when Pallete.accepts t.bgp addr  -> Pallete.write_byte t.bgp ~addr ~data
   | _ when Lcd_stat.accepts t.ls addr     -> Lcd_stat.write_byte t.ls ~addr ~data
   | _ when Lcd_control.accepts t.lc addr  ->
-    (* When LCD is disabled, LY and mcycle count is set to 0 and mode is set to HBlank
-     * https://www.reddit.com/r/Gameboy/comments/a1c8h0/what_happens_when_a_gameboy_screen_is_disabled/ *)
+    (* When LCD is disabled, LY and mcycle count is set to 0 and mode is set to HBlank *)
     begin match Lcd_control.write_byte' t.lc ~addr ~data with
       | `Lcd_disabled ->
         Lcd_position.reset_ly t.lp;

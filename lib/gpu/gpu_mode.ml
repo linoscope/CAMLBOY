@@ -1,5 +1,5 @@
 type t =
-  | OAM_search      (* Search OAM for sprites that should be rendered on the current scanline *)
-  | Pixel_transfer  (* Transfer pixes to LCD *)
-  | HBlank          (* Horizontal blank *)
-  | VBlank          (* Vertical blank *)
+  | OAM_search     (* Mode 2. Search OAM for sprites that should be rendered on current scanline *)
+  | Pixel_transfer (* Mode 3. Transfer pixes to LCD *)
+  | HBlank         (* Mode 0. Horizontal blank *)
+  | VBlank         (* Mode 1. Vertical blank *)
