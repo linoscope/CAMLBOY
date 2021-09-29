@@ -19,7 +19,9 @@ val get_scx : t -> int
 
 val get_ly : t -> int
 
-val set_ly : t -> int -> unit
+val incr_ly : t -> unit
+
+val reset_ly : t -> unit
 
 val get_lyc : t -> int
 

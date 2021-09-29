@@ -26,7 +26,8 @@ let create ~scy_addr ~scx_addr ~ly_addr ~lyc_addr ~wy_addr ~wx_addr = {
 let get_scy t = t.scy.value
 let get_scx t = t.scx.value
 let get_ly t = t.ly.value
-let set_ly t x = t.ly.value <- x
+let incr_ly t = t.ly.value <- t.ly.value + 1
+let reset_ly t = t.ly.value <- 0
 let get_lyc t = t.lyc.value
 let get_wy t = t.wy.value
 let get_wx t = t.wx.value
@@ -54,8 +55,8 @@ let read_byte t addr =
 
 let write_byte t ~addr ~data =
   if Uint16.(addr = t.ly.addr) then
-    (* LY is read only *)
-    ()
+    (* Any write to LY resets it to 0 *)
+    t.ly.value <- 0
   else
     let r = register_of_addr t addr in
     r.value <- Uint8.to_int data

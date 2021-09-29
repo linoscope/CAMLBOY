@@ -26,7 +26,7 @@ let%expect_test "test read initial values" =
     $00
     $00 |}]
 
-let%expect_test "test write to ly is ignored" =
+let%expect_test "test write" =
   let t = create () in
 
   Lcd_position.write_byte t ~addr:scy_addr ~data:(Uint8.of_int 0xAA);
@@ -65,11 +65,35 @@ let%expect_test "test get functions" =
   [%expect {|
     1 2 0 4 5 6 |}]
 
-let%expect_test "test set ly" =
+let%expect_test "test incr ly" =
   let t = create () in
 
-  Lcd_position.set_ly t 10;
+  Lcd_position.incr_ly t;
+  Lcd_position.incr_ly t;
+  Lcd_position.incr_ly t;
 
   Lcd_position.get_ly t |> print_int;
 
-  [%expect {| 10 |}]
+  [%expect {| 3 |}]
+
+let%expect_test "test reset ly" =
+  let t = create () in
+
+  Lcd_position.incr_ly t;
+  Lcd_position.incr_ly t;
+  Lcd_position.incr_ly t;
+  Lcd_position.reset_ly t;
+
+  Lcd_position.get_ly t |> print_int;
+
+  [%expect {| 0 |}]
+
+let%expect_test "test write to ly sets it to 0" =
+  let t = create () in
+
+  Lcd_position.incr_ly t;
+  Lcd_position.write_byte t ~addr:ly_addr  ~data:(Uint8.of_int 0x03);
+
+  Lcd_position.get_ly t |> print_int;
+
+  [%expect {| 0 |}]

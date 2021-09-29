@@ -40,8 +40,19 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~ie_addr:(of_int 0xFFFF)
       ~if_addr:(of_int 0xFF0F)
   in
+  let tile_data = Tile_data.create
+      ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
+      ~area0_start_addr:(of_int 0x8000)
+      ~area1_start_addr:(of_int 0x9000)
+  in
+  let tile_map =   Tile_map.create
+      ~tile_map_ram:(Ram.create ~start_addr:(Uint16.of_int 0x9800) ~end_addr:(Uint16.of_int 0x9FFF))
+      ~area0_start_addr:(Uint16.of_int 0x9800)
+      ~area1_start_addr:(Uint16.of_int 0x9C00)
+  in
   let gpu = Gpu.create
-      ~vram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x9FFF))
+      ~tile_data
+      ~tile_map
       ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
       ~bgp:(Pallete.create ~addr:(of_int 0xFF47))
       ~lcd_control:(Lcd_control.create ~addr:(of_int 0xFF40))

@@ -1,7 +1,8 @@
 type t
 
 val create :
-  vram:Ram.t
+  tile_data:Tile_data.t
+  -> tile_map:Tile_map.t
   -> oam:Ram.t
   -> bgp:Pallete.t
   -> lcd_stat:Lcd_stat.t

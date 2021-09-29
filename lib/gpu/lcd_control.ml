@@ -64,7 +64,7 @@ let read_byte t addr =
   end else
     raise @@ Invalid_argument "Address out of bounds"
 
-let write_byte t ~addr ~data =
+let write_byte' t ~addr ~data =
   if accepts t addr then begin
     let (b7, b6, b5, b4, b3, b2, b1, b0) = Bit_util.bitflags_of_byte data in
     t.lcd_enable <- b7;
@@ -75,5 +75,12 @@ let write_byte t ~addr ~data =
     t.obj_size <- b2;
     t.obj_enable <- b1;
     t.bg_window_display <- b0;
+    if b7 then
+      `Lcd_disabled
+    else
+      `Nothing
   end else
     raise @@ Invalid_argument "Address out of bounds"
+
+let write_byte t ~addr ~data =
+  ignore (write_byte' t ~addr ~data)

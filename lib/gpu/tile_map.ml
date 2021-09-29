@@ -21,7 +21,7 @@ let get_tile t ~area ~i ~j =
     | Area0 -> t.area0_start_addr
     | Area1 -> t.area1_start_addr
   in
-  let offset = i * 32 + j |> Uint16.of_int in
+  let offset = (i / 8) * 32 + j |> Uint16.of_int in
   Ram.read_byte t.ram Uint16.(start_addr + offset) |> Uint8.to_int
 
 let accepts t = Ram.accepts t.ram
