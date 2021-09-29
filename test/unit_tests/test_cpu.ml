@@ -163,7 +163,18 @@ let%expect_test "LD8 A, (HL-)" =
   [%expect{|
     A:$BB F:---- BC:$0000 DE:$0000 HL:$0001 SP:$0000 PC:$0000 |}]
 
-let%expect_test "LD8 HL, SP+0x03" =
+let%expect_test "LD8 A, ($FF00+$44)" =
+  let mmu = Mmu.create ~size:0xFFFF in
+  Mmu.write_byte mmu ~addr:Uint16.(of_int 0xFF44) ~data:Uint8.(of_int 0xAA);
+  let t = create_cpu ~mmu () in
+
+  LD8 (R A, FF00_offset (Uint8.of_int 0x44))
+  |> print_execute_result t;
+
+  [%expect{|
+    A:$AA F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
+
+let%expect_test "LD16 HL, SP+0x03" =
   let t = create_cpu ~sp:0x1234 () in
 
   LD16 (RR HL, SP_offset (Int8.of_int 0x03))
@@ -172,7 +183,7 @@ let%expect_test "LD8 HL, SP+0x03" =
   [%expect{|
     A:$00 F:---- BC:$0000 DE:$0000 HL:$1237 SP:$1234 PC:$0000 |}]
 
-let%expect_test "LD8 HL, SP+0x01 (carry + half carry)" =
+let%expect_test "LD16 HL, SP+0x01 (carry + half carry)" =
   let t = create_cpu ~sp:0x00FF () in
 
   LD16 (RR HL, SP_offset (Int8.of_int 0x01))
@@ -181,7 +192,7 @@ let%expect_test "LD8 HL, SP+0x01 (carry + half carry)" =
   [%expect{|
     A:$00 F:--HC BC:$0000 DE:$0000 HL:$0100 SP:$00FF PC:$0000 |}]
 
-let%expect_test "LD8 HL, SP-0x01 (carry + half carry)" =
+let%expect_test "LD16 HL, SP-0x01 (carry + half carry)" =
   let t = create_cpu ~l:0xFF ~sp:0x0001 () in
 
   LD16 (RR HL, SP_offset (Int8.of_int (-0x01)))
@@ -191,7 +202,7 @@ let%expect_test "LD8 HL, SP-0x01 (carry + half carry)" =
   [%expect{|
     A:$00 F:--HC BC:$0000 DE:$0000 HL:$0000 SP:$0001 PC:$0000 |}]
 
-let%expect_test "LD8 HL, SP-0x01 (no carry)" =
+let%expect_test "LD16 HL, SP-0x01 (no carry)" =
   let t = create_cpu ~sp:0x0000 () in
 
   LD16 (RR HL, SP_offset (Int8.of_int (-0x01)))
@@ -201,7 +212,7 @@ let%expect_test "LD8 HL, SP-0x01 (no carry)" =
   [%expect{|
     A:$00 F:---- BC:$0000 DE:$0000 HL:$FFFF SP:$0000 PC:$0000 |}]
 
-let%expect_test "LD8 SP, 0xABCD" =
+let%expect_test "LD16 SP, 0xABCD" =
   let t = create_cpu () in
 
   LD16 (SP, Immediate16 (0xabcd |> Uint16.of_int))
