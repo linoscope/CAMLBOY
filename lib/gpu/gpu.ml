@@ -113,8 +113,15 @@ let run t ~mcycles =
         end
       end
   end
+
 let accepts t addr =
-  Tile_map.accepts t.tm addr || Tile_data.accepts t.td addr || Ram.accepts t.oam addr
+  Tile_map.accepts t.tm addr
+  || Tile_data.accepts t.td addr
+  || Ram.accepts t.oam addr
+  || Pallete.accepts t.bgp addr
+  || Lcd_stat.accepts t.ls addr
+  || Lcd_control.accepts t.lc addr
+  || Lcd_position.accepts t.lp addr
 
 let read_byte t addr =
   match addr with
