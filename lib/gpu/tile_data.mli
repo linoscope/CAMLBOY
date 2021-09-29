@@ -13,4 +13,6 @@ val create :
 
 val get_row_pixels : t -> area:area -> index:int -> row:int -> Color_id.t list
 
+val get_pixel : t -> area:area -> index:int -> row:int -> col:int -> Color_id.t
+
 include Addressable_intf.S with type t := t

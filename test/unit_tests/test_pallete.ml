@@ -18,14 +18,14 @@ let%expect_test "lookup" =
 
   [ID_00; ID_01; ID_10; ID_11]
   |> List.map (Pallete.lookup t)
-  |> List.map Pallete.show_color
+  |> List.map Color.show
   |> List.iter print_endline;
 
   [%expect {|
-    Pallete.White
-    Pallete.Light_gray
-    Pallete.Dark_gray
-    Pallete.Black |}]
+    Color.White
+    Color.Light_gray
+    Color.Dark_gray
+    Color.Black |}]
 
 let%expect_test "write then read" =
   let t = Pallete.create ~addr in

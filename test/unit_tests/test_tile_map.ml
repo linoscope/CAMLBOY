@@ -11,9 +11,9 @@ let create () =
     ~area1_start_addr
 
 let print_all_tiles ~area t =
-  for i = 0 to 31 do
-    for j = 0 to 31 do
-      Tile_map.get_tile t ~area ~i ~j
+  for y = 0 to 31 do
+    for x = 0 to 31 do
+      Tile_map.get_tile_id t ~area ~y ~x
       |> Printf.printf "%d "
     done;
     Printf.printf "\n"

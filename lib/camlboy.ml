@@ -112,4 +112,6 @@ module For_tests = struct
 
   let prev_inst t = Cpu.For_tests.prev_inst t.cpu
 
+  let get_frame_buffer t = Gpu.get_frame_buffer t.gpu
+
 end

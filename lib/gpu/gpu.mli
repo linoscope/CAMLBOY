@@ -11,6 +11,8 @@ val create :
   -> ic:Interrupt_controller.t
   -> t
 
+val get_frame_buffer : t -> Color.t array array
+
 include Runnable_intf.S with type t := t
 
 include Addressable_intf.S with type t := t

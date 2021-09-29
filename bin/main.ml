@@ -1,7 +1,7 @@
 open Camlboy_lib
 
 let () =
-  let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/test_roms/hello.gb" in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~echo_flag:false in
   while true do
     Printf.printf "%s" (Camlboy.show camlboy);

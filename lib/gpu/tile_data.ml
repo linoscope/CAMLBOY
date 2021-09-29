@@ -18,7 +18,7 @@ let create ~tile_data_ram ~area0_start_addr ~area1_start_addr = {
   area1_start_addr;
 }
 
-let get_row_pixels t ~area ~index ~row =
+let get_pixel t ~area ~index ~row ~col =
   let row_offset = 2 * row |> Uint16.of_int in
   let low_bit_row_addr = match area with
     | Area0 ->
@@ -31,11 +31,14 @@ let get_row_pixels t ~area ~index ~row =
   let hi_bit_row_addr  = Uint16.(low_bit_row_addr + one) in
   let low_bit_row = Ram.read_byte t.tile_data_ram low_bit_row_addr |> Uint8.to_int in
   let hi_bit_row  = Ram.read_byte t.tile_data_ram hi_bit_row_addr |> Uint8.to_int in
-  [7; 6; 5; 4; 3; 2; 1; 0]
-  |> List.map (fun i ->
-      let hi_bit  = (hi_bit_row lsr i) land 1 = 1 in
-      let low_bit = (low_bit_row lsr i) land 1 = 1 in
-      Color_id.of_bits ~hi:hi_bit ~lo:low_bit)
+  let i = 7 - col in
+  let hi_bit  = (hi_bit_row lsr i) land 1 = 1 in
+  let low_bit = (low_bit_row lsr i) land 1 = 1 in
+  Color_id.of_bits ~hi:hi_bit ~lo:low_bit
+
+let get_row_pixels t ~area ~index ~row =
+  [0; 1; 2; 3; 4; 5; 6; 7]
+  |> List.map (fun col -> get_pixel t ~area ~index ~row ~col)
 
 let accepts t addr = Ram.accepts t.tile_data_ram addr
 

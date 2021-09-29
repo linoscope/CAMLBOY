@@ -10,4 +10,6 @@ module For_tests : sig
 
   val prev_inst : t -> Instruction.t
 
+  val get_frame_buffer : t -> Color.t array array
+
 end

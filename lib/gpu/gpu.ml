@@ -10,6 +10,7 @@ type t = {
   lp : Lcd_position.t;
   ic : Interrupt_controller.t;
   mutable mcycles_in_mode : int; (* number of mycycles consumed in current mode *)
+  frame_buffer : Color.t array array; (* frame_buffer.(i).(j) :=  color of ith row and jth column*)
 }
 
 let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~ic = {
@@ -22,7 +23,10 @@ let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~
   lp = lcd_position;
   mcycles_in_mode = 0;
   ic;
+  frame_buffer = Array.make_matrix 144 160 Color.White;
 }
+
+let get_frame_buffer t = t.frame_buffer
 
 let oam_read_mcycles = 20
 let draw_mcycles = 43
@@ -39,6 +43,36 @@ let transition_to mode t =
   t.mcycles_in_mode <- 0;
   Lcd_stat.set_gpu_mode t.ls mode
 
+let render_bg_tiles t =
+  let scy = Lcd_position.get_scy t.lp in
+  let scx = Lcd_position.get_scx t.lp in
+  let tile_data_area = Lcd_control.get_tile_data_area t.lc in
+  let tile_map_area  = Lcd_control.get_bg_tile_map_area t.lc in
+  let ly = Lcd_position.get_ly t.lp in
+  let y = scy + ly in
+  let row_in_tile = y mod 8 in
+  for x = 0 to 159 do
+    let col_in_tile = x mod 8 in
+    let tile_id = Tile_map.get_tile_id t.tm ~area:tile_map_area ~y ~x:(scx + x) in
+    let pixel_color_id = Tile_data.get_pixel t.td
+        ~index:tile_id
+        ~area:tile_data_area
+        ~row:row_in_tile
+        ~col:col_in_tile
+    in
+    let color = Pallete.lookup t.bgp pixel_color_id in
+    t.frame_buffer.(ly).(x) <- color
+  done
+;;
+
+let render_scan_line t =
+  if Lcd_control.get_bg_window_display t.lc then
+    render_bg_tiles t;
+  if Lcd_control.get_obj_enable t.lc then
+    ()
+(* TODO: render_sprites t; *)
+
+
 let run t ~mcycles =
   if not (Lcd_control.get_lcd_enable t.lc) then
     ()
@@ -54,7 +88,7 @@ let run t ~mcycles =
         transition_to HBlank t;
         if Lcd_stat.is_enabled t.ls HBlank then
           Interrupt_controller.request t.ic LCD_stat;
-        (* TODO: render_scanline (); *)
+        render_scan_line t;
       end
     | HBlank ->
       if t.mcycles_in_mode >= hblank_mcycles then begin

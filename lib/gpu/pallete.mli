@@ -5,15 +5,8 @@ open Uints
 
 type t
 
-type color =
-  | White
-  | Light_gray
-  | Dark_gray
-  | Black
-[@@deriving show]
-
 val create : addr:uint16 -> t
 
-val lookup : t -> Color_id.t -> color
+val lookup : t -> Color_id.t -> Color.t
 
 include Addressable_intf.S with type t := t
