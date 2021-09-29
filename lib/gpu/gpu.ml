@@ -28,20 +28,15 @@ let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~
 
 let get_frame_buffer t = t.frame_buffer
 
-let oam_read_mcycles = 20
-let draw_mcycles = 43
-let hblank_mcycles = 51
+let oam_read_mcycles = 20       (* 80 / 4 *)
+let draw_mcycles = 43           (* 172 / 4 *)
+let hblank_mcycles = 51         (* 204 / 4 *)
 let one_line_mcycle = oam_read_mcycles + draw_mcycles + hblank_mcycles
-let vblank_mcycles = 1140
 
 let check_lyc_eq_ly t =
   if Lcd_stat.is_enabled t.ls LYC_eq_LY &&
      Lcd_position.get_ly t.lp = Lcd_position.get_lyc t.lp then
     Interrupt_controller.request t.ic LCD_stat
-
-let transition_to mode t =
-  t.mcycles_in_mode <- 0;
-  Lcd_stat.set_gpu_mode t.ls mode
 
 let render_bg_tiles t =
   let scy = Lcd_position.get_scy t.lp in
@@ -63,7 +58,6 @@ let render_bg_tiles t =
     let color = Pallete.lookup t.bgp pixel_color_id in
     t.frame_buffer.(ly).(x) <- color
   done
-;;
 
 let render_scan_line t =
   if Lcd_control.get_bg_window_display t.lc then
@@ -71,7 +65,6 @@ let render_scan_line t =
   if Lcd_control.get_obj_enable t.lc then
     ()
 (* TODO: render_sprites t; *)
-
 
 let run t ~mcycles =
   if not (Lcd_control.get_lcd_enable t.lc) then
@@ -81,33 +74,39 @@ let run t ~mcycles =
     t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
     match Lcd_stat.get_gpu_mode t.ls with
     | OAM_search ->
-      if t.mcycles_in_mode >= oam_read_mcycles then
-        transition_to Pixel_transfer t
+      if t.mcycles_in_mode >= oam_read_mcycles then begin
+        t.mcycles_in_mode <- t.mcycles_in_mode - oam_read_mcycles;
+        Lcd_stat.set_gpu_mode t.ls Pixel_transfer;
+      end
     | Pixel_transfer ->
       if t.mcycles_in_mode >= draw_mcycles then begin
-        transition_to HBlank t;
+        t.mcycles_in_mode <- t.mcycles_in_mode - draw_mcycles;
+        Lcd_stat.set_gpu_mode t.ls HBlank;
         if Lcd_stat.is_enabled t.ls HBlank then
           Interrupt_controller.request t.ic LCD_stat;
         render_scan_line t;
       end
     | HBlank ->
       if t.mcycles_in_mode >= hblank_mcycles then begin
+        t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
         Lcd_position.incr_ly t.lp;
-        if Lcd_position.get_ly t.lp = 143 then begin
-          transition_to VBlank t;
+        if Lcd_position.get_ly t.lp = 144 then begin
+          Lcd_stat.set_gpu_mode t.ls VBlank;
           if Lcd_stat.is_enabled t.ls VBlank then
             Interrupt_controller.request t.ic LCD_stat;
           Interrupt_controller.request t.ic VBlank;
           (* TODO: copy image data to screen buffer (); *)
-        end else
-          transition_to OAM_search t
+        end else begin
+          Lcd_stat.set_gpu_mode t.ls OAM_search;
+        end
       end
     | VBlank ->
-      if t.mcycles_in_mode mod one_line_mcycle = 0 then begin
+      if t.mcycles_in_mode >= one_line_mcycle then begin
+        t.mcycles_in_mode <- t.mcycles_in_mode mod one_line_mcycle;
         Lcd_position.incr_ly t.lp;
-        if t.mcycles_in_mode >= vblank_mcycles then begin
+        if Lcd_position.get_ly t.lp = 154 then begin
           Lcd_position.reset_ly t.lp;
-          transition_to OAM_search t;
+          Lcd_stat.set_gpu_mode t.ls OAM_search;
           if Lcd_stat.is_enabled t.ls OAM then
             Interrupt_controller.request t.ic LCD_stat;
         end
