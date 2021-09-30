@@ -28,10 +28,10 @@ let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~
 
 let get_frame_buffer t = t.frame_buffer
 
-let oam_read_mcycles = 20       (* 80 / 4 *)
-let draw_mcycles = 43           (* 172 / 4 *)
+let oam_search_mcycles = 20     (*  80 / 4 *)
+let pixel_transfer_mcycles = 43 (* 172 / 4 *)
 let hblank_mcycles = 51         (* 204 / 4 *)
-let one_line_mcycle = oam_read_mcycles + draw_mcycles + hblank_mcycles
+let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles
 
 let check_lyc_eq_ly t =
   if Lcd_stat.is_enabled t.ls LYC_eq_LY &&
@@ -56,6 +56,10 @@ let render_bg_tiles t =
         ~col:col_in_tile
     in
     let color = Pallete.lookup t.bgp pixel_color_id in
+    begin match color with
+      | Black | Dark_gray | Light_gray -> assert false
+      | White -> ()
+    end;
     t.frame_buffer.(ly).(x) <- color
   done
 
@@ -74,13 +78,13 @@ let run t ~mcycles =
     t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
     match Lcd_stat.get_gpu_mode t.ls with
     | OAM_search ->
-      if t.mcycles_in_mode >= oam_read_mcycles then begin
-        t.mcycles_in_mode <- t.mcycles_in_mode - oam_read_mcycles;
+      if t.mcycles_in_mode >= oam_search_mcycles then begin
+        t.mcycles_in_mode <- t.mcycles_in_mode mod oam_search_mcycles;
         Lcd_stat.set_gpu_mode t.ls Pixel_transfer;
       end
     | Pixel_transfer ->
-      if t.mcycles_in_mode >= draw_mcycles then begin
-        t.mcycles_in_mode <- t.mcycles_in_mode - draw_mcycles;
+      if t.mcycles_in_mode >= pixel_transfer_mcycles then begin
+        t.mcycles_in_mode <- t.mcycles_in_mode mod pixel_transfer_mcycles;
         Lcd_stat.set_gpu_mode t.ls HBlank;
         if Lcd_stat.is_enabled t.ls HBlank then
           Interrupt_controller.request t.ic LCD_stat;
