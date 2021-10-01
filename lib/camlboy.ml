@@ -19,7 +19,8 @@ let create_with_rom ~echo_flag ~rom_bytes =
   Rom.load rom ~rom_bytes;
   let wram = Ram.create
       ~start_addr:(of_int 0xC000)
-      ~end_addr:(of_int 0xDFFF) in
+      ~end_addr:(of_int 0xDFFF)
+  in
   let shadow_ram = Shadow_ram.create
       ~target:wram
       ~target_start:(of_int 0xC000)
@@ -45,7 +46,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~area0_start_addr:(of_int 0x8000)
       ~area1_start_addr:(of_int 0x9000)
   in
-  let tile_map =   Tile_map.create
+  let tile_map = Tile_map.create
       ~tile_map_ram:(Ram.create ~start_addr:(Uint16.of_int 0x9800) ~end_addr:(Uint16.of_int 0x9FFF))
       ~area0_start_addr:(Uint16.of_int 0x9800)
       ~area1_start_addr:(Uint16.of_int 0x9C00)
@@ -108,10 +109,10 @@ let run_instruction t =
   Timer.run t.timer ~mcycles;
   Gpu.run t.gpu ~mcycles
 
+let get_frame_buffer t = Gpu.get_frame_buffer t.gpu
+
 module For_tests = struct
 
   let prev_inst t = Cpu.For_tests.prev_inst t.cpu
-
-  let get_frame_buffer t = Gpu.get_frame_buffer t.gpu
 
 end

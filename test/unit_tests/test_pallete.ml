@@ -3,6 +3,13 @@ open Uints
 
 let addr = Uint16.of_int 0xFF47
 
+let show_color = function
+  | `White -> "White"
+  | `Light_gray -> "Light_gray"
+  | `Dark_gray -> "Dark_gray"
+  | `Black -> "Black"
+
+
 let%expect_test "test create then read" =
   let t = Pallete.create ~addr in
 
@@ -18,14 +25,14 @@ let%expect_test "lookup" =
 
   [ID_00; ID_01; ID_10; ID_11]
   |> List.map (Pallete.lookup t)
-  |> List.map Color.show
+  |> List.map show_color
   |> List.iter print_endline;
 
   [%expect {|
-    Color.White
-    Color.Light_gray
-    Color.Dark_gray
-    Color.Black |}]
+    White
+    Light_gray
+    Dark_gray
+    Black |}]
 
 let%expect_test "write then read" =
   let t = Pallete.create ~addr in

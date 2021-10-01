@@ -1,18 +1,21 @@
 open Uints
+
+type color = [`White | `Light_gray | `Dark_gray | `Black ]
+
 type t = {
   addr : uint16;
-  mutable id_00 : Color.t;
-  mutable id_01 : Color.t;
-  mutable id_10 : Color.t;
-  mutable id_11 : Color.t;
+  mutable id_00 : color;
+  mutable id_01 : color;
+  mutable id_10 : color;
+  mutable id_11 : color;
 }
 
 let create ~addr = {
   addr;
-  id_00 = White;
-  id_01 = Light_gray;
-  id_10 = Dark_gray;
-  id_11 = Black;
+  id_00 = `White;
+  id_01 = `Light_gray;
+  id_10 = `Dark_gray;
+  id_11 = `Black;
 }
 
 let lookup t color_id =
@@ -27,10 +30,10 @@ let accepts t addr = Uint16.(addr = t.addr)
 
 let read_byte t addr =
   let bits_of_color = function
-    | Color.White -> 0b00
-    | Light_gray -> 0b01
-    | Dark_gray -> 0b10
-    | Black -> 0b11
+    | `White -> 0b00
+    | `Light_gray -> 0b01
+    | `Dark_gray -> 0b10
+    | `Black -> 0b11
   in
   if accepts t addr then
     (bits_of_color t.id_00)
@@ -43,10 +46,10 @@ let read_byte t addr =
 
 let write_byte t ~addr ~data =
   let color_of_bits = function
-    | 0b00 -> Color.White
-    | 0b01 -> Light_gray
-    | 0b10 -> Dark_gray
-    | 0b11 -> Black
+    | 0b00 -> `White
+    | 0b01 -> `Light_gray
+    | 0b10 -> `Dark_gray
+    | 0b11 -> `Black
     | _    -> assert false
   in
   let data = Uint8.to_int data in

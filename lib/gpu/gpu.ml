@@ -10,7 +10,7 @@ type t = {
   lp : Lcd_position.t;
   ic : Interrupt_controller.t;
   mutable mcycles_in_mode : int; (* number of mycycles consumed in current mode *)
-  frame_buffer : Color.t array array; (* frame_buffer.(i).(j) :=  color of ith row and jth column*)
+  frame_buffer : [`White | `Light_gray | `Dark_gray | `Black ] array array; (* frame_buffer.(i).(j) :=  color of ith row and jth column*)
 }
 
 let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~ic = {
@@ -23,7 +23,7 @@ let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~
   lp = lcd_position;
   mcycles_in_mode = 0;
   ic;
-  frame_buffer = Array.make_matrix 144 160 Color.White;
+  frame_buffer = Array.make_matrix 144 160 `White;
 }
 
 let get_frame_buffer t = t.frame_buffer
@@ -57,8 +57,8 @@ let render_bg_tiles t =
     in
     let color = Pallete.lookup t.bgp pixel_color_id in
     begin match color with
-      | Black | Dark_gray | Light_gray -> assert false
-      | White -> ()
+      | `Black | `Dark_gray | `Light_gray -> assert false
+      | `White -> ()
     end;
     t.frame_buffer.(ly).(x) <- color
   done

@@ -7,6 +7,6 @@ type t
 
 val create : addr:uint16 -> t
 
-val lookup : t -> Color_id.t -> Color.t
+val lookup : t -> Color_id.t -> [`White | `Light_gray | `Dark_gray | `Black ]
 
 include Addressable_intf.S with type t := t
