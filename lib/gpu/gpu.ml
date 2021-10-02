@@ -9,34 +9,37 @@ type t = {
   lc : Lcd_control.t;
   lp : Lcd_position.t;
   ic : Interrupt_controller.t;
-  mutable mcycles_in_mode : int; (* number of mycycles consumed in current mode *)
-  frame_buffer : [`White | `Light_gray | `Dark_gray | `Black ] array array; (* frame_buffer.(i).(j) :=  color of ith row and jth column*)
+  (* number of mycycles consumed in current mode *)
+  mutable mcycles_in_mode : int;
+  (* frame_buffer.(y).(x) :=  color of yth row and xth column*)
+  frame_buffer : [`White | `Light_gray | `Dark_gray | `Black ] array array;
 }
 
-let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~ic = {
-  td = tile_data;
-  tm = tile_map;
-  oam;
-  bgp;
-  ls = lcd_stat;
-  lc = lcd_control;
-  lp = lcd_position;
-  mcycles_in_mode = 0;
-  ic;
-  frame_buffer = Array.make_matrix 144 160 `White;
-}
+let handle_ly_eq_lyc t =
+  let ly = Lcd_position.get_ly t.lp in
+  let lyc = Lcd_position.get_lyc t.lp in
+  let ly_eq_lyc = ly = lyc in
+  Lcd_stat.set_lyc_eq_ly_flag t.ls ly_eq_lyc;
+  if ly_eq_lyc && Lcd_stat.is_enabled t.ls LYC_eq_LY then
+    Interrupt_controller.request t.ic LCD_stat
+
+let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~ic =
+  let t = {
+    td = tile_data;
+    tm = tile_map;
+    oam;
+    bgp;
+    ls = lcd_stat;
+    lc = lcd_control;
+    lp = lcd_position;
+    mcycles_in_mode = 0;
+    ic;
+    frame_buffer = Array.make_matrix 144 160 `White; }
+  in
+  handle_ly_eq_lyc t;
+  t
 
 let get_frame_buffer t = t.frame_buffer
-
-let oam_search_mcycles = 20     (*  80 / 4 *)
-let pixel_transfer_mcycles = 43 (* 172 / 4 *)
-let hblank_mcycles = 51         (* 204 / 4 *)
-let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles
-
-let check_lyc_eq_ly t =
-  if Lcd_stat.is_enabled t.ls LYC_eq_LY &&
-     Lcd_position.get_ly t.lp = Lcd_position.get_lyc t.lp then
-    Interrupt_controller.request t.ic LCD_stat
 
 let render_bg_tiles t =
   let scy = Lcd_position.get_scy t.lp in
@@ -70,11 +73,19 @@ let render_scan_line t =
     ()
 (* TODO: render_sprites t; *)
 
+let incr_ly t =
+  Lcd_position.incr_ly t.lp;
+  Lcd_position.get_ly t.lp
+
+let oam_search_mcycles = 20     (*  80 / 4 *)
+let pixel_transfer_mcycles = 43 (* 172 / 4 *)
+let hblank_mcycles = 51         (* 204 / 4 *)
+let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles
+
 let run t ~mcycles =
   if not (Lcd_control.get_lcd_enable t.lc) then
     ()
   else begin
-    check_lyc_eq_ly t;
     t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
     match Lcd_stat.get_gpu_mode t.ls with
     | OAM_search ->
@@ -93,8 +104,9 @@ let run t ~mcycles =
     | HBlank ->
       if t.mcycles_in_mode >= hblank_mcycles then begin
         t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
-        Lcd_position.incr_ly t.lp;
-        if Lcd_position.get_ly t.lp = 144 then begin
+        let ly = incr_ly t in
+        handle_ly_eq_lyc t;
+        if ly = 144 then begin
           Lcd_stat.set_gpu_mode t.ls VBlank;
           if Lcd_stat.is_enabled t.ls VBlank then
             Interrupt_controller.request t.ic LCD_stat;
@@ -102,14 +114,18 @@ let run t ~mcycles =
           (* TODO: copy image data to screen buffer (); *)
         end else begin
           Lcd_stat.set_gpu_mode t.ls OAM_search;
+          if Lcd_stat.is_enabled t.ls OAM then
+            Interrupt_controller.request t.ic LCD_stat;
         end
       end
     | VBlank ->
       if t.mcycles_in_mode >= one_line_mcycle then begin
         t.mcycles_in_mode <- t.mcycles_in_mode mod one_line_mcycle;
-        Lcd_position.incr_ly t.lp;
-        if Lcd_position.get_ly t.lp = 154 then begin
+        let ly = incr_ly t in
+        handle_ly_eq_lyc t;
+        if ly = 154 then begin
           Lcd_position.reset_ly t.lp;
+          handle_ly_eq_lyc t;
           Lcd_stat.set_gpu_mode t.ls OAM_search;
           if Lcd_stat.is_enabled t.ls OAM then
             Interrupt_controller.request t.ic LCD_stat;
@@ -175,13 +191,39 @@ let write_byte t ~addr ~data =
   | _ when Pallete.accepts t.bgp addr  -> Pallete.write_byte t.bgp ~addr ~data
   | _ when Lcd_stat.accepts t.ls addr     -> Lcd_stat.write_byte t.ls ~addr ~data
   | _ when Lcd_control.accepts t.lc addr  ->
+    Lcd_control.write_byte t.lc ~addr ~data;
     (* When LCD is disabled, LY and mcycle count is set to 0 and mode is set to HBlank *)
-    begin match Lcd_control.write_byte' t.lc ~addr ~data with
-      | `Lcd_disabled ->
-        Lcd_position.reset_ly t.lp;
-        t.mcycles_in_mode <- 0;
-        Lcd_stat.set_gpu_mode t.ls HBlank
-      | `Nothing -> ()
+    if not (Lcd_control.get_lcd_enable t.lc) then begin
+      Lcd_position.reset_ly t.lp;
+      t.mcycles_in_mode <- 0;
+      Lcd_stat.set_gpu_mode t.ls HBlank
     end
   | _ when Lcd_position.accepts t.lp addr -> Lcd_position.write_byte t.lp ~addr ~data
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
+
+module For_tests = struct
+
+  let run t ~mcycles =
+    let mode_before = Lcd_stat.get_gpu_mode t.ls in
+    run t ~mcycles;
+    let mode_after = Lcd_stat.get_gpu_mode t.ls in
+    if mode_before != mode_after then
+      `Mode_changed
+    else
+      `Mode_not_changed
+
+  let show t =
+    let interrupt_str = match Interrupt_controller.next t.ic with
+      | None -> "-"
+      | Some int -> Interrupt_controller.show_type_ int
+    in
+    Printf.sprintf "mode=%d, mcycles=%4d, ly=%3d, lcd_stat=%s, interrupt=%s)"
+      (Lcd_stat.get_gpu_mode t.ls |> Gpu_mode.to_int)
+      t.mcycles_in_mode
+      (Lcd_position.get_ly t.lp)
+      (Lcd_stat.peek t.ls |> Uint8.show)
+      interrupt_str
+
+  let get_mcycles_in_mode t = t.mcycles_in_mode
+
+end

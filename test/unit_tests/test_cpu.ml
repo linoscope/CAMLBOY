@@ -703,6 +703,15 @@ let%expect_test "JR NC, 0x0e when c=1" =
   [%expect {|
     A:$00 F:---C BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0002 |}]
 
+let%expect_test "JR NZ, -14 when z=0" =
+  let t = create_cpu ~zero:false ~pc:(0xFF) () in
+
+  JR (NZ, Int8.of_int (-1))
+  |> print_execute_result t;
+
+  [%expect {|
+    A:$00 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$00FE |}]
+
 let%expect_test "CALL 0x0010" =
   let mmu = Mmu.create ~size:0x10 in
   let t = create_cpu ~mmu ~pc:0xBBCC ~sp:0x8 () in

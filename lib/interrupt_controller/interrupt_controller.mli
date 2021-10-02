@@ -16,6 +16,8 @@ val request : t -> type_ -> unit
 
 val clear : t -> type_ -> unit
 
+val clear_all : t -> unit
+
 (** Returns interrupt that is enabled, requested, and highest priority *)
 val next : t -> type_ option
 

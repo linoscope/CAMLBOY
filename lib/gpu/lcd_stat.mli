@@ -33,4 +33,6 @@ val get_gpu_mode : t -> Gpu_mode.t
 
 val set_gpu_mode : t -> Gpu_mode.t -> unit
 
+val peek : t -> uint8
+
 include Addressable_intf.S with type t := t

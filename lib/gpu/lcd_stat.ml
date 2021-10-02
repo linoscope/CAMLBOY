@@ -40,7 +40,6 @@ let get_gpu_mode t = t.gpu_mode
 
 let set_gpu_mode t mode = t.gpu_mode <- mode
 
-
 let accepts t addr = Uint16.(addr = t.addr)
 
 let read_byte t addr =
@@ -72,3 +71,5 @@ let write_byte t ~addr ~data =
     t.hblank_int_enabled <- b3
   end else
     raise @@ Invalid_argument "Address out of bounds"
+
+let peek t = read_byte t t.addr

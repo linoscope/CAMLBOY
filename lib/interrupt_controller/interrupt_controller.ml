@@ -15,11 +15,11 @@ and state = {
 }
 
 type type_ =
-  | VBlank
-  | LCD_stat
-  | Timer
-  | Serial_port
-  | Joypad
+  | VBlank      [@printer fun fmt _ -> fprintf fmt "VBlank"]
+  | LCD_stat    [@printer fun fmt _ -> fprintf fmt "LCD_stat"]
+  | Timer       [@printer fun fmt _ -> fprintf fmt "Timer"]
+  | Serial_port [@printer fun fmt _ -> fprintf fmt "Serial_port"]
+  | Joypad      [@printer fun fmt _ -> fprintf fmt "Joypad"]
 [@@deriving show]
 
 let show t =
@@ -35,7 +35,7 @@ let show t =
 let pp fmt t = Format.fprintf fmt "%s" (show t)
 
 let create ~ie_addr ~if_addr = {
-  ie  = {addr = ie_addr; vblank = true; lcd_stat = true; timer = true; serial_port = true; joypad = true};
+  ie  = {addr = ie_addr; vblank = false; lcd_stat = false; timer = false; serial_port = false; joypad = false};
   if_ = {addr = if_addr; vblank = false; lcd_stat = false; timer = false; serial_port = false; joypad = false};
 }
 
@@ -51,6 +51,10 @@ let update state type_ b =
 let request t type_ = t.if_ <- update t.if_ type_ true
 
 let clear t type_ = t.if_ <- update t.if_ type_ false
+
+let clear_all t =
+  [VBlank; LCD_stat; Timer; Serial_port; Joypad]
+  |> List.iter (fun type_ -> clear t type_)
 
 let next t =
   let get state = function

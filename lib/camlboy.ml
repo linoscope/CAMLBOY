@@ -10,6 +10,9 @@ type t = {
 
 let show t = Cpu.show t.cpu
 
+let ly_addr = Uint16.of_int 0xFF44
+let lcd_stat_addr = Uint16.of_int 0xFF41
+
 let create_with_rom ~echo_flag ~rom_bytes =
   let open Uint16 in
   let rom = Rom.create
@@ -57,12 +60,12 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
       ~bgp:(Pallete.create ~addr:(of_int 0xFF47))
       ~lcd_control:(Lcd_control.create ~addr:(of_int 0xFF40))
-      ~lcd_stat:(Lcd_stat.create ~addr:(of_int 0xFF41))
+      ~lcd_stat:(Lcd_stat.create ~addr:lcd_stat_addr)
       ~lcd_position:(
         Lcd_position.create
           ~scy_addr:(of_int 0xFF42)
           ~scx_addr:(of_int 0xFF43)
-          ~ly_addr:(of_int 0xFF44)
+          ~ly_addr
           ~lyc_addr:(of_int 0xFF45)
           ~wy_addr:(of_int 0xFF4A)
           ~wx_addr:(of_int 0xFF4B))
@@ -114,5 +117,11 @@ let get_frame_buffer t = Gpu.get_frame_buffer t.gpu
 module For_tests = struct
 
   let prev_inst t = Cpu.For_tests.prev_inst t.cpu
+
+  let get_ly t = Gpu.read_byte t.gpu ly_addr |> Uint8.to_int
+
+  let get_lcd_stat t = Gpu.read_byte t.gpu lcd_stat_addr
+
+  let get_mcycles_in_mode t = Gpu.For_tests.get_mcycles_in_mode t.gpu
 
 end

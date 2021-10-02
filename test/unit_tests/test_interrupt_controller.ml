@@ -11,7 +11,7 @@ let%expect_test "create" =
   let t = create () in
 
   t |> Interrupt_controller.show |> Printf.printf "%s";
-  [%expect {| ie:(vblank:1, lcd_stat:1, timer:1, serial_port:1, joypad:1), if:(vblank:0, lcd_stat:0, timer:0, serial_port:0, joypad:0) |}]
+  [%expect {| ie:(vblank:0, lcd_stat:0, timer:0, serial_port:0, joypad:0), if:(vblank:0, lcd_stat:0, timer:0, serial_port:0, joypad:0) |}]
 
 
 let%expect_test "request" =
@@ -21,7 +21,7 @@ let%expect_test "request" =
   Interrupt_controller.request t Timer;
 
   t |> Interrupt_controller.show |> Printf.printf "%s";
-  [%expect {| ie:(vblank:1, lcd_stat:1, timer:1, serial_port:1, joypad:1), if:(vblank:1, lcd_stat:0, timer:1, serial_port:0, joypad:0) |}]
+  [%expect {| ie:(vblank:0, lcd_stat:0, timer:0, serial_port:0, joypad:0), if:(vblank:1, lcd_stat:0, timer:1, serial_port:0, joypad:0) |}]
 
 let%expect_test "clear" =
   let t = create () in
@@ -31,7 +31,7 @@ let%expect_test "clear" =
   Interrupt_controller.clear t Timer;
 
   t |> Interrupt_controller.show |> Printf.printf "%s";
-  [%expect {| ie:(vblank:1, lcd_stat:1, timer:1, serial_port:1, joypad:1), if:(vblank:1, lcd_stat:0, timer:0, serial_port:0, joypad:0) |}]
+  [%expect {| ie:(vblank:0, lcd_stat:0, timer:0, serial_port:0, joypad:0), if:(vblank:1, lcd_stat:0, timer:0, serial_port:0, joypad:0) |}]
 
 let%expect_test "next returns None when nothing is requested" =
   let t = create () in
@@ -52,7 +52,7 @@ let%expect_test "next returns enabled, requested, and highest priority" =
     | None -> Printf.printf "None"
     | Some type_ -> type_ |> Interrupt_controller.show_type_ |> Printf.printf "%s"
   end;
-  [%expect {| Interrupt_controller.VBlank |}]
+  [%expect {| None |}]
 
 let%expect_test "write byte" =
   let t = create () in
