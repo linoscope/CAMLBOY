@@ -10,7 +10,53 @@ type t = {
 
 let show t = Cpu.show t.cpu
 
+let initialize_state ~registers ~mmu ~lcd_stat ~gpu =
+  (* initialize registers *)
+  Registers.set_flags registers ~z:true ~n:false ~h:true ~c:true ();
+  Registers.[
+    (AF, 0x01B0);
+    (BC, 0x0013);
+    (DE, 0x00D8);
+    (HL, 0x014D)
+  ]
+  |> List.iter (fun (reg, data) ->
+      Registers.write_rr registers reg (Uint16.of_int data));
+
+  (* initialize mmu *)
+  [
+    (0xFF00, 0xCF);
+    (0xFF01, 0x00);
+    (0xFF02, 0x7E);
+    (0xFF04, 0xAB);
+    (0xFF05, 0x00);
+    (0xFF06, 0x00);
+    (0xFF07, 0xF8);
+    (0xFF0F, 0xE1);
+    (* TODO: Fill sound related IO registers *)
+    (* (0xFF10, 0x--); *)
+    (0xFF40, 0x91);
+    (0xFF42, 0x00);
+    (0xFF43, 0x00);
+    (0xFF44, 0x00);
+    (0xFF45, 0x00);
+    (0xFF46, 0xFF);
+    (0xFF47, 0xFC);
+    (0xFF4A, 0x00);
+    (0xFF4B, 0x00);
+    (* TODO: Fill joypad related IO registers *)
+    (* (0xFF4D, 0x--); *)
+    (0xFFFF, 0x00);
+  ]
+  |> List.iter (fun (addr, data) ->
+      Mmu.write_byte mmu ~addr:(Uint16.of_int addr) ~data:(Uint8.of_int data));
+
+  (* initialize GPU *)
+  Lcd_stat.set_gpu_mode lcd_stat Gpu_mode.VBlank;
+  Gpu.set_mcycles_in_mode gpu 0
+
+
 let ly_addr = Uint16.of_int 0xFF44
+
 let lcd_stat_addr = Uint16.of_int 0xFF41
 
 let create_with_rom ~echo_flag ~rom_bytes =
@@ -54,13 +100,14 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~area0_start_addr:(Uint16.of_int 0x9800)
       ~area1_start_addr:(Uint16.of_int 0x9C00)
   in
+  let lcd_stat = Lcd_stat.create ~addr:lcd_stat_addr in
   let gpu = Gpu.create
       ~tile_data
       ~tile_map
       ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
       ~bgp:(Pallete.create ~addr:(of_int 0xFF47))
       ~lcd_control:(Lcd_control.create ~addr:(of_int 0xFF40))
-      ~lcd_stat:(Lcd_stat.create ~addr:lcd_stat_addr)
+      ~lcd_stat
       ~lcd_position:(
         Lcd_position.create
           ~scy_addr:(of_int 0xFF42)
@@ -89,12 +136,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~timer
   in
   let registers = Registers.create () in
-  Registers.write_rr registers AF (of_int 0x01b0);
-  Registers.write_rr registers BC (of_int 0x0013);
-  Registers.write_rr registers DE (of_int 0x00D8);
-  Registers.write_rr registers HL (of_int 0x014D);
-  Registers.set_flags registers ~z:true ~n:false ~h:true ~c:true ();
-  let cpu = Cpu.For_tests.create
+  let cpu = Cpu.create
       ~mmu
       ~ic
       ~registers
@@ -103,6 +145,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~halted:false
       ~ime:false
   in
+  initialize_state ~mmu ~registers ~lcd_stat ~gpu;
   { cpu; timer; gpu }
 
 let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag

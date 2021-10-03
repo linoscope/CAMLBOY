@@ -23,7 +23,16 @@ let handle_ly_eq_lyc t =
   if ly_eq_lyc && Lcd_stat.is_enabled t.ls LYC_eq_LY then
     Interrupt_controller.request t.ic LCD_stat
 
-let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~ic =
+let create
+    ~tile_data
+    ~tile_map
+    ~oam
+    ~bgp
+    ~lcd_stat
+    ~lcd_control
+    ~lcd_position
+    ~ic
+  =
   let t = {
     td = tile_data;
     tm = tile_map;
@@ -38,6 +47,8 @@ let create ~tile_data ~tile_map ~oam ~bgp ~lcd_stat ~lcd_control ~lcd_position ~
   in
   handle_ly_eq_lyc t;
   t
+
+let set_mcycles_in_mode t mcycles_in_mode = t.mcycles_in_mode <- mcycles_in_mode
 
 let get_frame_buffer t = t.frame_buffer
 
@@ -80,7 +91,7 @@ let incr_ly t =
 let oam_search_mcycles = 20     (*  80 / 4 *)
 let pixel_transfer_mcycles = 43 (* 172 / 4 *)
 let hblank_mcycles = 51         (* 204 / 4 *)
-let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles
+let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles (* 114 *)
 
 let run t ~mcycles =
   if not (Lcd_control.get_lcd_enable t.lc) then
@@ -191,13 +202,25 @@ let write_byte t ~addr ~data =
   | _ when Pallete.accepts t.bgp addr  -> Pallete.write_byte t.bgp ~addr ~data
   | _ when Lcd_stat.accepts t.ls addr     -> Lcd_stat.write_byte t.ls ~addr ~data
   | _ when Lcd_control.accepts t.lc addr  ->
+    let lcd_enable_before = Lcd_control.get_lcd_enable t.lc in
     Lcd_control.write_byte t.lc ~addr ~data;
-    (* When LCD is disabled, LY and mcycle count is set to 0 and mode is set to HBlank *)
-    if not (Lcd_control.get_lcd_enable t.lc) then begin
-      Lcd_position.reset_ly t.lp;
-      t.mcycles_in_mode <- 0;
-      Lcd_stat.set_gpu_mode t.ls HBlank
+    let lcd_enable_after = Lcd_control.get_lcd_enable t.lc in
+    begin match lcd_enable_before, lcd_enable_after with
+      | true, false ->
+        (* When LCD is disabled, LY and mcycle count is set to 0 and mode is set to HBlank. *)
+        if not (Lcd_control.get_lcd_enable t.lc) then begin
+          Lcd_position.reset_ly t.lp;
+          t.mcycles_in_mode <- 0;
+          Lcd_stat.set_gpu_mode t.ls HBlank
+        end
+      | false, true ->
+        (* "33" is from observation of what happens when LCD is enabled in BGB *)
+        t.mcycles_in_mode <- 33;
+        handle_ly_eq_lyc t;
+      | true, true
+      | false, false -> ()
     end
+
   | _ when Lcd_position.accepts t.lp addr -> Lcd_position.write_byte t.lp ~addr ~data
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 

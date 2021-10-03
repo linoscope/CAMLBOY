@@ -26,18 +26,19 @@ module Make (Mmu : Word_addressable.S) = struct
 
   let pp fmt t = Format.fprintf fmt "%s" (show t)
 
-  let create mmu ic = {
-    registers = Registers.create ();
-    pc = Uint16.zero;
-    sp = Uint16.zero;
-    mmu;
-    halted = false;
-    ime = true;
-    until_enable_ime = None;
-    until_disable_ime = None;
-    prev_inst = NOP;
-    ic;
-  }
+  let create ~mmu ~ic ~registers ~sp ~pc ~halted ~ime =
+    {
+      registers;
+      mmu;
+      sp;
+      pc;
+      halted;
+      ime;
+      until_enable_ime = None;
+      until_disable_ime = None;
+      prev_inst = NOP;
+      ic
+    }
 
 
   type next_pc = Next | Jump of uint16
@@ -484,9 +485,6 @@ module Make (Mmu : Word_addressable.S) = struct
   module For_tests = struct
 
     let execute = execute
-
-    let create ~mmu ~ic ~registers ~sp ~pc ~halted ~ime =
-      { registers; mmu; sp; pc; halted; ime; until_enable_ime = None; until_disable_ime = None; prev_inst = NOP; ic }
 
     let prev_inst t = t.prev_inst
 

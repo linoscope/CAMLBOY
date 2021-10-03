@@ -129,19 +129,3 @@ let%expect_test "instr_timing.gb" =
     Timer doesn't  work properly
 
     Failed #2 |}]
-
-(*  A:$20 F:-N-- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0180 | LD A, ($FF00+$41)
- * -A:$87 F:-N-- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0182 | AND A, $02
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0184 | JR NZ, -6
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0180 | LD A, ($FF00+$41)
- * -A:$87 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0182 | AND A, $02
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0184 | JR NZ, -6
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0180 | LD A, ($FF00+$41)
- * -A:$87 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0182 | AND A, $02
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0184 | JR NZ, -6
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0180 | LD A, ($FF00+$41)
- * -A:$87 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0182 | AND A, $02
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0184 | JR NZ, -6
- * -A:$02 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0180 | LD A, ($FF00+$41)
- * -A:$84 F:--H- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0182 | AND A, $02
- * +A:$80 F:-N-- BC:$0400 DE:$9000 HL:$9800 SP:$FFFB PC:$0182 | AND A, $02 *)

@@ -23,7 +23,7 @@ let create_cpu
   Registers.set_flags registers ~c:carry ~h:half_carry ~n:sub ~z:zero ();
   let zeros = Bytes.create 0x10 in
   Bytes.fill zeros 0 0x10 (Char.chr 0);
-  Cpu.For_tests.create
+  Cpu.create
     ~mmu
     ~ic:(Interrupt_controller.create ~ie_addr:Uint16.(of_int 0xF) ~if_addr:Uint16.(of_int 0xE))
     ~registers
