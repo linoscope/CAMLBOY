@@ -1,5 +1,14 @@
 open Uints
 
+type state =
+  | Enabled
+  | Disabled
+  (* GPU enters HBlank mode after transitioning from enabled to disabled.
+   * This HBlank has two differences from normal HBLank:
+   * 1. The mode only has 33 mcylces remaining (starts with +18 mcycles)
+   * 2. LY does not increment when changing to OAM_search *)
+  | HBlank_after_enabled
+
 type t = {
   td : Tile_data.t;
   tm : Tile_map.t;
@@ -11,6 +20,7 @@ type t = {
   ic : Interrupt_controller.t;
   (* number of mycycles consumed in current mode *)
   mutable mcycles_in_mode : int;
+  mutable state : state;
   (* frame_buffer.(y).(x) :=  color of yth row and xth column*)
   frame_buffer : [`White | `Light_gray | `Dark_gray | `Black ] array array;
 }
@@ -42,6 +52,7 @@ let create
     lc = lcd_control;
     lp = lcd_position;
     mcycles_in_mode = 0;
+    state = Enabled;
     ic;
     frame_buffer = Array.make_matrix 144 160 `White; }
   in
@@ -94,55 +105,65 @@ let hblank_mcycles = 51         (* 204 / 4 *)
 let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles (* 114 *)
 
 let run t ~mcycles =
-  if not (Lcd_control.get_lcd_enable t.lc) then
-    ()
-  else begin
+  match t.state with
+  | Disabled -> ()
+  | Enabled ->
     t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
-    match Lcd_stat.get_gpu_mode t.ls with
-    | OAM_search ->
-      if t.mcycles_in_mode >= oam_search_mcycles then begin
-        t.mcycles_in_mode <- t.mcycles_in_mode mod oam_search_mcycles;
-        Lcd_stat.set_gpu_mode t.ls Pixel_transfer;
-      end
-    | Pixel_transfer ->
-      if t.mcycles_in_mode >= pixel_transfer_mcycles then begin
-        t.mcycles_in_mode <- t.mcycles_in_mode mod pixel_transfer_mcycles;
-        Lcd_stat.set_gpu_mode t.ls HBlank;
-        if Lcd_stat.is_enabled t.ls HBlank then
-          Interrupt_controller.request t.ic LCD_stat;
-        render_scan_line t;
-      end
-    | HBlank ->
-      if t.mcycles_in_mode >= hblank_mcycles then begin
-        t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
-        let ly = incr_ly t in
-        handle_ly_eq_lyc t;
-        if ly = 144 then begin
-          Lcd_stat.set_gpu_mode t.ls VBlank;
-          if Lcd_stat.is_enabled t.ls VBlank then
-            Interrupt_controller.request t.ic LCD_stat;
-          Interrupt_controller.request t.ic VBlank;
-          (* TODO: copy image data to screen buffer (); *)
-        end else begin
-          Lcd_stat.set_gpu_mode t.ls OAM_search;
-          if Lcd_stat.is_enabled t.ls OAM then
-            Interrupt_controller.request t.ic LCD_stat;
+    begin match Lcd_stat.get_gpu_mode t.ls with
+      | OAM_search ->
+        if t.mcycles_in_mode >= oam_search_mcycles then begin
+          t.mcycles_in_mode <- t.mcycles_in_mode mod oam_search_mcycles;
+          Lcd_stat.set_gpu_mode t.ls Pixel_transfer;
         end
-      end
-    | VBlank ->
-      if t.mcycles_in_mode >= one_line_mcycle then begin
-        t.mcycles_in_mode <- t.mcycles_in_mode mod one_line_mcycle;
-        let ly = incr_ly t in
-        handle_ly_eq_lyc t;
-        if ly = 154 then begin
-          Lcd_position.reset_ly t.lp;
+      | Pixel_transfer ->
+        if t.mcycles_in_mode >= pixel_transfer_mcycles then begin
+          t.mcycles_in_mode <- t.mcycles_in_mode mod pixel_transfer_mcycles;
+          Lcd_stat.set_gpu_mode t.ls HBlank;
+          if Lcd_stat.is_enabled t.ls HBlank then
+            Interrupt_controller.request t.ic LCD_stat;
+          render_scan_line t;
+        end
+      | HBlank ->
+        if t.mcycles_in_mode >= hblank_mcycles then begin
+          t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
+          let ly = incr_ly t in
           handle_ly_eq_lyc t;
-          Lcd_stat.set_gpu_mode t.ls OAM_search;
-          if Lcd_stat.is_enabled t.ls OAM then
-            Interrupt_controller.request t.ic LCD_stat;
+          if ly = 144 then begin
+            Lcd_stat.set_gpu_mode t.ls VBlank;
+            if Lcd_stat.is_enabled t.ls VBlank then
+              Interrupt_controller.request t.ic LCD_stat;
+            Interrupt_controller.request t.ic VBlank;
+            (* TODO: copy image data to screen buffer (); *)
+          end else begin
+            Lcd_stat.set_gpu_mode t.ls OAM_search;
+            if Lcd_stat.is_enabled t.ls OAM then
+              Interrupt_controller.request t.ic LCD_stat;
+          end
         end
-      end
-  end
+      | VBlank ->
+        if t.mcycles_in_mode >= one_line_mcycle then begin
+          t.mcycles_in_mode <- t.mcycles_in_mode mod one_line_mcycle;
+          let ly = incr_ly t in
+          handle_ly_eq_lyc t;
+          if ly = 154 then begin
+            Lcd_position.reset_ly t.lp;
+            handle_ly_eq_lyc t;
+            Lcd_stat.set_gpu_mode t.ls OAM_search;
+            if Lcd_stat.is_enabled t.ls OAM then
+              Interrupt_controller.request t.ic LCD_stat;
+          end
+        end
+    end
+  | HBlank_after_enabled ->
+    t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
+    if t.mcycles_in_mode >= hblank_mcycles then begin
+      t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
+      t.state <- Enabled;
+      handle_ly_eq_lyc t;
+      Lcd_stat.set_gpu_mode t.ls OAM_search;
+      if Lcd_stat.is_enabled t.ls OAM then
+        Interrupt_controller.request t.ic LCD_stat;
+    end
 
 let accepts t addr =
   Tile_map.accepts t.tm addr
@@ -208,14 +229,14 @@ let write_byte t ~addr ~data =
     begin match lcd_enable_before, lcd_enable_after with
       | true, false ->
         (* When LCD is disabled, LY and mcycle count is set to 0 and mode is set to HBlank. *)
-        if not (Lcd_control.get_lcd_enable t.lc) then begin
-          Lcd_position.reset_ly t.lp;
-          t.mcycles_in_mode <- 0;
-          Lcd_stat.set_gpu_mode t.ls HBlank
-        end
+        Lcd_position.reset_ly t.lp;
+        t.mcycles_in_mode <- 0;
+        t.state <- Disabled;
+        Lcd_stat.set_gpu_mode t.ls HBlank
       | false, true ->
         (* "33" is from observation of what happens when LCD is enabled in BGB *)
-        t.mcycles_in_mode <- 33;
+        t.state <- HBlank_after_enabled;
+        t.mcycles_in_mode <- 18;
         handle_ly_eq_lyc t;
       | true, true
       | false, false -> ()
