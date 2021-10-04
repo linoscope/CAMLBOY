@@ -12,8 +12,6 @@ type result =
 
 val run_instruction : t -> result
 
-val get_frame_buffer : t -> [`White | `Light_gray | `Dark_gray | `Black ] array array
-
 module For_tests : sig
 
   val prev_inst : t -> Instruction.t

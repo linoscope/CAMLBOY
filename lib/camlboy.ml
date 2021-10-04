@@ -10,8 +10,6 @@ type t = {
 
 let show t = Cpu.show t.cpu
 
-let get_frame_buffer t = Gpu.get_frame_buffer t.gpu
-
 let initialize_state ~registers ~mmu ~lcd_stat ~gpu =
   (* initialize registers *)
   Registers.set_flags registers ~z:true ~n:false ~h:true ~c:true ();
@@ -167,7 +165,7 @@ let run_instruction t =
     In_frame
   else begin
     mcycles_in_frame := !mcycles_in_frame - 70224;
-    Frame_ended (get_frame_buffer t)
+    Frame_ended (Gpu.get_frame_buffer  t.gpu)
   end
 
 module For_tests = struct
