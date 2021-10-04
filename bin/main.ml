@@ -8,6 +8,6 @@ let () =
     Printf.printf " LY:%d" (Camlboy.For_tests.get_ly camlboy);
     Printf.printf " LCD_STAT:%s" (Camlboy.For_tests.get_lcd_stat camlboy |> Uints.Uint8.show);
     Printf.printf " MC:%3d" (Camlboy.For_tests.get_mcycles_in_mode camlboy);
-    Camlboy.run_instruction camlboy;
+    ignore (Camlboy.run_instruction camlboy);
     Printf.printf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
   done

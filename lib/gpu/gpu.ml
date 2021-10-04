@@ -67,9 +67,10 @@ let render_bg_tiles t =
   let ly = Lcd_position.get_ly t.lp in
   let y = scy + ly in
   let row_in_tile = y mod 8 in
-  for x = 0 to 159 do
+  for lx = 0 to 159 do
+    let x = scx + lx in
     let col_in_tile = x mod 8 in
-    let tile_id = Tile_map.get_tile_id t.tm ~area:tile_map_area ~y ~x:(scx + x) in
+    let tile_id = Tile_map.get_tile_id t.tm ~area:tile_map_area ~y ~x in
     let pixel_color_id = Tile_data.get_pixel t.td
         ~index:tile_id
         ~area:tile_data_area
@@ -77,7 +78,7 @@ let render_bg_tiles t =
         ~col:col_in_tile
     in
     let color = Pallete.lookup t.bgp pixel_color_id in
-    t.frame_buffer.(ly).(x) <- color;
+    t.frame_buffer.(ly).(lx) <- color
   done
 
 let render_scan_line t =

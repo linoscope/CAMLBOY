@@ -6,7 +6,11 @@ val create : echo_flag:bool -> t
 
 val create_with_rom : echo_flag:bool -> rom_bytes:bytes -> t
 
-val run_instruction : t -> unit
+type result =
+  | In_frame
+  | Frame_ended of [`White | `Light_gray | `Dark_gray | `Black ] array array
+
+val run_instruction : t -> result
 
 val get_frame_buffer : t -> [`White | `Light_gray | `Dark_gray | `Black ] array array
 
