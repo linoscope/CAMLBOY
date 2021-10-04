@@ -92,8 +92,8 @@ let create_with_rom ~echo_flag ~rom_bytes =
   in
   let tile_data = Tile_data.create
       ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
-      ~area0_start_addr:(of_int 0x8000)
-      ~area1_start_addr:(of_int 0x9000)
+      ~area1_start_addr:(of_int 0x8000)
+      ~area0_start_addr:(of_int 0x9000)
   in
   let tile_map = Tile_map.create
       ~tile_map_ram:(Ram.create ~start_addr:(Uint16.of_int 0x9800) ~end_addr:(Uint16.of_int 0x9FFF))

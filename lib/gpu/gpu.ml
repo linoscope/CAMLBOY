@@ -3,10 +3,6 @@ open Uints
 type state =
   | Enabled
   | Disabled
-  (* GPU enters HBlank mode after transitioning from enabled to disabled.
-   * This HBlank has two differences from normal HBLank:
-   * 1. The mode only has 33 mcylces remaining (starts with +18 mcycles)
-   * 2. LY does not increment when changing to OAM_search *)
   | HBlank_after_enabled
 
 type t = {
@@ -81,11 +77,7 @@ let render_bg_tiles t =
         ~col:col_in_tile
     in
     let color = Pallete.lookup t.bgp pixel_color_id in
-    begin match color with
-      | `Black | `Dark_gray | `Light_gray -> assert false
-      | `White -> ()
-    end;
-    t.frame_buffer.(ly).(x) <- color
+    t.frame_buffer.(ly).(x) <- color;
   done
 
 let render_scan_line t =
@@ -155,6 +147,10 @@ let run t ~mcycles =
         end
     end
   | HBlank_after_enabled ->
+    (* The HBlank after transitioning from enabled to disabled
+     * has two differences from normal HBLank:
+     * 1. The mode only has 33 mcylces remaining (starts with +18 mcycles)
+     * 2. LY does not increment when changing to OAM_search *)
     t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
     if t.mcycles_in_mode >= hblank_mcycles then begin
       t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
@@ -206,7 +202,8 @@ let write_byte t ~addr ~data =
       (* VRAM is not accessable during pixel transfer *)
       match Lcd_stat.get_gpu_mode t.ls with
       | Pixel_transfer -> ()
-      | OAM_search | HBlank | VBlank -> Tile_data.write_byte t.td ~addr ~data
+      | OAM_search | HBlank | VBlank ->
+        Tile_data.write_byte t.td ~addr ~data;
     )
   | _ when Tile_map.accepts t.tm addr  -> (
       (* VRAM is not accessable during pixel transfer *)
