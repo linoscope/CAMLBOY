@@ -1,3 +1,5 @@
+(** Rom from https://github.com/Eiriksmal/gameboy *)
+
 open Camlboy_lib
 
 let run_test_rom_and_print_framebuffer file =
