@@ -148,9 +148,9 @@ let run t ~mcycles =
     end
   | HBlank_after_enabled ->
     (* The HBlank after transitioning from enabled to disabled
-     * has two differences from normal HBLank:
+     * seems to have two differences from normal HBLank (based on inspecting BGB):
      * 1. The mode only has 33 mcylces remaining (starts with +18 mcycles)
-     * 2. LY does not increment when changing to OAM_search *)
+     * 2. LY does not increment when HBLank ends *)
     t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
     if t.mcycles_in_mode >= hblank_mcycles then begin
       t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
