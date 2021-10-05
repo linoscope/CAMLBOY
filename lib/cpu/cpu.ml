@@ -9,16 +9,10 @@ module Make (Mmu : Word_addressable.S) = struct
     mmu : Mmu.t;
     mutable halted : bool;
     mutable ime : bool; (* interrupt master enable *)
-    mutable until_enable_ime : count_down;
-    mutable until_disable_ime : count_down;
+    mutable enable_ime_before_next_instr : bool;
     mutable prev_inst : Instruction.t; (* for debugging purpose *)
     ic : Interrupt_controller.t;
   }
-
-  and count_down =
-    | One
-    | Zero
-    | None
 
   let show t =
     Printf.sprintf "%s SP:%s PC:%s"
@@ -34,8 +28,7 @@ module Make (Mmu : Word_addressable.S) = struct
       pc;
       halted;
       ime;
-      until_enable_ime = None;
-      until_disable_ime = None;
+      enable_ime_before_next_instr = false;
       prev_inst = NOP;
       ic
     }
@@ -287,10 +280,12 @@ module Make (Mmu : Word_addressable.S) = struct
         Next
       | STOP -> assert false;
       | DI ->
-        t.until_disable_ime <- One;
+        (* DI cancels pending EI *)
+        t.enable_ime_before_next_instr <- false;
+        t.ime <- false;
         Next
       | EI ->
-        t.until_enable_ime <- One;
+        t.enable_ime_before_next_instr <- true;
         Next
       | RLCA ->
         let a = Registers.read_r t.registers A in
@@ -434,17 +429,6 @@ module Make (Mmu : Word_addressable.S) = struct
   module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
 
   let run_instruction t  =
-    let update_ime t =
-      begin match t.until_enable_ime with
-        | One  -> t.until_enable_ime <- Zero
-        | Zero -> t.until_enable_ime <- None; t.ime <- true
-        | None -> ()
-      end;
-      match t.until_disable_ime with
-      | One  -> t.until_disable_ime <- Zero
-      | Zero -> t.until_disable_ime <- None; t.ime <- false
-      | None -> ()
-    in
     let fetch_decode_execute t =
       if t.halted then
         4
@@ -477,7 +461,10 @@ module Make (Mmu : Word_addressable.S) = struct
           5
         end
     in
-    update_ime t;
+    if t.enable_ime_before_next_instr then begin
+      t.ime <- true;
+      t.enable_ime_before_next_instr <- false
+    end;
     let inst_mcycles = fetch_decode_execute t in
     let interrupt_mcycles = handle_interrupt t in
     inst_mcycles + interrupt_mcycles
