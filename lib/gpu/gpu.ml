@@ -21,6 +21,7 @@ type t = {
   frame_buffer : [`White | `Light_gray | `Dark_gray | `Black ] array array;
 }
 
+(* check if LY=LYC and set lcd_stat and request interrupt accordingly*)
 let handle_ly_eq_lyc t =
   let ly = Lcd_position.get_ly t.lp in
   let lyc = Lcd_position.get_lyc t.lp in
@@ -65,10 +66,10 @@ let render_bg_tiles t =
   let tile_data_area = Lcd_control.get_tile_data_area t.lc in
   let tile_map_area  = Lcd_control.get_bg_tile_map_area t.lc in
   let ly = Lcd_position.get_ly t.lp in
-  let y = scy + ly in
+  let y = (scy + ly) mod 255 in
   let row_in_tile = y mod 8 in
   for lx = 0 to 159 do
-    let x = scx + lx in
+    let x = (scx + lx) mod 255 in
     let col_in_tile = x mod 8 in
     let tile_id = Tile_map.get_tile_id t.tm ~area:tile_map_area ~y ~x in
     let pixel_color_id = Tile_data.get_pixel t.td

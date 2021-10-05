@@ -1,3 +1,3 @@
 (executable
  (name main)
- (libraries camlboy_lib ))
+ (libraries camlboy_lib tsdl))

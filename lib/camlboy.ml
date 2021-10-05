@@ -161,12 +161,12 @@ let run_instruction t =
   Timer.run t.timer ~mcycles;
   Gpu.run t.gpu ~mcycles;
   mcycles_in_frame := !mcycles_in_frame + mcycles;
-  if !mcycles_in_frame < 70224 then
-    In_frame
-  else begin
+  if 70224 <= !mcycles_in_frame then begin
     mcycles_in_frame := !mcycles_in_frame - 70224;
     Frame_ended (Gpu.get_frame_buffer  t.gpu)
-  end
+  end else
+    In_frame
+
 
 module For_tests = struct
 
