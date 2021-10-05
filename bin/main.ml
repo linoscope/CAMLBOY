@@ -21,10 +21,10 @@ let render_frame renderer framebuffer =
   framebuffer |> Array.iteri ~f:(fun y row ->
       row |> Array.iteri ~f:(fun x color ->
           begin match color with
-            | `White      -> Sdl.set_render_draw_color renderer 0xFF 0xFF 0xFF 0xFF |> or_exit
-            | `Light_gray -> Sdl.set_render_draw_color renderer 0x80 0x80 0x80 0xFF |> or_exit
-            | `Dark_gray  -> Sdl.set_render_draw_color renderer 0xD8 0xD8 0xD8 0xFF |> or_exit
-            | `Black      -> Sdl.set_render_draw_color renderer 0x00 0x00 0x00 0xFF |> or_exit
+            | `White      -> Sdl.set_render_draw_color renderer 175 197 160 255 |> or_exit
+            | `Light_gray -> Sdl.set_render_draw_color renderer  93 147  66 255 |> or_exit
+            | `Dark_gray  -> Sdl.set_render_draw_color renderer  22  63  48 255 |> or_exit
+            | `Black      -> Sdl.set_render_draw_color renderer   0  40   0 255 |> or_exit
           end;
           let rect = Sdl.Rect.create ~x:(5 * x) ~y:(5 * y) ~w:5 ~h:5 in
           Sdl.render_fill_rect renderer (Some rect) |> or_exit));
@@ -41,8 +41,8 @@ let handle_event () =
         | `Escape -> exit 0
         | _       -> ()
       end
-    | `Quit   -> exit 0
-    | _       -> ()
+    | `Quit -> exit 0
+    | _     -> ()
   end
 
 let () =
