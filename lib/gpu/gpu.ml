@@ -60,7 +60,7 @@ let set_mcycles_in_mode t mcycles_in_mode = t.mcycles_in_mode <- mcycles_in_mode
 
 let get_frame_buffer t = t.frame_buffer
 
-let render_bg_tiles t =
+let render_bg_line t =
   let scy = Lcd_position.get_scy t.lp in
   let scx = Lcd_position.get_scx t.lp in
   let tile_data_area = Lcd_control.get_tile_data_area t.lc in
@@ -82,9 +82,9 @@ let render_bg_tiles t =
     t.frame_buffer.(ly).(lx) <- color
   done
 
-let render_scan_line t =
+let render_line t =
   if Lcd_control.get_bg_window_display t.lc then
-    render_bg_tiles t;
+    render_bg_line t;
   if Lcd_control.get_obj_enable t.lc then
     ()
 (* TODO: render_sprites t; *)
@@ -115,7 +115,7 @@ let run t ~mcycles =
           Lcd_stat.set_gpu_mode t.ls HBlank;
           if Lcd_stat.is_enabled t.ls HBlank then
             Interrupt_controller.request t.ic LCD_stat;
-          render_scan_line t;
+          render_line t;
         end
       | HBlank ->
         if t.mcycles_in_mode >= hblank_mcycles then begin

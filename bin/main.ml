@@ -6,16 +6,12 @@ let or_exit = function
   | Error (`Msg e) -> Sdl.log "%s" e; exit 1
   | Ok x -> x
 
-let init_graphics () =
+let create_renderer () =
   Sdl.init Sdl.Init.video |> or_exit;
   let w = Sdl.create_window ~w:800 ~h:720 "CAMLBOY" Sdl.Window.opengl |> or_exit in
   let renderer = Sdl.create_renderer w ~index:(-1) |> or_exit in
   Sdl.set_render_draw_color renderer 0xFF 0xFF 0xFF 0xFF |> or_exit;
   renderer
-
-let clear_graphics renderer =
-  Sdl.set_render_draw_color renderer 0xFF 0xFF 0xFF 0xFF |> or_exit;
-  Sdl.render_clear renderer |> or_exit
 
 let render_frame renderer framebuffer =
   framebuffer |> Array.iteri ~f:(fun y row ->
@@ -48,7 +44,7 @@ let handle_event () =
 let () =
   let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/01-special.gb" in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~echo_flag:false in
-  let renderer = init_graphics () in
+  let renderer = create_renderer () in
   while true do
     Printf.printf "%s" (Camlboy.show camlboy);
     Printf.printf " LY:%d" (Camlboy.For_tests.get_ly camlboy);
