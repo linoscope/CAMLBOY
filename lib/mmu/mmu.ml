@@ -3,22 +3,24 @@ open Uints
 module Mmu = struct
 
   type t = {
-    rom_bank_0 : Rom.t;
-    wram       : Ram.t;
-    shadow_ram : Shadow_ram.t;
-    gpu        : Gpu.t;
-    zero_page  : Ram.t;
+    rom_bank_0  : Rom.t;
+    wram        : Ram.t;
+    shadow_ram  : Shadow_ram.t;
+    gpu         : Gpu.t;
+    zero_page   : Ram.t;
+    joypad      : Joypad.t;
     serial_port : Serial_port.t;
-    ic : Interrupt_controller.t;
-    timer : Timer.t;
+    ic          : Interrupt_controller.t;
+    timer       : Timer.t;
   }
 
-  let create ~rom ~wram ~gpu ~zero_page ~shadow_ram ~serial_port ~ic ~timer = {
+  let create ~rom ~wram ~gpu ~zero_page ~shadow_ram ~joypad ~serial_port ~ic ~timer = {
     rom_bank_0 = rom;
     wram;
     shadow_ram;
     gpu;
     zero_page;
+    joypad;
     serial_port;
     ic;
     timer;
@@ -31,6 +33,7 @@ module Mmu = struct
     | _ when Gpu.accepts t.gpu        addr          -> Gpu.read_byte t.gpu addr
     | _ when Ram.accepts t.zero_page  addr          -> Ram.read_byte t.zero_page addr
     | _ when Shadow_ram.accepts t.shadow_ram addr   -> Shadow_ram.read_byte t.shadow_ram addr
+    | _ when Joypad.accepts t.joypad addr           -> Joypad.read_byte t.joypad addr
     | _ when Serial_port.accepts t.serial_port addr -> Serial_port.read_byte t.serial_port addr
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.read_byte t.ic addr
     | _ when Timer.accepts t.timer addr             -> Timer.read_byte t.timer addr
@@ -44,6 +47,7 @@ module Mmu = struct
     | _ when Gpu.accepts t.gpu        addr          -> Gpu.write_byte t.gpu ~addr ~data
     | _ when Ram.accepts t.zero_page  addr          -> Ram.write_byte t.zero_page ~addr ~data
     | _ when Shadow_ram.accepts t.shadow_ram addr   -> Shadow_ram.write_byte t.shadow_ram ~addr ~data
+    | _ when Joypad.accepts t.joypad addr           -> Joypad.write_byte t.joypad ~addr ~data
     | _ when Serial_port.accepts t.serial_port addr -> Serial_port.write_byte t.serial_port ~addr ~data
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.write_byte t.ic ~addr ~data
     | _ when Timer.accepts t.timer  addr            -> Timer.write_byte t.timer ~addr ~data
@@ -56,6 +60,7 @@ module Mmu = struct
     || Ram.accepts t.zero_page addr
     || Shadow_ram.accepts t.shadow_ram addr
     || Shadow_ram.accepts t.shadow_ram addr
+    || Joypad.accepts t.joypad addr
     || Serial_port.accepts t.serial_port addr
     || Interrupt_controller.accepts t.ic addr
     || Timer.accepts t.timer addr

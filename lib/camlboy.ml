@@ -80,6 +80,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~start_addr:(of_int 0xFF80)
       ~end_addr:(of_int 0xFFFE)
   in
+  let joypad = Joypad.create ~addr:(of_int 0xFF00) in
   let serial_port = Serial_port.create
       ~sb:(Mmap_register.create ~addr:(of_int 0xFF01) ~type_:`RW ())
       ~sc:(Mmap_register.create ~addr:(of_int 0xFF02) ~type_:`RW ())
@@ -131,6 +132,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~shadow_ram
       ~zero_page
       ~gpu
+      ~joypad
       ~serial_port
       ~ic
       ~timer
