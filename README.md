@@ -2,6 +2,10 @@
 
 A WIP Game Boy emulator written in OCaml.
 
+## Screenshots
+
+![Tetris](./screenshot/tetris-sdl.png)
+
 ## TODO
 
 ### Core
