@@ -19,6 +19,7 @@ A WIP Game Boy emulator written in OCaml.
   - [x] Background
   - [ ] Window
   - [ ] Sprites
+  - [ ] DMA transfer
 - [ ] Cartridges
   - [ ] MBC1
   - [ ] MBC2
