@@ -152,10 +152,6 @@ let create_with_rom ~echo_flag ~rom_bytes =
 
 let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
-type result =
-  | In_frame
-  | Frame_ended of [`White | `Light_gray | `Dark_gray | `Black ] array array
-
 let mcycles_in_frame = ref 0
 
 let run_instruction t =
@@ -165,9 +161,9 @@ let run_instruction t =
   mcycles_in_frame := !mcycles_in_frame + mcycles;
   if 70224 <= !mcycles_in_frame then begin
     mcycles_in_frame := !mcycles_in_frame - 70224;
-    Frame_ended (Gpu.get_frame_buffer  t.gpu)
+    `Frame_ended (Gpu.get_frame_buffer  t.gpu)
   end else
-    In_frame
+    `In_frame
 
 
 module For_tests = struct
