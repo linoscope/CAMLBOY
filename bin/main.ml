@@ -8,7 +8,7 @@ let or_exit = function
 
 let create_renderer () =
   Sdl.init Sdl.Init.video |> or_exit;
-  let w = Sdl.create_window ~w:800 ~h:720 "CAMLBOY" Sdl.Window.opengl |> or_exit in
+  let w = Sdl.create_window ~w:320 ~h:288 "CAMLBOY" Sdl.Window.opengl |> or_exit in
   let renderer = Sdl.create_renderer w ~index:(-1) |> or_exit in
   Sdl.set_render_draw_color renderer 0xFF 0xFF 0xFF 0xFF |> or_exit;
   renderer
@@ -22,7 +22,7 @@ let render_frame renderer framebuffer =
             | `Dark_gray  -> Sdl.set_render_draw_color renderer  42  83  68 255 |> or_exit
             | `Black      -> Sdl.set_render_draw_color renderer   0  40   0 255 |> or_exit
           end;
-          let rect = Sdl.Rect.create ~x:(5 * x) ~y:(5 * y) ~w:5 ~h:5 in
+          let rect = Sdl.Rect.create ~x:(2 * x) ~y:(2 * y) ~w:2 ~h:2 in
           Sdl.render_fill_rect renderer (Some rect) |> or_exit));
   Sdl.render_present renderer
 
