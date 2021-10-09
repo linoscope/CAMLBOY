@@ -61,11 +61,11 @@ let lcd_stat_addr = Uint16.of_int 0xFF41
 
 let create_with_rom ~echo_flag ~rom_bytes =
   let open Uint16 in
-  let rom = Rom.create
+  let rom = Cartridge.create
       ~start_addr:(of_int 0x0000)
       ~end_addr:(of_int 0x7FFF)
   in
-  Rom.load rom ~rom_bytes;
+  Cartridge.load rom ~rom_bytes;
   let wram = Ram.create
       ~start_addr:(of_int 0xC000)
       ~end_addr:(of_int 0xDFFF)
