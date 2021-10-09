@@ -3,7 +3,7 @@ open Uints
 module Mmu = struct
 
   type t = {
-    cartridge  : Cartridge.t;
+    cartridge   : Cartridge.t;
     wram        : Ram.t;
     shadow_ram  : Shadow_ram.t;
     gpu         : Gpu.t;
@@ -28,7 +28,7 @@ module Mmu = struct
 
   let read_byte t addr =
     match addr with
-    | _ when Cartridge.accepts t.cartridge addr          -> Cartridge.read_byte t.cartridge addr
+    | _ when Cartridge.accepts t.cartridge addr     -> Cartridge.read_byte t.cartridge addr
     | _ when Ram.accepts t.wram       addr          -> Ram.read_byte t.wram addr
     | _ when Gpu.accepts t.gpu        addr          -> Gpu.read_byte t.gpu addr
     | _ when Ram.accepts t.zero_page  addr          -> Ram.read_byte t.zero_page addr
@@ -42,7 +42,7 @@ module Mmu = struct
 
   let write_byte t ~(addr : uint16) ~(data : uint8) =
     match addr with
-    | _ when Cartridge.accepts t.cartridge addr          -> Cartridge.write_byte t.cartridge ~addr ~data
+    | _ when Cartridge.accepts t.cartridge addr     -> Cartridge.write_byte t.cartridge ~addr ~data
     | _ when Ram.accepts t.wram       addr          -> Ram.write_byte t.wram ~addr ~data
     | _ when Gpu.accepts t.gpu        addr          -> Gpu.write_byte t.gpu ~addr ~data
     | _ when Ram.accepts t.zero_page  addr          -> Ram.write_byte t.zero_page ~addr ~data
