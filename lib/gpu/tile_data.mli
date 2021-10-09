@@ -11,12 +11,12 @@ val create :
   -> area0_start_addr:uint16
   -> t
 
-val get_pixel : t -> area:area -> index:int -> row:int -> col:int -> Color_id.t
+val get_pixel : t -> area:area -> index:int8 -> row:int -> col:int -> Color_id.t
 
-val get_row_pixels : t -> area:area -> index:int -> row:int -> Color_id.t array
+val get_row_pixels : t -> area:area -> index:int8 -> row:int -> Color_id.t array
 
-val get_full_pixels : t -> area:area -> index:int -> Color_id.t array array
+val get_full_pixels : t -> area:area -> index:int8 -> Color_id.t array array
 
-val print_full_pixels : t -> area:area -> index:int -> unit
+val print_full_pixels : t -> area:area -> index:int8 -> unit
 
 include Addressable_intf.S with type t := t

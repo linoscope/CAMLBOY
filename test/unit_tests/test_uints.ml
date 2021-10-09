@@ -27,9 +27,18 @@ let%expect_test "signed int8 (positive number)" =
 
   [%expect {|5|}]
 
-let%expect_test "signed int8 (of_int)" =
-  let i8 = Int8.of_int (-0x05) in
-  Int8.to_int i8
+let%expect_test "signed int8 (of_int -> to_int)" =
+  -5
+  |> Int8.of_int
+  |> Int8.to_int
   |> Printf.printf "%d";
 
   [%expect {|-5|}]
+
+let%expect_test "signed int8 (of_int -> to_int)" =
+  -128
+  |> Int8.of_int
+  |> Int8.to_int
+  |> Printf.printf "%d";
+
+  [%expect {|-128|}]

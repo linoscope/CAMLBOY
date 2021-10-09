@@ -103,12 +103,20 @@ module Int8 = struct
   let of_byte b = b
   let of_int x =
     if x < 0 then
-      (x land 0xFF) lor 0x8
+      (x land 0xFF) lor 0b10000000
     else
       (x land 0xFF)
   let is_neg t = t land (1 lsl 7) <> 0
-  let to_int t = if is_neg t then t - 0x100 else t
-  let abs t = if is_neg t then 0x100 - t else t
+  let abs t =
+    if is_neg t then
+      (t - 1) lxor 0b11111111
+    else
+      t
+  let to_int t =
+    if is_neg t then
+      -(abs t)
+    else
+      t
   let show t =
     if t land (1 lsl 7) <> 0 then
       Printf.sprintf "-%d" (Int.abs @@ t - 0x100)
