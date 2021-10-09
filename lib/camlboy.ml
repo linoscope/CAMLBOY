@@ -61,11 +61,11 @@ let lcd_stat_addr = Uint16.of_int 0xFF41
 
 let create_with_rom ~echo_flag ~rom_bytes =
   let open Uint16 in
-  let rom = Cartridge.create
+  let cartridge = Cartridge.create
+      ~rom_bytes
       ~start_addr:(of_int 0x0000)
       ~end_addr:(of_int 0x7FFF)
   in
-  Cartridge.load rom ~rom_bytes;
   let wram = Ram.create
       ~start_addr:(of_int 0xC000)
       ~end_addr:(of_int 0xDFFF)
@@ -127,7 +127,7 @@ let create_with_rom ~echo_flag ~rom_bytes =
       ~ic
   in
   let mmu = Mmu.create
-      ~rom
+      ~cartridge
       ~wram
       ~shadow_ram
       ~zero_page

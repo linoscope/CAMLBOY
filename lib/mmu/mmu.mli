@@ -1,7 +1,7 @@
 type t
 
 val create :
-  rom:Cartridge.t ->
+  cartridge:Cartridge.t ->
   wram:Ram.t ->
   gpu:Gpu.t ->
   zero_page:Ram.t ->

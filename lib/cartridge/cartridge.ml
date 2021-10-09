@@ -7,14 +7,11 @@ type t = {
   end_addr : uint16;
 }
 
-let create ~start_addr ~end_addr = {
-  bytes = Bytes.make Uint16.(to_int @@ end_addr - start_addr + one) (Char.chr 0);
+let create ~rom_bytes ~start_addr ~end_addr = {
+  bytes = rom_bytes;
   start_addr;
   end_addr;
 }
-
-let load t ~rom_bytes  =
-  Bytes.blit ~src:rom_bytes ~src_pos:0 ~dst:t.bytes ~dst_pos:0 ~len:(Bytes.length rom_bytes)
 
 let read_byte t addr =
   let offset = Uint16.(addr - t.start_addr) |> Uint16.to_int in
