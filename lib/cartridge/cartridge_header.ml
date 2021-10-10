@@ -1,18 +1,23 @@
-type cartridge_type = [`ROM_ONLY | `NO_MBC | `MBC1]
-
 type t = {
-  cartridge_type : cartridge_type;
+  cartridge_type : Cartridge_type.t;
   rom_bank_count : int;
   ram_bank_count : int;
 }
 
 let create ~rom_bytes =
   let cartridge_type =
+    let open Cartridge_type in
     match Bytes.get_int8 rom_bytes 0x147 with
-    | 0x00 -> `ROM_ONLY
-    | 0x01 -> `MBC1
-    | 0x08 -> `NO_MBC
-    | _ -> assert false
+    | 0x00 -> ROM_ONLY
+    | 0x01 -> MBC1
+    | 0x02 -> MBC1_RAM
+    | 0x03 -> MBC1_RAM_BATTERY
+    | 0x05 -> MBC2
+    | 0x06 -> MBC2_BATTERY
+    | 0x0F -> MBC3_TIMER_BATTERY
+    | 0x10 -> MBC3_TIMER_RAM_BATTERY
+    | 0x11 -> MBC3
+    |    x -> raise @@ Invalid_argument (Printf.sprintf "Unknown rom type : 0x%x" x)
   in
   let rom_bank_count =
     match Bytes.get_int8 rom_bytes 0x148 with
@@ -44,3 +49,4 @@ let get_cartridge_type t = t.cartridge_type
 let get_rom_bank_count t = t.rom_bank_count
 
 let get_ram_bank_count t = t.ram_bank_count
+
