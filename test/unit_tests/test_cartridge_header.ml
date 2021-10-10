@@ -6,6 +6,7 @@ let create file =
 
 let show_cartridge_type = function
   | `ROM_ONLY -> "ROM_ONLY"
+  | `NO_MBC   -> "NO_MBC"
   | `MBC1     -> "MBC1"
 
 let%expect_test "test rom only" =
@@ -16,7 +17,18 @@ let%expect_test "test rom only" =
   |> show_cartridge_type
   |> print_endline;
 
-  [%expect {| ROM_ONLY |}]
+  t
+  |> Cartridge_header.get_rom_bank_count
+  |> Printf.printf "%d\n";
+
+  t
+  |> Cartridge_header.get_ram_bank_count
+  |> Printf.printf "%d\n";
+
+  [%expect {|
+    ROM_ONLY
+    2
+    0 |}]
 
 let%expect_test "test mbc1" =
   let t = create "../../resource/test_roms/blargg/cpu_instrs/cpu_instrs.gb" in
@@ -26,4 +38,15 @@ let%expect_test "test mbc1" =
   |> show_cartridge_type
   |> print_endline;
 
-  [%expect {| MBC1 |}]
+  t
+  |> Cartridge_header.get_rom_bank_count
+  |> Printf.printf "%d\n";
+
+  t
+  |> Cartridge_header.get_ram_bank_count
+  |> Printf.printf "%d\n";
+
+  [%expect {|
+    MBC1
+    4
+    0 |}]
