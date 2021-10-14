@@ -2,6 +2,8 @@
 
 open Camlboy_lib
 
+module Camlboy = Camlboy.Make (Cartridge)
+
 let run_test_rom_and_print_framebuffer file =
   let rom_bytes = Read_rom_file.f file  in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~echo_flag:false in

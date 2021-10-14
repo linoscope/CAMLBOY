@@ -1,6 +1,6 @@
 open Uints
 
-module Mmu = struct
+module Make (Cartridge : Addressable_intf.S) = struct
 
   type t = {
     cartridge   : Cartridge.t;
@@ -65,7 +65,17 @@ module Mmu = struct
     || Interrupt_controller.accepts t.ic addr
     || Timer.accepts t.timer addr
 
-end
 
-include Mmu
-include Word_addressable.Make (Mmu)
+  let read_word t addr =
+    let lo = Uint8.to_int (read_byte t addr) in
+    let hi = Uint8.to_int (read_byte t Uint16.(succ addr)) in
+    (hi lsl 8) + lo |> Uint16.of_int
+
+  let write_word t ~addr ~(data : uint16) =
+    let data = Uint16.to_int data in
+    let hi = data lsr 8 |> Uint8.of_int in
+    let lo = data land 0xFF |> Uint8.of_int in
+    write_byte t ~addr ~data:lo;
+    write_byte t ~addr:Uint16.(succ addr) ~data:hi
+
+end

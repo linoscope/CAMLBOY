@@ -2,6 +2,8 @@ open Camlboy_lib
 open StdLabels
 open Tsdl
 
+module Camlboy = Camlboy.Make (Cartridge)
+
 let or_exit = function
   | Error (`Msg e) -> Sdl.log "%s" e; exit 1
   | Ok x -> x

@@ -1,6 +1,6 @@
 open Uints
 
-module Make (Mmu : Word_addressable.S) : sig
+module Make (Mmu : Word_addressable_intf.S) : sig
   type t [@@deriving show]
 
   val create :

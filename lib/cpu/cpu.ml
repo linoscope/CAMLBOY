@@ -1,6 +1,6 @@
 open Uints
 
-module Make (Mmu : Word_addressable.S) = struct
+module Make (Mmu : Word_addressable_intf.S) = struct
 
   type t = {
     registers : Registers.t;
