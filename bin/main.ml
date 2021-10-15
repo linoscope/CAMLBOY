@@ -2,7 +2,7 @@ open Camlboy_lib
 open StdLabels
 open Tsdl
 
-module Camlboy = Camlboy.Make (Cartridge)
+module Camlboy = Camlboy.Make (Rom_only)
 
 let or_exit = function
   | Error (`Msg e) -> Sdl.log "%s" e; exit 1
