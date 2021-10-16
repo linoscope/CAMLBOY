@@ -14,6 +14,6 @@ val create :
   area1_start_addr:uint16 ->
   t
 
-val get_tile_id : t -> area:area -> y:int -> x:int -> int8
+val get_tile_index : t -> area:area -> y:int -> x:int -> uint8
 
 include Addressable_intf.S with type t := t

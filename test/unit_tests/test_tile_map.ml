@@ -13,8 +13,8 @@ let create () =
 let print_all_tiles ~area t =
   for y = 0 to 31 do
     for x = 0 to 31 do
-      Tile_map.get_tile_id t ~area ~y ~x
-      |> Int8.to_int
+      Tile_map.get_tile_index t ~area ~y ~x
+      |> Uint8.to_int
       |> Printf.printf "%d "
     done;
     Printf.printf "\n"

@@ -111,6 +111,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     in
     let oam_table = Oam_table.create
         ~start_addr:(of_int 0xFE00)
+        ~end_addr:(of_int 0xFE9F)
         ~oam_ram:(Ram.create ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
     in
     let lcd_stat = Lcd_stat.create ~addr:lcd_stat_addr in

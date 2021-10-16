@@ -18,16 +18,18 @@ let create ~tile_data_ram ~area1_start_addr ~area0_start_addr = {
   area0_start_addr;
 }
 
-let get_pixel t ~area ~index ~row ~col =
-  let index = Int8.to_int index in
+let get_pixel t ~area ~(index:uint8) ~row ~col =
   let row_offset = 2 * row |> Uint16.of_int in
   let low_bit_row_addr = match area with
     | Area1 ->
+      let index = index |> Uint8.to_int in
       Uint16.(t.area1_start_addr + of_int 16 * of_int index + row_offset)
-    | Area0 when index < 0 ->
-      Uint16.(t.area0_start_addr - of_int 16 * of_int (abs index) + row_offset)
     | Area0 ->
-      Uint16.(t.area0_start_addr + of_int 16 * of_int index + row_offset)
+      let index = index |> Int8.of_byte |> Int8.to_int in
+      if index < 0 then
+        Uint16.(t.area0_start_addr - of_int 16 * of_int (abs index) + row_offset)
+      else
+        Uint16.(t.area0_start_addr + of_int 16 * of_int index + row_offset)
   in
   let hi_bit_row_addr  = Uint16.(low_bit_row_addr + one) in
   let low_bit_row = Ram.read_byte t.tile_data_ram low_bit_row_addr |> Uint8.to_int in

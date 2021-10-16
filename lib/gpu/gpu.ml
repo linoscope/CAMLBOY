@@ -64,20 +64,19 @@ let set_mcycles_in_mode t mcycles_in_mode = t.mcycles_in_mode <- mcycles_in_mode
 
 let get_frame_buffer t = t.frame_buffer
 
-let render_bg_line t =
+let render_bg_line t ly =
   let scy = Lcd_position.get_scy t.lp in
   let scx = Lcd_position.get_scx t.lp in
   let tile_data_area = Lcd_control.get_tile_data_area t.lc in
   let tile_map_area  = Lcd_control.get_bg_tile_map_area t.lc in
-  let ly = Lcd_position.get_ly t.lp in
   let y = (scy + ly) mod 255 in
   let row_in_tile = y mod 8 in
   for lx = 0 to 159 do
     let x = (scx + lx) mod 255 in
     let col_in_tile = x mod 8 in
-    let tile_id = Tile_map.get_tile_id t.tm ~area:tile_map_area ~y ~x in
+    let tile_index = Tile_map.get_tile_index t.tm ~area:tile_map_area ~y ~x in
     let pixel_color_id = Tile_data.get_pixel t.td
-        ~index:tile_id
+        ~index:tile_index
         ~area:tile_data_area
         ~row:row_in_tile
         ~col:col_in_tile
@@ -86,12 +85,40 @@ let render_bg_line t =
     t.frame_buffer.(ly).(lx) <- color
   done
 
+let render_sprite_line t ly =
+  let open Oam_table in
+  Oam_table.get_all_sprite_infos t.oam
+  |> List.filter (fun sprite -> sprite.y_pos <= ly && ly < sprite.y_pos + 8)
+  |> List.iter (fun sprite ->
+      let row = ly - sprite.y_pos in
+      let pallete = match sprite.pallete with
+        | `OBP0 -> t.obp0
+        | `OBP1 -> t.obp1
+      in
+      for col = 0 to 7 do
+        let lx = sprite.x_pos + col in
+        if lx < 0 || lx > 160 then
+          ()
+        else
+          let color_id = Tile_data.get_pixel t.td
+              ~area:Area1
+              ~index:sprite.tile_index
+              ~row
+              ~col
+          in
+          match color_id with
+          | ID_00 -> () (* transparant *)
+          | ID_01 | ID_10 | ID_11 ->
+            let color = Pallete.lookup pallete color_id in
+            t.frame_buffer.(ly).(lx) <- color
+      done)
+
 let render_line t =
+  let ly = Lcd_position.get_ly t.lp in
   if Lcd_control.get_bg_window_display t.lc then
-    render_bg_line t;
+    render_bg_line t ly;
   if Lcd_control.get_obj_enable t.lc then
-    ()
-(* TODO: render_sprites t; *)
+    render_sprite_line t ly
 
 let incr_ly t =
   Lcd_position.incr_ly t.lp;

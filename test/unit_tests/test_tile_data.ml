@@ -16,7 +16,7 @@ let%expect_test "test area 1, index 0, row 0" =
      (0x8001): [1, 0, 0, 0, 1, 0, 1, 1] *)
   t |> Tile_data.write_byte ~addr:(of_int 0x8000) ~data:(Uint8.of_int 0b01001110);
   t |> Tile_data.write_byte ~addr:(of_int 0x8001) ~data:(Uint8.of_int 0b10001011);
-  let color_ids = t |> Tile_data.get_row_pixels ~area:Area1 ~index:(Int8.of_int 0) ~row:0 in
+  let color_ids = t |> Tile_data.get_row_pixels ~area:Area1 ~index:(Uint8.of_int 0) ~row:0 in
 
   color_ids
   |> Array.map (Color_id.to_int)
@@ -32,7 +32,7 @@ let%expect_test "test area 1, index 0, first row" =
      (0x9001): [1, 0, 0, 0, 1, 0, 1, 1] *)
   t |> Tile_data.write_byte ~addr:(of_int 0x9000) ~data:(Uint8.of_int 0b01001110);
   t |> Tile_data.write_byte ~addr:(of_int 0x9001) ~data:(Uint8.of_int 0b10001011);
-  let color_ids = t |> Tile_data.get_row_pixels ~area:Area0 ~index:(Int8.of_int 0) ~row:0 in
+  let color_ids = t |> Tile_data.get_row_pixels ~area:Area0 ~index:(Uint8.of_int 0) ~row:0 in
 
   color_ids
   |> Array.map (Color_id.to_int)
@@ -48,7 +48,8 @@ let%expect_test "test area 0, index -128, first row" =
      (0x8801): [1, 0, 0, 0, 1, 0, 1, 1] *)
   t |> Tile_data.write_byte ~addr:(of_int 0x8800) ~data:(Uint8.of_int 0b01001110);
   t |> Tile_data.write_byte ~addr:(of_int 0x8801) ~data:(Uint8.of_int 0b10001011);
-  let color_ids = t |> Tile_data.get_row_pixels ~area:Area0 ~index:(Int8.of_int (-128)) ~row:0 in
+  (* -127 = 0b10000000 = 0x90 *)
+  let color_ids = t |> Tile_data.get_row_pixels ~area:Area0 ~index:(Uint8.of_int 0x80) ~row:0 in
 
   color_ids
   |> Array.map (Color_id.to_int)
@@ -95,7 +96,7 @@ let%expect_test "test full tile" =
   t |> Tile_data.write_byte ~addr:(of_int 0x801E) ~data:(Uint8.of_int 0b00000000);
   t |> Tile_data.write_byte ~addr:(of_int 0x801F) ~data:(Uint8.of_int 0b00000000);
 
-  Tile_data.print_full_pixels t ~area:Area1 ~index:(Int8.of_int 1);
+  Tile_data.print_full_pixels t ~area:Area1 ~index:(Uint8.of_int 1);
 
   [%expect {|
     03333300

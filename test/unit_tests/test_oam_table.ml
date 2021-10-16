@@ -5,6 +5,7 @@ let create () =
   let open Uint16 in
   Oam_table.create
     ~start_addr:(of_int 0xFE00)
+    ~end_addr:(of_int 0xFE9F)
     ~oam_ram:(Ram.create ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
 
 let%expect_test "test" =
@@ -21,5 +22,5 @@ let%expect_test "test" =
   |> print_endline;
 
   [%expect {|
-    { Oam_table.y_pos = 104; x_pos = 69; tile_index = 144;
+    { Oam_table.y_pos = 104; x_pos = 69; tile_index = $90;
       priority = `Sprite_bottom; y_flip = false; x_flip = true; pallete = `OBP1 } |}]
