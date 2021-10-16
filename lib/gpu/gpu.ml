@@ -86,6 +86,7 @@ let render_bg_line t ly =
   done
 
 let render_sprite_line t ly =
+  (* TODO: Support 8x16 sprites *)
   let open Oam_table in
   Oam_table.get_all_sprite_infos t.oam
   |> List.filter (fun sprite -> sprite.y_pos <= ly && ly < sprite.y_pos + 8)
