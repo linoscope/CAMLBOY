@@ -3,7 +3,7 @@ type t
 val create :
   sb:Mmap_register.t ->
   sc:Mmap_register.t ->
-  ?echo_flag:bool ->
+  ?print_serial_port:bool ->
   unit ->
   t
 

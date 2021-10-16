@@ -45,9 +45,9 @@ let handle_event () =
 
 let () =
   (* let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in *)
-  let rom_bytes = Read_rom_file.f "./resource/private/tetris.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/private/dr-mario.gb" in
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
-  let camlboy = Camlboy.create_with_rom ~rom_bytes ~echo_flag:false in
+  let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
   let renderer = create_renderer () in
   while true do
     Printf.printf "%s" (Camlboy.show camlboy);

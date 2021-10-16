@@ -63,7 +63,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
   let lcd_stat_addr = Uint16.of_int 0xFF41
 
-  let create_with_rom ~echo_flag ~rom_bytes =
+  let create_with_rom ~print_serial_port ~rom_bytes =
     let open Uint16 in
     let cartridge = Cartridge.create
         ~rom_bytes
@@ -92,7 +92,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     let serial_port = Serial_port.create
         ~sb:(Mmap_register.create ~addr:(of_int 0xFF01) ~type_:`RW ())
         ~sc:(Mmap_register.create ~addr:(of_int 0xFF02) ~type_:`RW ())
-        ~echo_flag
+        ~print_serial_port
         ()
     in
     let ic = Interrupt_controller.create
@@ -157,8 +157,6 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     in
     initialize_state ~mmu ~registers ~lcd_stat ~gpu;
     { cpu; timer; gpu }
-
-  let create ~echo_flag = create_with_rom ~rom_bytes:Bios.bytes ~echo_flag
 
   let mcycles_in_frame = ref 0
 

@@ -14,11 +14,9 @@ type t = {
   lc : Lcd_control.t;
   lp : Lcd_position.t;
   ic : Interrupt_controller.t;
-  (* number of mycycles consumed in current mode *)
-  mutable mcycles_in_mode : int;
+  mutable mcycles_in_mode : int; (* number of mycycles consumed in current mode *)
   mutable state : state;
-  (* frame_buffer.(y).(x) :=  color of yth row and xth column*)
-  frame_buffer : [`White | `Light_gray | `Dark_gray | `Black ] array array;
+  frame_buffer : [`White | `Light_gray | `Dark_gray | `Black ] array array; (* frame_buffer.(y).(x) :=  color of yth row and xth column*)
 }
 
 (* check if LY=LYC and set lcd_stat and request interrupt accordingly*)
