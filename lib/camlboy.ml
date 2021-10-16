@@ -67,8 +67,12 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     let open Uint16 in
     let cartridge = Cartridge.create
         ~rom_bytes
-        ~start_addr:(of_int 0x0000)
-        ~end_addr:(of_int 0x7FFF)
+        ~rom_start_addr:(of_int 0x0000)
+        ~rom_end_addr:(of_int 0x3FFF)
+        ~rom_bank_start_addr:(of_int 0x4000)
+        ~rom_bank_end_addr:(of_int 0x7FFF)
+        ~ram_bank_start_addr:(of_int 0xA000)
+        ~ram_bank_end_addr:(of_int 0xBFFF)
     in
     let wram = Ram.create
         ~start_addr:(of_int 0xC000)

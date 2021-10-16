@@ -6,8 +6,12 @@ module type S = sig
 
   val create :
     rom_bytes:bytes ->
-    start_addr:uint16 ->
-    end_addr:uint16 ->
+    rom_start_addr:uint16 ->
+    rom_end_addr:uint16 ->
+    rom_bank_start_addr:uint16 ->
+    rom_bank_end_addr:uint16 ->
+    ram_bank_start_addr:uint16 ->
+    ram_bank_end_addr:uint16 ->
     t
 
   include Addressable_intf.S with type t := t
