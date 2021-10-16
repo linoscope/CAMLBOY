@@ -1,3 +1,5 @@
+open Uints
+
 type t
 
 val create :
@@ -14,6 +16,9 @@ val create :
 val set_mcycles_in_mode : t -> int -> unit
 
 val get_frame_buffer : t -> [`White | `Light_gray | `Dark_gray | `Black ] array array
+
+(** Write to OAM ram. Used for DMA transfer.  *)
+val oam_dma_write : t -> offset:int -> data:uint8 -> unit
 
 include Runnable_intf.S with type t := t
 

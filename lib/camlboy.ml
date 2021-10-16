@@ -134,6 +134,11 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~tac_addr:(of_int 0xFF07)
         ~ic
     in
+    let dma_transfer = Mmap_register.create
+        ~addr:(of_int 0xFF46)
+        ~type_:`RW
+        ()
+    in
     let mmu = Mmu.create
         ~cartridge
         ~wram
@@ -144,6 +149,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~serial_port
         ~ic
         ~timer
+        ~dma_transfer
     in
     let registers = Registers.create () in
     let cpu = Cpu.create

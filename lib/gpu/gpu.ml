@@ -242,6 +242,9 @@ let write_byte t ~addr ~data =
   | _ when Lcd_position.accepts t.lp addr -> Lcd_position.write_byte t.lp ~addr ~data
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
+
+let oam_dma_write t ~offset ~data = Ram.write_with_offset t.oam ~offset ~data
+
 module For_tests = struct
 
   let run t ~mcycles =

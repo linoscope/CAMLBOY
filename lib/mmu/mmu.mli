@@ -13,6 +13,7 @@ module Make (Cartridge : Addressable_intf.S) : sig
     serial_port:Serial_port.t ->
     ic:Interrupt_controller.t ->
     timer:Timer.t ->
+    dma_transfer:Mmap_register.t ->
     t
 
   include Word_addressable_intf.S with type t := t
