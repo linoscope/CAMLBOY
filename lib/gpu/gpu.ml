@@ -8,8 +8,10 @@ type state =
 type t = {
   td : Tile_data.t;
   tm : Tile_map.t;
-  oam : Ram.t;
+  oam : Oam_table.t;
   bgp : Pallete.t; (* BG palette data *)
+  obp0 : Pallete.t; (* OBJ pallete 0 data  *)
+  obp1 : Pallete.t; (* OBJ pallete 1 data  *)
   ls : Lcd_stat.t;
   lc : Lcd_control.t;
   lp : Lcd_position.t;
@@ -33,6 +35,8 @@ let create
     ~tile_map
     ~oam
     ~bgp
+    ~obp0
+    ~obp1
     ~lcd_stat
     ~lcd_control
     ~lcd_position
@@ -43,6 +47,8 @@ let create
     tm = tile_map;
     oam;
     bgp;
+    obp0;
+    obp1;
     ls = lcd_stat;
     lc = lcd_control;
     lp = lcd_position;
@@ -164,35 +170,39 @@ let run t ~mcycles =
 let accepts t addr =
   Tile_map.accepts t.tm addr
   || Tile_data.accepts t.td addr
-  || Ram.accepts t.oam addr
+  || Oam_table.accepts t.oam addr
   || Pallete.accepts t.bgp addr
+  || Pallete.accepts t.obp0 addr
+  || Pallete.accepts t.obp1 addr
   || Lcd_stat.accepts t.ls addr
   || Lcd_control.accepts t.lc addr
   || Lcd_position.accepts t.lp addr
 
 let read_byte t addr =
   match addr with
-  | _ when Tile_data.accepts t.td addr    -> (
+  | _ when Tile_data.accepts t.td addr -> (
       (* VRAM is not accessable during pixel transfer *)
       match Lcd_stat.get_gpu_mode t.ls with
       | Pixel_transfer -> Uint8.of_int 0xFF
       | OAM_search | HBlank | VBlank -> Tile_data.read_byte t.td addr
     )
-  | _ when Tile_map.accepts t.tm addr     -> (
+  | _ when Tile_map.accepts t.tm addr -> (
       (* VRAM is not accessable during pixel transfer *)
       match Lcd_stat.get_gpu_mode t.ls with
       | Pixel_transfer -> Uint8.of_int 0xFF
       | OAM_search | HBlank | VBlank -> Tile_map.read_byte t.tm addr
     )
-  | _ when Ram.accepts t.oam  addr        -> (
+  | _ when Oam_table.accepts t.oam  addr -> (
       (* VRAM is not accessable during pixel transfer and OAM search *)
       match Lcd_stat.get_gpu_mode t.ls with
       | Pixel_transfer | OAM_search -> Uint8.of_int 0xFF
-      | HBlank | VBlank -> Ram.read_byte t.oam addr
+      | HBlank | VBlank -> Oam_table.read_byte t.oam addr
     )
-  | _ when Pallete.accepts t.bgp addr     -> Pallete.read_byte t.bgp addr
-  | _ when Lcd_stat.accepts t.ls addr     -> Lcd_stat.read_byte t.ls addr
-  | _ when Lcd_control.accepts t.lc addr  -> Lcd_control.read_byte t.lc addr
+  | _ when Pallete.accepts t.bgp addr-> Pallete.read_byte t.bgp addr
+  | _ when Pallete.accepts t.obp0 addr -> Pallete.read_byte t.obp0 addr
+  | _ when Pallete.accepts t.obp1 addr -> Pallete.read_byte t.obp1 addr
+  | _ when Lcd_stat.accepts t.ls addr -> Lcd_stat.read_byte t.ls addr
+  | _ when Lcd_control.accepts t.lc addr -> Lcd_control.read_byte t.lc addr
   | _ when Lcd_position.accepts t.lp addr -> Lcd_position.read_byte t.lp addr
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
@@ -205,21 +215,23 @@ let write_byte t ~addr ~data =
       | OAM_search | HBlank | VBlank ->
         Tile_data.write_byte t.td ~addr ~data;
     )
-  | _ when Tile_map.accepts t.tm addr  -> (
+  | _ when Tile_map.accepts t.tm addr -> (
       (* VRAM is not accessable during pixel transfer *)
       match Lcd_stat.get_gpu_mode t.ls with
       | Pixel_transfer -> ()
       | OAM_search | HBlank | VBlank -> Tile_map.write_byte t.tm ~addr ~data
     )
-  | _ when Ram.accepts t.oam  addr     -> (
+  | _ when Oam_table.accepts t.oam addr -> (
       (* VRAM is not accessable during pixel transfer and OAM search *)
       match Lcd_stat.get_gpu_mode t.ls with
       | Pixel_transfer | OAM_search -> ()
-      | HBlank | VBlank -> Ram.write_byte t.oam  ~addr ~data
+      | HBlank | VBlank -> Oam_table.write_byte t.oam  ~addr ~data
     )
-  | _ when Pallete.accepts t.bgp addr  -> Pallete.write_byte t.bgp ~addr ~data
-  | _ when Lcd_stat.accepts t.ls addr     -> Lcd_stat.write_byte t.ls ~addr ~data
-  | _ when Lcd_control.accepts t.lc addr  ->
+  | _ when Pallete.accepts t.bgp addr -> Pallete.write_byte t.bgp ~addr ~data
+  | _ when Pallete.accepts t.obp0 addr -> Pallete.write_byte t.obp0 ~addr ~data
+  | _ when Pallete.accepts t.obp1 addr -> Pallete.write_byte t.obp1 ~addr ~data
+  | _ when Lcd_stat.accepts t.ls addr -> Lcd_stat.write_byte t.ls ~addr ~data
+  | _ when Lcd_control.accepts t.lc addr ->
     let lcd_enable_before = Lcd_control.get_lcd_enable t.lc in
     Lcd_control.write_byte t.lc ~addr ~data;
     let lcd_enable_after = Lcd_control.get_lcd_enable t.lc in
@@ -243,7 +255,7 @@ let write_byte t ~addr ~data =
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 
-let write_oam_with_offset t ~offset ~data = Ram.write_with_offset t.oam ~offset ~data
+let write_oam_with_offset t ~offset ~data = Oam_table.write_with_offset t.oam ~offset ~data
 
 module For_tests = struct
 

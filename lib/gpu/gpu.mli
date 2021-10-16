@@ -3,15 +3,17 @@ open Uints
 type t
 
 val create :
-  tile_data:Tile_data.t
-  -> tile_map:Tile_map.t
-  -> oam:Ram.t
-  -> bgp:Pallete.t
-  -> lcd_stat:Lcd_stat.t
-  -> lcd_control:Lcd_control.t
-  -> lcd_position:Lcd_position.t
-  -> ic:Interrupt_controller.t
-  -> t
+  tile_data:Tile_data.t ->
+  tile_map:Tile_map.t ->
+  oam:Oam_table.t ->
+  bgp:Pallete.t ->
+  obp0:Pallete.t ->
+  obp1:Pallete.t ->
+  lcd_stat:Lcd_stat.t ->
+  lcd_control:Lcd_control.t ->
+  lcd_position:Lcd_position.t ->
+  ic:Interrupt_controller.t ->
+  t
 
 val set_mcycles_in_mode : t -> int -> unit
 

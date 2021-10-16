@@ -109,12 +109,18 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~area0_start_addr:(Uint16.of_int 0x9800)
         ~area1_start_addr:(Uint16.of_int 0x9C00)
     in
+    let oam_table = Oam_table.create
+        ~start_addr:(of_int 0xFE00)
+        ~oam_ram:(Ram.create ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
+    in
     let lcd_stat = Lcd_stat.create ~addr:lcd_stat_addr in
     let gpu = Gpu.create
         ~tile_data
         ~tile_map
-        ~oam:(Ram.create  ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
+        ~oam:oam_table
         ~bgp:(Pallete.create ~addr:(of_int 0xFF47))
+        ~obp0:(Pallete.create ~addr:(of_int 0xFF48))
+        ~obp1:(Pallete.create ~addr:(of_int 0xFF49))
         ~lcd_control:(Lcd_control.create ~addr:(of_int 0xFF40))
         ~lcd_stat
         ~lcd_position:(
