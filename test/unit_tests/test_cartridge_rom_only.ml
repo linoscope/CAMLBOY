@@ -15,11 +15,11 @@ let%expect_test "load then read" =
       ~ram_bank_end_addr:(of_int 0xBFFF)
   in
 
-  [ Cartridge_rom_only.read_byte catrdige (of_int 0x01);
+  [ Cartridge_rom_only.read_byte catrdige (of_int 0x00);
+    Cartridge_rom_only.read_byte catrdige (of_int 0x01);
     Cartridge_rom_only.read_byte catrdige (of_int 0x02);
     Cartridge_rom_only.read_byte catrdige (of_int 0x03);
-    Cartridge_rom_only.read_byte catrdige (of_int 0x04);
-    Cartridge_rom_only.read_byte catrdige (of_int 0x05);]
+    Cartridge_rom_only.read_byte catrdige (of_int 0x04);]
   |> List.map ~f:Uint8.show
   |> List.iter ~f:print_endline;
 

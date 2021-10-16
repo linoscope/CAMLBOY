@@ -51,7 +51,7 @@ module Make (Cartridge : Addressable_intf.S) = struct
       in
       for i = 0 to 0x9F do
         let data = read_byte t Uint16.(source + (of_int i)) in
-        Gpu.oam_dma_write t.gpu ~offset:i ~data
+        Gpu.write_oam_with_offset t.gpu ~offset:i ~data
       done
     in
     match addr with

@@ -243,7 +243,7 @@ let write_byte t ~addr ~data =
   | _ -> raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
 
 
-let oam_dma_write t ~offset ~data = Ram.write_with_offset t.oam ~offset ~data
+let write_oam_with_offset t ~offset ~data = Ram.write_with_offset t.oam ~offset ~data
 
 module For_tests = struct
 
