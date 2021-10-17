@@ -121,6 +121,7 @@ let render_bg_window_line t ly =
 
 let render_sprite_line t ly =
   (* TODO: Support 8x16 sprites *)
+  (* TODO: Handle priorities properly  *)
   let open Oam_table in
   Oam_table.get_all_sprite_infos t.oam
   |> List.filter (fun sprite -> sprite.y_pos <= ly && ly < sprite.y_pos + 8)
@@ -156,16 +157,15 @@ let render_line t =
   if Lcd_control.get_obj_enable t.lc then
     render_sprite_line t ly
 
-let incr_ly t =
-  Lcd_position.incr_ly t.lp;
-  Lcd_position.get_ly t.lp
-
-let oam_search_mcycles = 20     (*  80 / 4 *)
-let pixel_transfer_mcycles = 43 (* 172 / 4 *)
-let hblank_mcycles = 51         (* 204 / 4 *)
-let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles (* 114 *)
-
 let run t ~mcycles =
+  let incr_ly t =
+    Lcd_position.incr_ly t.lp;
+    Lcd_position.get_ly t.lp
+  in
+  let oam_search_mcycles = 20 in     (*  80 / 4 *)
+  let pixel_transfer_mcycles = 43 in (* 172 / 4 *)
+  let hblank_mcycles = 51 in         (* 204 / 4 *)
+  let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles in (* 114 *)
   match t.state with
   | Disabled -> ()
   | Enabled ->

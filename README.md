@@ -16,7 +16,7 @@ A WIP Game Boy emulator written in OCaml.
 - [x] Interrupt controller
 - [ ] GPU
   - [x] Background
-  - [ ] Window
+  - [x] Window
   - [x] DMA transfer
   - [ ] Sprites
     - [x] 8x8 sprites
