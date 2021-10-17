@@ -30,6 +30,11 @@ let handle_ly_eq_lyc t =
   if ly_eq_lyc && Lcd_stat.is_enabled t.ls LYC_eq_LY then
     Interrupt_controller.request t.ic LCD_stat
 
+let screen_w = 160
+let screen_h = 144
+let bg_wh = 256
+let window_wh = 256
+
 let create
     ~tile_data
     ~tile_map
@@ -55,7 +60,7 @@ let create
     mcycles_in_mode = 0;
     state = Enabled;
     ic;
-    frame_buffer = Array.make_matrix 144 160 `White; }
+    frame_buffer = Array.make_matrix screen_h screen_w `White; }
   in
   handle_ly_eq_lyc t;
   t
@@ -64,26 +69,55 @@ let set_mcycles_in_mode t mcycles_in_mode = t.mcycles_in_mode <- mcycles_in_mode
 
 let get_frame_buffer t = t.frame_buffer
 
-let render_bg_line t ly =
-  let scy = Lcd_position.get_scy t.lp in
-  let scx = Lcd_position.get_scx t.lp in
+let render_bg_window_line t ly =
+  let render_bg_line t ly tile_data_area =
+    let scy = Lcd_position.get_scy t.lp in
+    let scx = Lcd_position.get_scx t.lp in
+    let y = (scy + ly) mod (bg_wh - 1) in
+    let bg_tile_map_area  = Lcd_control.get_bg_tile_map_area t.lc in
+    let row_in_tile = y mod 8 in
+    for lx = 0 to screen_w - 1 do
+      let x = (scx + lx) mod (bg_wh - 1) in
+      let col_in_tile = x mod 8 in
+      let tile_index = Tile_map.get_tile_index t.tm ~area:bg_tile_map_area ~y ~x in
+      let pixel_color_id = Tile_data.get_pixel t.td
+          ~index:tile_index
+          ~area:tile_data_area
+          ~row:row_in_tile
+          ~col:col_in_tile
+      in
+      let color = Pallete.lookup t.bgp pixel_color_id in
+      t.frame_buffer.(ly).(lx) <- color
+    done
+  in
+  let render_window_line t ly tile_data_area =
+    let wy = Lcd_position.get_wy t.lp in
+    let wx = Lcd_position.get_wx t.lp - 7 in
+    if wy <= ly && ly <= wy + window_wh && wx <= screen_w then
+      let window_tile_map_area = Lcd_control.get_window_tile_map_area t.lc in
+      let row_in_tile = (Int.abs (wy - ly)) mod 8 in
+      for lx = wx to screen_w - 1 do
+        let col_in_tile = lx mod 8 in
+        let tile_index = Tile_map.get_tile_index t.tm
+            ~area:window_tile_map_area
+            ~y:(Int.abs (ly - wy))
+            ~x:(Int.abs (lx - wx))
+        in
+        let pixel_color_id = Tile_data.get_pixel t.td
+            ~index:tile_index
+            ~area:tile_data_area
+            ~row:row_in_tile
+            ~col:col_in_tile
+        in
+        let color = Pallete.lookup t.bgp pixel_color_id in
+        t.frame_buffer.(ly).(lx) <- color
+      done
+  in
   let tile_data_area = Lcd_control.get_tile_data_area t.lc in
-  let tile_map_area  = Lcd_control.get_bg_tile_map_area t.lc in
-  let y = (scy + ly) mod 255 in
-  let row_in_tile = y mod 8 in
-  for lx = 0 to 159 do
-    let x = (scx + lx) mod 255 in
-    let col_in_tile = x mod 8 in
-    let tile_index = Tile_map.get_tile_index t.tm ~area:tile_map_area ~y ~x in
-    let pixel_color_id = Tile_data.get_pixel t.td
-        ~index:tile_index
-        ~area:tile_data_area
-        ~row:row_in_tile
-        ~col:col_in_tile
-    in
-    let color = Pallete.lookup t.bgp pixel_color_id in
-    t.frame_buffer.(ly).(lx) <- color
-  done
+  render_bg_line t ly tile_data_area;
+  if Lcd_control.get_window_enable t.lc then
+    render_window_line t ly tile_data_area
+
 
 let render_sprite_line t ly =
   (* TODO: Support 8x16 sprites *)
@@ -98,14 +132,14 @@ let render_sprite_line t ly =
       in
       for col = 0 to 7 do
         let lx = sprite.x_pos + col in
-        if lx < 0 || lx > 160 then
+        if lx < 0 || lx > screen_w then
           ()
         else
           let color_id = Tile_data.get_pixel t.td
               ~area:Area1
               ~index:sprite.tile_index
-              ~row
-              ~col
+              ~row:(if sprite.y_flip then 7 - row else row)
+              ~col:(if sprite.x_flip then 7 - col else col)
           in
           match color_id with
           | ID_00 -> () (* transparant *)
@@ -116,8 +150,9 @@ let render_sprite_line t ly =
 
 let render_line t =
   let ly = Lcd_position.get_ly t.lp in
-  if Lcd_control.get_bg_window_display t.lc then
-    render_bg_line t ly;
+  if Lcd_control.get_bg_window_display t.lc then begin
+    render_bg_window_line t ly;
+  end;
   if Lcd_control.get_obj_enable t.lc then
     render_sprite_line t ly
 
@@ -154,7 +189,7 @@ let run t ~mcycles =
           t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
           let ly = incr_ly t in
           handle_ly_eq_lyc t;
-          if ly = 144 then begin
+          if ly = screen_h then begin
             Lcd_stat.set_gpu_mode t.ls VBlank;
             if Lcd_stat.is_enabled t.ls VBlank then
               Interrupt_controller.request t.ic LCD_stat;
@@ -171,7 +206,7 @@ let run t ~mcycles =
           t.mcycles_in_mode <- t.mcycles_in_mode mod one_line_mcycle;
           let ly = incr_ly t in
           handle_ly_eq_lyc t;
-          if ly = 154 then begin
+          if ly = 154 then begin (* 154 = screen_h + 10 *)
             Lcd_position.reset_ly t.lp;
             handle_ly_eq_lyc t;
             Lcd_stat.set_gpu_mode t.ls OAM_search;
