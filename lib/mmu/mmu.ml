@@ -40,7 +40,10 @@ module Make (Cartridge : Addressable_intf.S) = struct
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.read_byte t.ic addr
     | _ when Timer.accepts t.timer addr             -> Timer.read_byte t.timer addr
     | _ when Mmap_register.accepts t.dt addr        -> Mmap_register.read_byte t.dt addr
-    | _ -> Uint8.zero
+    | _ ->
+      (* Undocumented IO registers should always return 0xFF. Blargg's cpu_insrs fail without this.
+       * https://www.reddit.com/r/EmuDev/comments/ipap0w/comment/g76m04i/?utm_source=share&utm_medium=web2x&context=3 *)
+      Uint8.of_int 0xFF
 
 
   let write_byte t ~(addr : uint16) ~(data : uint8) =

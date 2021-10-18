@@ -26,7 +26,11 @@ let read_byte t addr =
     Ram.read_byte t.target (t.target_start + offset)
   end
 
-let write_byte _ ~addr ~data =
-  failwith @@
-  Printf.sprintf "Write to shadow ram not allowed. addr:%s, data:%s"
-    (Uint16.show addr) (Uint8.show data)
+let write_byte t ~addr ~data =
+  if not @@ accepts t addr then
+    raise @@ Invalid_argument (Printf.sprintf "Address out of range: %s" (Uint16.show addr))
+  else begin
+    let open Uint16 in
+    let offset = addr - t.shadow_start in
+    Ram.write_byte t.target ~addr:(t.target_start + offset) ~data
+  end

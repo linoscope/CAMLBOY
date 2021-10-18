@@ -133,7 +133,7 @@ let render_sprite_line t ly =
       in
       for col = 0 to 7 do
         let lx = sprite.x_pos + col in
-        if lx < 0 || lx > screen_w then
+        if lx < 0 || lx >= screen_w then
           ()
         else
           let color_id = Tile_data.get_pixel t.td

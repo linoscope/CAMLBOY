@@ -1,7 +1,7 @@
 open Camlboy_lib
 open Uints
 
-module Camlboy = Camlboy.Make (Cartridge_rom_only)
+module Camlboy = Camlboy.Make (Cartridge_mbc1)
 
 (** Blargg tests end with "JR -2" infinite loop *)
 let is_infinite_loop instr =
@@ -21,6 +21,12 @@ let run_test_rom file =
       loop ()
   in
   loop ()
+
+(* let%expect_test "cpu_instrs.gb" =
+ *   run_test_rom "../../resource/test_roms/blargg/cpu_instrs/cpu_instrs.gb";
+ *
+ *   [%expect {| |}] *)
+
 
 let%expect_test "01-special.gb" =
   run_test_rom "../../resource/test_roms/blargg/cpu_instrs/individual/01-special.gb";

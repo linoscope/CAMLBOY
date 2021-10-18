@@ -6,8 +6,8 @@ module type S = sig
 
   val create :
     rom_bytes:bytes ->
-    rom_start_addr:uint16 ->
-    rom_end_addr:uint16 ->
+    rom_bank0_start_addr:uint16 ->
+    rom_bank0_end_addr:uint16 ->
     rom_bank_start_addr:uint16 ->
     rom_bank_end_addr:uint16 ->
     ram_bank_start_addr:uint16 ->

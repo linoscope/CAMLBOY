@@ -6,7 +6,8 @@ module Make (Cartridge : Cartridge_intf.S) : sig
 
   val create_with_rom : print_serial_port:bool -> rom_bytes:bytes -> t
 
-  val run_instruction : t -> [`In_frame | `Frame_ended of [`White | `Light_gray | `Dark_gray | `Black ] array array]
+  val run_instruction :
+    t -> [`In_frame | `Frame_ended of [`White | `Light_gray | `Dark_gray | `Black ] array array]
 
   module For_tests : sig
 

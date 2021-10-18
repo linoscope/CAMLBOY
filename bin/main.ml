@@ -2,8 +2,6 @@ open Camlboy_lib
 open StdLabels
 open Tsdl
 
-module Camlboy = Camlboy.Make (Cartridge_rom_only)
-
 let or_exit = function
   | Error (`Msg e) -> Sdl.log "%s" e; exit 1
   | Ok x -> x
@@ -44,9 +42,15 @@ let handle_event () =
   end
 
 let () =
-  (* let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in *)
-  let rom_bytes = Read_rom_file.f "./resource/private/dr-mario.gb" in
-  (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
+  Printexc.record_backtrace true;
+  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
+  (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/cpu_instrs.gb" in *)
+  let cartridge =
+    Cartridge_header.create ~rom_bytes
+    |> Cartridge_header.get_cartridge_type
+    |> Cartridge_of_cartridge_type.f
+  in
+  let module Camlboy = Camlboy.Make (val cartridge) in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
   let renderer = create_renderer () in
   while true do
