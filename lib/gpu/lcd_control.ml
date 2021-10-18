@@ -13,7 +13,7 @@ type t = {
   (* bit 3 *)
   mutable bg_tile_map_area : Tile_map.area;
   (* bit 2 *)
-  mutable obj_size : bool;
+  mutable obj_size : [`_8x8 | `_8x16];
   (* bit 1 *)
   mutable obj_enable : bool;
   (* bit 0 *)
@@ -27,7 +27,7 @@ let create ~addr = {
   window_enable = false;
   tile_data_area = Tile_data.Area1;
   bg_tile_map_area = Tile_map.Area0;
-  obj_size = false;
+  obj_size = `_8x8;
   obj_enable = false;
   bg_window_display = true;
 }
@@ -58,7 +58,7 @@ let read_byte t addr =
       t.window_enable
       (t.tile_data_area = Tile_data.Area1)
       (t.bg_tile_map_area = Tile_map.Area1)
-      t.obj_size
+      (t.obj_size = `_8x16)
       t.obj_enable
       t.bg_window_display
   end else
@@ -72,7 +72,7 @@ let write_byte t ~addr ~data =
     t.window_enable <- b5;
     t.tile_data_area <- if b4 then Area1 else Area0;
     t.bg_tile_map_area <- if b3 then Area1 else Area0;
-    t.obj_size <- b2;
+    t.obj_size <- if b2 then `_8x16 else `_8x8;
     t.obj_enable <- b1;
     t.bg_window_display <- b0;
   end else

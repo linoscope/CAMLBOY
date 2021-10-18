@@ -16,7 +16,7 @@ val get_tile_data_area : t -> Tile_data.area
 
 val get_bg_tile_map_area : t -> Tile_map.area
 
-val get_obj_size : t -> bool    (* TODO: Replace bool with more descriptive type *)
+val get_obj_size : t -> [`_8x8 | `_8x16]
 
 val get_obj_enable : t -> bool
 

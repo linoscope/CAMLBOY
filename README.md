@@ -14,17 +14,17 @@ A WIP Game Boy emulator written in OCaml.
 - [x] MMU
 - [x] Timers
 - [x] Interrupt controller
-- [ ] GPU
+- [x] GPU
   - [x] Background
   - [x] Window
   - [x] DMA transfer
-  - [ ] Sprites
+  - [x] Sprites
     - [x] 8x8 sprites
-    - [ ] 8x16 sprites
+    - [x] 8x16 sprites
 - [ ] Cartridges
   - [x] ROM_ONLY
-  - [ ] MBC1
-  - [ ] MBC2
+  - [x] MBC1
+  - [ ] MBC3
 - [ ] Joypad
 - [ ] APU
 

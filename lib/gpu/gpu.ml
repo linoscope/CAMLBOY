@@ -120,11 +120,14 @@ let render_bg_window_line t ly =
 
 
 let render_sprite_line t ly =
-  (* TODO: Support 8x16 sprites *)
   (* TODO: Handle priorities properly  *)
   let open Oam_table in
+  let y_sprite_size = match Lcd_control.get_obj_size t.lc with
+    | `_8x8  -> 8
+    | `_8x16 -> 16
+  in
   Oam_table.get_all_sprite_infos t.oam
-  |> List.filter (fun sprite -> sprite.y_pos <= ly && ly < sprite.y_pos + 8)
+  |> List.filter (fun sprite -> sprite.y_pos <= ly && ly <= sprite.y_pos + y_sprite_size - 1)
   |> List.iter (fun sprite ->
       let row = ly - sprite.y_pos in
       let pallete = match sprite.pallete with
@@ -139,11 +142,12 @@ let render_sprite_line t ly =
           let color_id = Tile_data.get_pixel t.td
               ~area:Area1
               ~index:sprite.tile_index
-              ~row:(if sprite.y_flip then 7 - row else row)
+              ~row:(if sprite.y_flip then y_sprite_size - row - 1 else row)
               ~col:(if sprite.x_flip then 7 - col else col)
           in
           match color_id with
-          | ID_00 -> () (* transparant *)
+          | ID_00 ->
+            () (* transparant *)
           | ID_01 | ID_10 | ID_11 ->
             let color = Pallete.lookup pallete color_id in
             t.frame_buffer.(ly).(lx) <- color

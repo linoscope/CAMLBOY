@@ -3,6 +3,10 @@ open Uints
 
 let addr = (Uint16.of_int 0xFF04)
 
+let show_obj_size = function
+  | `_8x8 -> "8x8"
+  | `_8x16 -> "8x16"
+
 let%expect_test "test" =
   let t = Lcd_control.create ~addr in
   Lcd_control.write_byte t ~addr ~data:(Uint8.of_int 0x91);
@@ -21,7 +25,7 @@ let%expect_test "test" =
   Lcd_control.get_window_enable t |> print_bool;
   Lcd_control.get_tile_data_area t |> print_tile_data_area;
   Lcd_control.get_bg_tile_map_area t |> print_tile_map_area;
-  Lcd_control.get_obj_size t |> print_bool;
+  Lcd_control.get_obj_size t |> show_obj_size |> print_endline;
   Lcd_control.get_obj_enable t |> print_bool;
   Lcd_control.get_bg_window_display t |> print_bool;
 
@@ -31,6 +35,6 @@ let%expect_test "test" =
     false
     true
     false
-    false
+    8x8
     false
     true |}];
