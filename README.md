@@ -25,10 +25,14 @@ A WIP Game Boy emulator written in OCaml.
   - [x] ROM_ONLY
   - [x] MBC1
   - [ ] MBC3
-- [ ] Joypad
+- [x] Joypad
 - [ ] APU
 
 ### UI
 
 - [x] SDL
 - [ ] Browser (with js_of_ocaml)
+
+### Other
+
+- [ ] Improve SDL performance by using Sdl_texture
