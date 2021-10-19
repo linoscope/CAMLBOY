@@ -6,6 +6,6 @@ type t
 
 val create : uint16 -> t
 
-include Runnable_intf.S with type t := t
+val run : t -> mcycles:int -> unit
 
 include Addressable_intf.S with type t := t

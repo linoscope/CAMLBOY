@@ -10,6 +10,6 @@ val create :
   -> ic:Interrupt_controller.t
   -> t
 
-include Runnable_intf.S with type t := t
+val run : t -> mcycles:int -> unit
 
 include Addressable_intf.S with type t := t

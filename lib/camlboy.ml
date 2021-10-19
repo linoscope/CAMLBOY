@@ -171,18 +171,10 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     initialize_state ~mmu ~registers ~lcd_stat ~gpu;
     { cpu; timer; gpu }
 
-  let mcycles_in_frame = ref 0
-
   let run_instruction t =
     let mcycles = Cpu.run_instruction t.cpu in
     Timer.run t.timer ~mcycles;
-    Gpu.run t.gpu ~mcycles;
-    mcycles_in_frame := !mcycles_in_frame + mcycles;
-    if 70224 <= !mcycles_in_frame then begin
-      mcycles_in_frame := !mcycles_in_frame - 70224;
-      `Frame_ended (Gpu.get_frame_buffer  t.gpu)
-    end else
-      `In_frame
+    Gpu.run t.gpu ~mcycles
 
 
   module For_tests = struct

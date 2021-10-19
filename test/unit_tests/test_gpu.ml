@@ -127,7 +127,7 @@ let%expect_test "test disabling lcd resets ly and changes mode to HBlank" =
   let t = create () in
 
   for _ = 0 to 115 do
-    Gpu.run t ~mcycles:1;
+    ignore @@ Gpu.run t ~mcycles:1;
   done;
   run_and_print_transitions t 1;
   Gpu.write_byte t ~addr:lcd_control_addr ~data:(Uint8.of_int 0x00); (* disable lcd *)

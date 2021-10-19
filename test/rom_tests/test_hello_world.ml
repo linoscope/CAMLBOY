@@ -11,7 +11,7 @@ let run_test_rom_and_print_framebuffer file =
     let run_result = Camlboy.run_instruction camlboy in
     let prev_instr = Camlboy.For_tests.prev_inst camlboy in
     match prev_instr, run_result with
-    | HALT, `Frame_ended famebuffer ->
+    | HALT, Frame_ended famebuffer ->
       Printf.printf "%s\n" @@ Camlboy.show camlboy;
       famebuffer
       |> Array.iteri (fun i row ->

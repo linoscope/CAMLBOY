@@ -73,11 +73,11 @@ let render_bg_window_line t ly =
   let render_bg_line t ly tile_data_area =
     let scy = Lcd_position.get_scy t.lp in
     let scx = Lcd_position.get_scx t.lp in
-    let y = (scy + ly) mod (bg_wh - 1) in
+    let y = (scy + ly) mod bg_wh in
     let bg_tile_map_area  = Lcd_control.get_bg_tile_map_area t.lc in
     let row_in_tile = y mod 8 in
     for lx = 0 to screen_w - 1 do
-      let x = (scx + lx) mod (bg_wh - 1) in
+      let x = (scx + lx) mod bg_wh in
       let col_in_tile = x mod 8 in
       let tile_index = Tile_map.get_tile_index t.tm ~area:bg_tile_map_area ~y ~x in
       let pixel_color_id = Tile_data.get_pixel t.td
@@ -161,6 +161,10 @@ let render_line t =
   if Lcd_control.get_obj_enable t.lc then
     render_sprite_line t ly
 
+type run_result =
+  | In_frame
+  | Frame_ended of [`White | `Light_gray | `Dark_gray | `Black ] array array
+
 let run t ~mcycles =
   let incr_ly t =
     Lcd_position.incr_ly t.lp;
@@ -171,7 +175,7 @@ let run t ~mcycles =
   let hblank_mcycles = 51 in         (* 204 / 4 *)
   let one_line_mcycle = oam_search_mcycles + pixel_transfer_mcycles + hblank_mcycles in (* 114 *)
   match t.state with
-  | Disabled -> ()
+  | Disabled -> In_frame
   | Enabled ->
     t.mcycles_in_mode <- t.mcycles_in_mode + mcycles;
     begin match Lcd_stat.get_gpu_mode t.ls with
@@ -179,7 +183,8 @@ let run t ~mcycles =
         if t.mcycles_in_mode >= oam_search_mcycles then begin
           t.mcycles_in_mode <- t.mcycles_in_mode mod oam_search_mcycles;
           Lcd_stat.set_gpu_mode t.ls Pixel_transfer;
-        end
+        end;
+        In_frame
       | Pixel_transfer ->
         if t.mcycles_in_mode >= pixel_transfer_mcycles then begin
           t.mcycles_in_mode <- t.mcycles_in_mode mod pixel_transfer_mcycles;
@@ -187,7 +192,8 @@ let run t ~mcycles =
           if Lcd_stat.is_enabled t.ls HBlank then
             Interrupt_controller.request t.ic LCD_stat;
           render_line t;
-        end
+        end;
+        In_frame
       | HBlank ->
         if t.mcycles_in_mode >= hblank_mcycles then begin
           t.mcycles_in_mode <- t.mcycles_in_mode mod hblank_mcycles;
@@ -198,24 +204,29 @@ let run t ~mcycles =
             if Lcd_stat.is_enabled t.ls VBlank then
               Interrupt_controller.request t.ic LCD_stat;
             Interrupt_controller.request t.ic VBlank;
-            (* TODO: copy image data to screen buffer (); *)
           end else begin
             Lcd_stat.set_gpu_mode t.ls OAM_search;
             if Lcd_stat.is_enabled t.ls OAM then
               Interrupt_controller.request t.ic LCD_stat;
           end
-        end
+        end;
+        In_frame
       | VBlank ->
-        if t.mcycles_in_mode >= one_line_mcycle then begin
+        if t.mcycles_in_mode < one_line_mcycle then
+          In_frame
+        else begin
           t.mcycles_in_mode <- t.mcycles_in_mode mod one_line_mcycle;
           let ly = incr_ly t in
           handle_ly_eq_lyc t;
-          if ly = 154 then begin (* 154 = screen_h + 10 *)
+          if ly < 154 then
+            In_frame
+          else begin (* 154 = screen_h + 10 *)
             Lcd_position.reset_ly t.lp;
             handle_ly_eq_lyc t;
             Lcd_stat.set_gpu_mode t.ls OAM_search;
             if Lcd_stat.is_enabled t.ls OAM then
               Interrupt_controller.request t.ic LCD_stat;
+            Frame_ended (t.frame_buffer)
           end
         end
     end
@@ -232,7 +243,9 @@ let run t ~mcycles =
       Lcd_stat.set_gpu_mode t.ls OAM_search;
       if Lcd_stat.is_enabled t.ls OAM then
         Interrupt_controller.request t.ic LCD_stat;
-    end
+    end;
+    In_frame
+
 
 let accepts t addr =
   Tile_map.accepts t.tm addr
@@ -328,7 +341,7 @@ module For_tests = struct
 
   let run t ~mcycles =
     let mode_before = Lcd_stat.get_gpu_mode t.ls in
-    run t ~mcycles;
+    ignore @@ run t ~mcycles;
     let mode_after = Lcd_stat.get_gpu_mode t.ls in
     if mode_before != mode_after then
       `Mode_changed

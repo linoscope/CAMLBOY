@@ -43,7 +43,7 @@ let handle_event () =
 
 let () =
   Printexc.record_backtrace true;
-  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/private/mario-world.gb" in
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/cpu_instrs.gb" in *)
   let cartridge =
     Cartridge_header.create ~rom_bytes
@@ -54,15 +54,15 @@ let () =
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
   let renderer = create_renderer () in
   while true do
-    Printf.printf "%s" (Camlboy.show camlboy);
-    Printf.printf " LY:%d" (Camlboy.For_tests.get_ly camlboy);
-    (* Printf.printf " LCD_STAT:%s" (Camlboy.For_tests.get_lcd_stat camlboy |> Uints.Uint8.show);
+    (* Printf.printf "%s" (Camlboy.show camlboy);
+     * Printf.printf " LY:$%02x" (Camlboy.For_tests.get_ly camlboy);
+     * Printf.printf " LCD_STAT:%s" (Camlboy.For_tests.get_lcd_stat camlboy |> Uints.Uint8.show);
      * Printf.printf " MC:%3d" (Camlboy.For_tests.get_mcycles_in_mode camlboy); *)
     begin match Camlboy.run_instruction camlboy with
-      | `In_frame -> ()
-      | `Frame_ended framebuffer ->
+      | In_frame -> ()
+      | Frame_ended framebuffer ->
         handle_event ();
         render_frame renderer framebuffer;
     end;
-    Printf.printf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
+    (* Printf.printf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show); *)
   done

@@ -22,7 +22,11 @@ val get_frame_buffer : t -> [`White | `Light_gray | `Dark_gray | `Black ] array 
 (** Used for DMA transfer.  *)
 val write_oam_with_offset : t -> offset:int -> data:uint8 -> unit
 
-include Runnable_intf.S with type t := t
+type run_result =
+  | In_frame
+  | Frame_ended of [`White | `Light_gray | `Dark_gray | `Black ] array array
+
+val run : t -> mcycles:int -> run_result
 
 include Addressable_intf.S with type t := t
 
