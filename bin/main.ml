@@ -14,6 +14,7 @@ let create_renderer () =
   renderer
 
 let render_frame renderer framebuffer =
+  (* TODO: Improve speed by using Sdl_texture *)
   framebuffer |> Array.iteri ~f:(fun y row ->
       row |> Array.iteri ~f:(fun x color ->
           begin match color with
@@ -27,23 +28,8 @@ let render_frame renderer framebuffer =
   Sdl.render_present renderer
 
 
-let handle_event () =
-  let event = Sdl.Event.create () in
-  if Sdl.poll_event (Some event) then begin
-    match Sdl.Event.(get event typ |> enum) with
-    | `Key_down ->
-      let scancode = Sdl.Event.(get event keyboard_scancode) in
-      begin match Sdl.Scancode.enum scancode with
-        | `Escape -> exit 0
-        | _       -> ()
-      end
-    | `Quit -> exit 0
-    | _     -> ()
-  end
-
 let () =
-  Printexc.record_backtrace true;
-  let rom_bytes = Read_rom_file.f "./resource/private/mario-world.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/private/mario-land-2.gb" in
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/cpu_instrs.gb" in *)
   let cartridge =
     Cartridge_header.create ~rom_bytes
@@ -52,7 +38,43 @@ let () =
   in
   let module Camlboy = Camlboy.Make (val cartridge) in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
+  let handle_event () =
+    let event = Sdl.Event.create () in
+    if Sdl.poll_event (Some event) then begin
+      match Sdl.Event.(get event typ |> enum) with
+      | `Key_down ->
+        let scancode = Sdl.Event.(get event keyboard_scancode) in
+        begin match Sdl.Scancode.enum scancode with
+          | `Return -> Camlboy.press camlboy Start
+          | `Tab -> Camlboy.press camlboy Select
+          | `Z -> Camlboy.press camlboy B
+          | `X -> Camlboy.press camlboy A
+          | `Up -> Camlboy.press camlboy Up
+          | `Down -> Camlboy.press camlboy Down
+          | `Left -> Camlboy.press camlboy Left
+          | `Right -> Camlboy.press camlboy Right
+          | `Escape -> exit 0
+          | _ -> ()
+        end
+      | `Key_up ->
+        let scancode = Sdl.Event.(get event keyboard_scancode) in
+        begin match Sdl.Scancode.enum scancode with
+          | `Return -> Camlboy.release camlboy Start
+          | `Tab -> Camlboy.release camlboy Select
+          | `Z -> Camlboy.release camlboy B
+          | `X -> Camlboy.release camlboy A
+          | `Up -> Camlboy.release camlboy Up
+          | `Down -> Camlboy.release camlboy Down
+          | `Left -> Camlboy.release camlboy Left
+          | `Right -> Camlboy.release camlboy Right
+          | _ -> ()
+        end
+      | `Quit -> exit 0
+      | _     -> ()
+    end
+  in
   let renderer = create_renderer () in
+  let cnt = ref 0 in
   while true do
     (* Printf.printf "%s" (Camlboy.show camlboy);
      * Printf.printf " LY:$%02x" (Camlboy.For_tests.get_ly camlboy);
@@ -62,7 +84,9 @@ let () =
       | In_frame -> ()
       | Frame_ended framebuffer ->
         handle_event ();
-        render_frame renderer framebuffer;
+        incr cnt;
+        if !cnt mod 4 = 0 then
+          render_frame renderer framebuffer;
     end;
     (* Printf.printf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show); *)
   done

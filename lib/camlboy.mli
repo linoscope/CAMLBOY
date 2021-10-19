@@ -8,6 +8,10 @@ module Make (Cartridge : Cartridge_intf.S) : sig
 
   val run_instruction : t -> Gpu.run_result
 
+  val press : t -> Joypad.key -> unit
+
+  val release : t -> Joypad.key -> unit
+
   module For_tests : sig
 
     val prev_inst : t -> Instruction.t

@@ -7,9 +7,10 @@ module Make (Cartridge : Cartridge_intf.S) = struct
   module Cpu = Cpu.Make(Mmu)
 
   type t = {
-    cpu   : Cpu.t;
-    timer : Timer.t; [@opaque]
-    gpu   : Gpu.t;   [@opaque]
+    cpu    : Cpu.t;
+    timer  : Timer.t;  [@opaque]
+    gpu    : Gpu.t;    [@opaque]
+    joypad : Joypad.t; [@opaque]
   } [@@deriving show]
 
   let show t = Cpu.show t.cpu
@@ -47,7 +48,6 @@ module Make (Cartridge : Cartridge_intf.S) = struct
       (0xFF47, 0xFC);
       (0xFF4A, 0x00);
       (0xFF4B, 0x00);
-      (* TODO: Fill joypad related IO registers *)
       (* (0xFF4D, 0x--); *)
       (0xFFFF, 0x00);
     ]
@@ -169,12 +169,16 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~ime:false
     in
     initialize_state ~mmu ~registers ~lcd_stat ~gpu;
-    { cpu; timer; gpu }
+    { cpu; timer; gpu; joypad }
 
   let run_instruction t =
     let mcycles = Cpu.run_instruction t.cpu in
     Timer.run t.timer ~mcycles;
     Gpu.run t.gpu ~mcycles
+
+  let press t key = Joypad.press t.joypad key
+
+  let release t key = Joypad.release t.joypad key
 
 
   module For_tests = struct
