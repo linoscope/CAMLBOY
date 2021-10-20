@@ -32,7 +32,3 @@ A WIP Game Boy emulator written in OCaml.
 
 - [x] SDL
 - [ ] Browser (with js_of_ocaml)
-
-### Other
-
-- [ ] Improve SDL performance by using Sdl_texture

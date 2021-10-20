@@ -8,6 +8,7 @@ module Key_state = struct
   type t = Pressed | Not_pressed
   let to_bool t = t = Not_pressed (* 0=Pressed, 1=Not_pressed *)
 end
+
 type t = {
   addr : uint16;
   mutable mode   : mode;
