@@ -27,7 +27,7 @@ let create_texture renderer =
   |> or_exit
 
 let render_framebuffer ~texture ~renderer ~fb =
-  let copy_framebuffer_to_pixels pixels fb =
+  let copy_framebuffer_to_pixels fb pixels =
     for y = 0 to gb_h - 1 do
       for x = 0 to gb_w - 1 do
         let index = (y * gb_w) + x in
@@ -39,16 +39,17 @@ let render_framebuffer ~texture ~renderer ~fb =
       done
     done
   in
-  let pixels, _ = Sdl.lock_texture texture None Bigarray.int32 |> or_exit in
-  copy_framebuffer_to_pixels pixels fb;
+  Sdl.lock_texture texture None Bigarray.int32 |> or_exit
+  |> (fun (pixels, _) -> pixels)
+  |> copy_framebuffer_to_pixels fb;
   Sdl.unlock_texture texture;
   Sdl.render_copy renderer texture |> or_exit;
   Sdl.render_present renderer
 
 let () =
   Printexc.record_backtrace true;
-  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
-  (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/cpu_instrs.gb" in *)
+  (* let rom_bytes = Read_rom_file.f "./resource/private/mario-land-2.gb" in *)
+  let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/tim00.gb" in
   let cartridge =
     Cartridge_header.create ~rom_bytes
     |> Cartridge_header.get_cartridge_type
@@ -93,11 +94,13 @@ let () =
   in
   let renderer = create_renderer () in
   let texture = create_texture renderer in
+  let buf = Buffer.create 1500 in
   while true do
-    (* Printf.printf "%s" (Camlboy.show camlboy);
-     * Printf.printf " LY:$%02x" (Camlboy.For_tests.get_ly camlboy);
-     * Printf.printf " LCD_STAT:%s" (Camlboy.For_tests.get_lcd_stat camlboy |> Uints.Uint8.show);
-     * Printf.printf " MC:%3d" (Camlboy.For_tests.get_mcycles_in_mode camlboy); *)
+    Buffer.add_string buf (Camlboy.show camlboy);
+    (* Printf.sprintf " LY:$%02x" (Camlboy.For_tests.get_ly camlboy) |> Buffer.add_string buf;
+     * Printf.sprintf " LCD_STAT:%s" (Camlboy.For_tests.get_lcd_stat camlboy |> Uints.Uint8.show)
+     * |> Buffer.add_string buf;
+     * Printf.sprintf " MC:%3d" (Camlboy.For_tests.get_mcycles_in_mode camlboy) |> Buffer.add_string buf; *)
     begin match Camlboy.run_instruction camlboy with
       | In_frame ->
         ()
@@ -105,5 +108,7 @@ let () =
         handle_event ();
         render_framebuffer ~texture ~renderer ~fb:framebuffer;
     end;
-    (* Printf.printf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show); *)
+    Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
+    print_string (Buffer.contents buf);
+    Buffer.clear buf;
   done
