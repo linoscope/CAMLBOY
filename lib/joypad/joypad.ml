@@ -11,6 +11,7 @@ end
 
 type t = {
   addr : uint16;
+  ic   : Interrupt_controller.t;
   mutable mode   : mode;
   mutable down   : Key_state.t;
   mutable up     : Key_state.t;
@@ -22,8 +23,9 @@ type t = {
   mutable a      : Key_state.t;
 }
 
-let create ~addr = {
+let create ~addr ~ic = {
   addr;
+  ic;
   mode = Direction;
   down   = Not_pressed;
   up     = Not_pressed;
@@ -35,7 +37,9 @@ let create ~addr = {
   a      = Not_pressed
 }
 
-let press t = function
+let press t key =
+  Interrupt_controller.request t.ic Joypad;
+  match key with
   | Down   -> t.down   <- Pressed
   | Up     -> t.up     <- Pressed
   | Left   -> t.left   <- Pressed

@@ -88,7 +88,6 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~start_addr:(of_int 0xFF80)
         ~end_addr:(of_int 0xFFFE)
     in
-    let joypad = Joypad.create ~addr:(of_int 0xFF00) in
     let serial_port = Serial_port.create
         ~sb:(Mmap_register.create ~addr:(of_int 0xFF01) ~type_:`RW ())
         ~sc:(Mmap_register.create ~addr:(of_int 0xFF02) ~type_:`RW ())
@@ -115,6 +114,10 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~oam_ram:(Ram.create ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
     in
     let lcd_stat = Lcd_stat.create ~addr:lcd_stat_addr in
+    let joypad = Joypad.create
+        ~addr:(of_int 0xFF00)
+        ~ic
+    in
     let gpu = Gpu.create
         ~tile_data
         ~tile_map

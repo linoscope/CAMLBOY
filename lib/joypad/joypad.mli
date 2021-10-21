@@ -2,7 +2,7 @@ open Uints
 
 type t
 
-val create : addr:uint16 -> t
+val create : addr:uint16 -> ic:Interrupt_controller.t -> t
 
 type key =
   | Down
