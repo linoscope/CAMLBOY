@@ -133,7 +133,5 @@ let%expect_test "instr_timing.gb" =
   [%expect {|
     instr_timing
 
-
-    Timer doesn't  work properly
-
-    Failed #2 |}]
+    CB 46:4-3 CB 4E:4-3 CB 56:4-3 CB 5E:4-3 CB 66:4-3 CB 6E:4-3 CB 76:4-3 CB 7E:4-3
+    Failed |}]

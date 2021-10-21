@@ -491,7 +491,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD E, (HL);
     	inst_len = 1;
-    	mcycles = (1, 1)
+    	mcycles = (2, 2)
     }
     {
     	inst = LD E, A;
@@ -531,7 +531,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD H, (HL);
     	inst_len = 1;
-    	mcycles = (1, 1)
+    	mcycles = (2, 2)
     }
     {
     	inst = LD H, A;
@@ -571,7 +571,7 @@ let%expect_test "test all instructions" =
     {
     	inst = LD L, (HL);
     	inst_len = 1;
-    	mcycles = (1, 1)
+    	mcycles = (2, 2)
     }
     {
     	inst = LD L, A;
@@ -1006,7 +1006,7 @@ let%expect_test "test all instructions" =
     {
     	inst = PUSH BC;
     	inst_len = 1;
-    	mcycles = (1, 4)
+    	mcycles = (4, 4)
     }
     {
     	inst = ADD A, $AB;
@@ -2361,7 +2361,7 @@ let%expect_test "test all instructions" =
     {
     	inst = PUSH DE;
     	inst_len = 1;
-    	mcycles = (1, 4)
+    	mcycles = (4, 4)
     }
     {
     	inst = SUB A, $AB;

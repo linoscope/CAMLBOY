@@ -10,10 +10,10 @@ end = struct
 
   (* cpu mclock: 1048576 Hz
    * timer mclock:
-   * - 00: 4096 Hz => cpu mclock / timer mclock = 256
+   * - 00:   4096 Hz => cpu mclock / timer mclock = 256
    * - 01: 262144 Hz => cpu mclock / timer mclock = 4
-   * - 10: 65536 Hz => cpu mclock / timer mclock = 16
-   * - 11: 16384 Hz => cpu mclock / timer mclock = 64
+   * - 10:  65536 Hz => cpu mclock / timer mclock = 16
+   * - 11:  16384 Hz => cpu mclock / timer mclock = 64
    *  *)
   let of_byte u8 =
     let open Uint8 in
@@ -62,14 +62,14 @@ let run t ~mcycles =
   if t.is_running then begin
     t.uncounted_mcycles <- t.uncounted_mcycles + mcycles;
     let mcycle_per_count = Speed.mcycle_per_count t.speed in
-    while t.uncounted_mcycles >= mcycle_per_count do
-      t.uncounted_mcycles <- t.uncounted_mcycles - mcycle_per_count;
-      t.count <- t.count + 1;
-      if t.count >= 0xFF then begin
+    if t.uncounted_mcycles >= mcycle_per_count then begin
+      t.count <- t.count + (t.uncounted_mcycles / mcycle_per_count);
+      t.uncounted_mcycles <- t.uncounted_mcycles mod mcycle_per_count;
+      if t.count > 0xFF then begin
         Interrupt_controller.request t.ic Timer;
         t.count <- t.modulo
       end
-    done
+    end
   end
 
 let accepts t addr =
@@ -77,7 +77,8 @@ let accepts t addr =
 
 let read_byte t addr =
   match addr with
-  | _ when Uint16.(addr = t.tima_addr) -> t.count |> Uint8.of_int
+  | _ when Uint16.(addr = t.tima_addr) ->
+    t.count |> Uint8.of_int
   | _ when Uint16.(addr = t.tma_addr)  -> t.modulo |> Uint8.of_int
   | _ when Uint16.(addr = t.tac_addr)  ->
     let open Uint8 in
@@ -92,5 +93,7 @@ let write_byte t ~addr ~data =
   | _ when Uint16.(addr = t.tma_addr)  -> t.modulo <- Uint8.to_int data
   | _ when Uint16.(addr = t.tac_addr)  ->
     t.speed <- Speed.of_byte data;
-    t.is_running <- Uint8.(data land of_int 0b100 <> zero)
+    t.is_running <- Uint8.(data land of_int 0b100 <> zero);
+    if not t.is_running then
+      t.uncounted_mcycles <- 0
   | _ -> raise @@ Invalid_argument "Address out of bounds"

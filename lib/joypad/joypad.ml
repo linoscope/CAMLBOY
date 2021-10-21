@@ -70,8 +70,8 @@ let read_byte t _ =
   match t.mode with
   | Direction ->
     Bit_util.byte_of_bitflags
-      false
-      false
+      true
+      true
       false
       true
       (t.down  |> Key_state.to_bool)
@@ -80,8 +80,8 @@ let read_byte t _ =
       (t.right |> Key_state.to_bool)
   | Action ->
     Bit_util.byte_of_bitflags
-      false
-      false
+      true
+      true
       true
       false
       (t.start  |> Key_state.to_bool)

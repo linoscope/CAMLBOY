@@ -120,7 +120,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x5B -> l1, (1, 1), LD8 (R E, R E)
     | 0x5C -> l1, (1, 1), LD8 (R E, R H)
     | 0x5D -> l1, (1, 1), LD8 (R E, R L)
-    | 0x5E -> l1, (1, 1), LD8 (R E, RR_indirect HL)
+    | 0x5E -> l1, (2, 2), LD8 (R E, RR_indirect HL)
     | 0x5F -> l1, (1, 1), LD8 (R E, R A)
     | 0x60 -> l1, (1, 1), LD8 (R H, R B)
     | 0x61 -> l1, (1, 1), LD8 (R H, R C)
@@ -128,7 +128,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x63 -> l1, (1, 1), LD8 (R H, R E)
     | 0x64 -> l1, (1, 1), LD8 (R H, R H)
     | 0x65 -> l1, (1, 1), LD8 (R H, R L)
-    | 0x66 -> l1, (1, 1), LD8 (R H, RR_indirect HL)
+    | 0x66 -> l1, (2, 2), LD8 (R H, RR_indirect HL)
     | 0x67 -> l1, (1, 1), LD8 (R H, R A)
     | 0x68 -> l1, (1, 1), LD8 (R L, R B)
     | 0x69 -> l1, (1, 1), LD8 (R L, R C)
@@ -136,7 +136,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0x6B -> l1, (1, 1), LD8 (R L, R E)
     | 0x6C -> l1, (1, 1), LD8 (R L, R H)
     | 0x6D -> l1, (1, 1), LD8 (R L, R L)
-    | 0x6E -> l1, (1, 1), LD8 (R L, RR_indirect HL)
+    | 0x6E -> l1, (2, 2), LD8 (R L, RR_indirect HL)
     | 0x6F -> l1, (1, 1), LD8 (R L, R A)
     | 0x70 -> l1, (2, 2), LD8 (RR_indirect HL, R B)
     | 0x71 -> l1, (2, 2), LD8 (RR_indirect HL, R C)
@@ -223,7 +223,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0xC2 -> l3, (3, 4), JP (NZ, Immediate16 (next_word ()))
     | 0xC3 -> l3, (4, 4), JP (None, Immediate16 (next_word ()))
     | 0xC4 -> l3, (3, 6), CALL (NZ, next_word ())
-    | 0xC5 -> l1, (1, 4), PUSH BC
+    | 0xC5 -> l1, (4, 4), PUSH BC
     | 0xC6 -> l2, (2, 2), ADD8 (R A, (Immediate8 (next_byte ())))
     | 0xC7 -> l1, (4, 4), RST RST_offset.x00
     | 0xC8 -> l1, (2, 5), RET Z
@@ -238,7 +238,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     | 0xD2 -> l3, (3, 4), JP (NC, Immediate16 (next_word ()))
     | 0xD3 -> l1, (1, 1), NOP
     | 0xD4 -> l3, (3, 6), CALL (NC, next_word ())
-    | 0xD5 -> l1, (1, 4), PUSH DE
+    | 0xD5 -> l1, (4, 4), PUSH DE
     | 0xD6 -> l2, (2, 2), SUB (R A, Immediate8 (next_byte ()))
     | 0xD7 -> l1, (4, 4), RST RST_offset.x10
     | 0xD8 -> l1, (2, 5), RET C

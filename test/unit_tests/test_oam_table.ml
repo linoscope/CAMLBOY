@@ -23,4 +23,4 @@ let%expect_test "test" =
 
   [%expect {|
     { Oam_table.y_pos = 104; x_pos = 69; tile_index = $90;
-      priority = `Sprite_bottom; y_flip = false; x_flip = true; pallete = `OBP1 } |}]
+      priority = `Sprite_top; y_flip = false; x_flip = true; pallete = `OBP1 } |}]
