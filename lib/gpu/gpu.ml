@@ -120,7 +120,6 @@ let render_bg_window_line t ly =
 
 
 let render_sprite_line t ly =
-  (* TODO: Handle priorities properly  *)
   let open Oam_table in
   let y_sprite_size = match Lcd_control.get_obj_size t.lc with
     | `_8x8  -> 8
@@ -149,8 +148,15 @@ let render_sprite_line t ly =
           | ID_00 ->
             () (* transparant *)
           | ID_01 | ID_10 | ID_11 ->
-            let color = Pallete.lookup pallete color_id in
-            t.frame_buffer.(ly).(lx) <- color
+            match sprite.priority, t.frame_buffer.(ly).(lx) with
+            | `Sprite_top, _
+            | _, `White ->
+              let color = Pallete.lookup pallete color_id in
+              t.frame_buffer.(ly).(lx) <- color
+            | `Sprite_bottom, `Black
+            | `Sprite_bottom, `Dark_gray
+            | `Sprite_bottom, `Light_gray ->
+              ()
       done)
 
 let render_line t =

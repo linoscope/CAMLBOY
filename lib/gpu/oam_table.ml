@@ -51,7 +51,7 @@ let get_sprite_info t ~index =
     |> Ram.read_byte t.oam_ram
     |> Bit_util.bitflags_of_byte
   in
-  let priority = if b7 then `Sprite_top else `Sprite_bottom in
+  let priority = if b7 then `Sprite_bottom else `Sprite_top in
   let pallete = if b4 then `OBP1 else `OBP0 in
   {
     y_pos;
