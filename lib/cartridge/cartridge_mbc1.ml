@@ -1,9 +1,8 @@
 open Uints
+module Bytes = BytesLabels
 
-(* TODO: Properly handle modes: https://gbdev.io/pandocs/MBC1.html *)
-type mode =
-  | Rom_banking_mode
-  | Ram_banking_mode
+type mode = F0 | F1
+
 
 type t = {
   rom_bytes : bytes;
@@ -11,110 +10,111 @@ type t = {
   rom_bank_size : int;
   ram_bank_size : int;
   mutable ram_enabled : bool;
-  mutable cur_rom_bank : int;
-  mutable cur_ram_bank : int;
+  mutable rom_bank_num : int;
+  mutable ram_bank_num : int;
   mutable mode : mode;
-  (* addresses *)
-  rom_bank0_start_addr : uint16;
-  rom_bank0_half_addr : uint16;
-  rom_bank0_end_addr : uint16;
-  rom_bank_start_addr : uint16;
-  rom_bank_half_addr : uint16;
-  rom_bank_end_addr : uint16;
-  ram_bank_start_addr : uint16;
-  ram_bank_end_addr : uint16;
 }
 
-let create
-    ~rom_bytes
-    ~rom_bank0_start_addr
-    ~rom_bank0_end_addr
-    ~rom_bank_start_addr
-    ~rom_bank_end_addr
-    ~ram_bank_start_addr
-    ~ram_bank_end_addr
-  =
-  let rom_bank_size = Uint16.to_int rom_bank_end_addr - Uint16.to_int rom_bank_start_addr + 1 in
-  let ram_bank_size = Uint16.to_int ram_bank_end_addr - Uint16.to_int ram_bank_start_addr + 1 in
-  let rom_bank0_half_addr = Uint16.((rom_bank0_start_addr + rom_bank0_end_addr) / of_int 2) in
-  let rom_bank_half_addr = Uint16.((rom_bank_start_addr + rom_bank_end_addr) / of_int 2) in
-  let ram_bytes = Bytes.create (4 * ram_bank_size) in (* MBC1 can have up to 4 RAM banks *)
+let create ~rom_bytes =
+  let h = Cartridge_header.create ~rom_bytes in
+  let rom_bank_size = Cartridge_header.get_rom_bank_count h in
+  let ram_bank_size = Cartridge_header.get_ram_bank_count h in
+  let ram_bytes = Bytes.create (ram_bank_size * 0x2000) in
   {
     rom_bytes;
     ram_bytes;
     rom_bank_size;
     ram_bank_size;
-    ram_enabled = true;
-    cur_rom_bank = 1;
-    cur_ram_bank = 0;
-    mode = Rom_banking_mode;
-    rom_bank0_start_addr;
-    rom_bank0_half_addr;
-    rom_bank0_end_addr;
-    rom_bank_start_addr;
-    rom_bank_half_addr;
-    rom_bank_end_addr;
-    ram_bank_start_addr;
-    ram_bank_end_addr;
+    ram_enabled = false;
+    rom_bank_num = 1;
+    ram_bank_num = 0;
+    mode = F0;
   }
 
-let get_ram_addr t addr =
-  let bank_base = t.cur_ram_bank * t.ram_bank_size in
-  bank_base + Uint16.to_int addr - Uint16.to_int t.ram_bank_start_addr
+(* https://hacktixme.ga/GBEDG/mbcs/mbc1/#zero-bank *)
+let zero_bank_num t =
+  match t.mode, t.rom_bank_size with
+  | F0, _              -> 0
+  | F1, n when n <= 32 -> 0
+  | F1, n when n =  64 -> (t.ram_bank_num land 0b1) lsl 5
+  | F1, n when n = 128 -> (t.ram_bank_num land 0b11) lsl 5
+  | F1, _ -> assert false
+
+(* https://hacktixme.ga/GBEDG/mbcs/mbc1/#high-bank *)
+let high_bank_num t =
+  match t.rom_bank_size with
+  | n when n <= 32 -> t.rom_bank_num
+  | n when n =  64 ->
+    let bit5  = (t.ram_bank_num land 0b1) lsl 5 in
+    bit5 lor t.rom_bank_num
+  | n when n = 128 ->
+    let bit56 = (t.ram_bank_num land 0b11) lsl 5 in
+    bit56 lor t.rom_bank_num
+  | _ -> assert false
+
+let ram_addr_of_addr t addr =
+  match t.mode, t.ram_bank_size with
+  | F0, _
+  | F1, 1 ->
+    (addr - 0xA000) mod 0x2000
+  | F1, 4 ->
+    0x2000 * t.ram_bank_num + (addr - 0xA000)
+  | F1, n ->
+    raise @@ Invalid_argument (Printf.sprintf "Unexpected ram size: %d" n)
 
 let read_byte t addr =
-  if Uint16.(t.rom_bank0_start_addr <= addr && addr <= t.rom_bank0_end_addr) then
-    let rom_addr = Uint16.(addr - t.rom_bank0_start_addr) |> Uint16.to_int in
-    Bytes.get_int8 t.rom_bytes rom_addr |> Uint8.of_int
-  else if Uint16.(t.rom_bank_start_addr <= addr && addr <= t.rom_bank_end_addr) then
-    let bank_base = ((t.cur_rom_bank - 1) * t.rom_bank_size) in
-    let rom_addr = bank_base + Uint16.to_int addr - Uint16.to_int t.rom_bank0_start_addr in
-    Bytes.get_int8 t.rom_bytes rom_addr |> Uint8.of_int
-  else if Uint16.(t.ram_bank_start_addr <= addr && addr <= t.ram_bank_end_addr) then
-    if t.ram_enabled then
-      let ram_addr = get_ram_addr t addr in
-      Bytes.get_int8 t.ram_bytes ram_addr |> Uint8.of_int
+  let addr = Uint16.to_int addr in
+  match addr with
+  | _ when 0x0000 <= addr && addr <= 0x3FFF ->
+    let zero_bank_num = zero_bank_num t in
+    (0x4000 * zero_bank_num + addr)
+    |> Bytes.get_int8 t.rom_bytes
+    |> Uint8.of_int
+  | _ when 0x4000 <= addr && addr <= 0x7FFF ->
+    let high_bank_num = high_bank_num t in
+    (0x4000 * high_bank_num + (addr - 0x4000))
+    |> Bytes.get_int8 t.rom_bytes
+    |> Uint8.of_int
+  | _ when 0xA000 <= addr && addr <= 0xBFFF ->
+    if t.ram_enabled && t.ram_bank_size > 0 then
+      addr
+      |> ram_addr_of_addr t
+      |> Bytes.get_int8 t.ram_bytes
+      |> Uint8.of_int
     else
       Uint8.of_int 0xFF
-  else
-    raise @@ Invalid_argument "Address out of bounds"
+  | _ -> assert false
+
+
+let bitmask_of_rom_size = function
+  | 2   -> 0b00000001
+  | 4   -> 0b00000011
+  | 8   -> 0b00000111
+  | 16  -> 0b00001111
+  | 32  -> 0b00011111
+  | 64  -> 0b00011111
+  | 128 -> 0b00011111
+  | n -> raise @@ Invalid_argument (Printf.sprintf "Unexpected rom size: %d" n)
 
 let write_byte t ~addr ~data =
-  if Uint16.(t.rom_bank0_start_addr <= addr && addr <  t.rom_bank0_half_addr) then begin
-    t.ram_enabled <- Uint8.(data = of_int 0x0A)
-  end
-  else if Uint16.(t.rom_bank0_half_addr <= addr && addr <= t.rom_bank0_end_addr) then begin
-    if Uint8.(data = zero) then
-      t.cur_ram_bank <- 1
-    else
-      let data = Uint8.to_int data in
-      let bank = t.cur_rom_bank land 0b01100000 in
-      let bank = bank lor (data land 0b00011111) in
-      t.cur_rom_bank <- bank;
-  end
-  else if Uint16.(t.rom_bank_start_addr <= addr && addr < t.rom_bank_half_addr) then
-    match t.mode with
-    | Rom_banking_mode ->
-      (* data is high 2 bits of ROM bank *)
-      let data = Uint8.to_int data in
-      let bank = t.cur_rom_bank land 0b00011111 in
-      let bank = bank lor (data land 0b01100000) in
-      t.cur_rom_bank <- bank;
-    | Ram_banking_mode ->
-      let bank = (Uint8.to_int data) land 0b11 in
-      t.cur_ram_bank <- bank
-  else if Uint16.(t.rom_bank_half_addr <= addr && addr <= t.rom_bank_end_addr) then
-    t.mode <-
-      if Uint8.(data land one = zero) then Rom_banking_mode else Ram_banking_mode
-  else if Uint16.(t.ram_bank_start_addr <= addr && addr <= t.ram_bank_end_addr) then begin
-    if t.ram_enabled then
-      let ram_addr = get_ram_addr t addr in
-      Bytes.set_int8 t.ram_bytes ram_addr (Uint8.to_int data)
-  end else
-    raise @@ Invalid_argument (Printf.sprintf "Address out of bounds: %s" (addr |> Uint16.show))
+  let addr = Uint16.to_int addr in
+  let data = Uint8.to_int data in
+  match addr with
+  | _ when 0x0000 <= addr && addr <= 0x1FFF ->
+    t.ram_enabled <- data = 0x0A
+  | _ when 0x2000 <= addr && addr <= 0x3FFF ->
+    let rom_bank_num = data land (bitmask_of_rom_size t.rom_bank_size) in
+    t.rom_bank_num <- if rom_bank_num = 0 then 1 else rom_bank_num
+  | _ when 0x4000 <= addr && addr <= 0x5FFF ->
+    t.ram_bank_num <- data land 0b11
+  | _ when 0x6000 <= addr && addr <= 0x7FFF ->
+    t.mode <- if data land 1 = 0 then F0 else F1
+  | _ when 0xA000 <= addr && addr <= 0xBFFF ->
+    if t.ram_enabled && t.ram_bank_size > 0  then
+      let ram_addr = addr |> ram_addr_of_addr t in
+      Bytes.set_int8 t.ram_bytes ram_addr data
+  | _ -> assert false
 
-
-let accepts t addr =
-  Uint16.(t.rom_bank0_start_addr <= addr && addr <= t.rom_bank0_end_addr)
-  || Uint16.(t.rom_bank_start_addr <= addr && addr <= t.rom_bank_end_addr)
-  || Uint16.(t.ram_bank_start_addr <= addr && addr <= t.ram_bank_end_addr)
+let accepts _ addr =
+  let addr = Uint16.to_int addr in
+  0x0000 <= addr && addr <= 0x7FFF ||  0xA000 <= addr && addr <= 0xBFFF

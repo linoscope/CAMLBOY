@@ -44,4 +44,4 @@ let%expect_test "test mbc1" =
   [%expect {|
     Cartridge_type.MBC1
     4
-    0 |}]
+    1 |}]

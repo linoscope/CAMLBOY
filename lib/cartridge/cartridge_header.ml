@@ -33,9 +33,9 @@ let create ~rom_bytes =
     | _ -> assert false
   in
   let ram_bank_count =
-    match Bytes.get_int8 rom_bytes 0x148 with
+    match Bytes.get_int8 rom_bytes 0x149 with
     | 0x00 -> 0
-    | 0x01 -> 0
+    | 0x01 -> 1
     | 0x02 -> 1
     | 0x03 -> 4
     | 0x04 -> 16

@@ -1,44 +1,19 @@
 open Uints
 module Bytes = BytesLabels
 
-type t = {
-  rom_bytes : bytes;
-  rom_bank0_start_addr : uint16;
-  rom_bank0_end_addr : uint16;
-  rom_bank_start_addr : uint16;
-  rom_bank_end_addr : uint16;
-  ram_bank_start_addr : uint16;
-  ram_bank_end_addr : uint16;
-}
+type t = { rom_bytes : bytes; }
 
-let create
-    ~rom_bytes
-    ~rom_bank0_start_addr
-    ~rom_bank0_end_addr
-    ~rom_bank_start_addr
-    ~rom_bank_end_addr
-    ~ram_bank_start_addr
-    ~ram_bank_end_addr =
-  {
-    rom_bytes;
-    rom_bank0_start_addr;
-    rom_bank0_end_addr;
-    rom_bank_start_addr;
-    rom_bank_end_addr;
-    ram_bank_start_addr;
-    ram_bank_end_addr;
-  }
+let create ~rom_bytes = { rom_bytes; }
 
 let read_byte t addr =
-  if Uint16.(t.rom_bank0_start_addr <= addr && addr <= t.rom_bank_end_addr) then
-    let offset = Uint16.(addr - t.rom_bank0_start_addr) |> Uint16.to_int in
-    Bytes.get_int8 t.rom_bytes offset |> Uint8.of_int
+  let addr = Uint16.to_int addr in
+  if (0x0000 <= addr && addr <= 0x7FFF) then
+    Bytes.get_int8 t.rom_bytes addr |> Uint8.of_int
   else
     raise @@ Invalid_argument "Address out of bounds"
 
 let write_byte _ ~addr:_ ~data:_ = ()
 
-let accepts t addr =
-  Uint16.(t.rom_bank0_start_addr <= addr && addr <= t.rom_bank0_end_addr)
-  || Uint16.(t.rom_bank_start_addr <= addr && addr <= t.rom_bank_end_addr)
-  || Uint16.(t.ram_bank_start_addr <= addr && addr <= t.ram_bank_end_addr)
+let accepts _ addr =
+  let addr = Uint16.to_int addr in
+  (0x0000 <= addr && addr <= 0x7FFF)

@@ -4,15 +4,7 @@ open StdLabels
 
 let create () =
   let rom_bytes = Bytes.init 0x16000 ~f:(fun i -> Char.chr ((i lsr 8) land 0xFF)) in
-  let open Uint16 in
-  Cartridge_mbc1.create
-    ~rom_bytes
-    ~rom_bank0_start_addr:(of_int 0x0000)
-    ~rom_bank0_end_addr:(of_int 0x3FFF)
-    ~rom_bank_start_addr:(of_int 0x4000)
-    ~rom_bank_end_addr:(of_int 0x7FFF)
-    ~ram_bank_start_addr:(of_int 0xA000)
-    ~ram_bank_end_addr:(of_int 0xBFFF)
+  Cartridge_mbc1.create ~rom_bytes
 
 let%expect_test "test rom bank switch" =
   let open Uint16 in
