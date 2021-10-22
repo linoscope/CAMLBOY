@@ -1386,7 +1386,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 0, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 0, A;
@@ -1426,7 +1426,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 1, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 1, A;
@@ -1466,7 +1466,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 2, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 2, A;
@@ -1506,7 +1506,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 3, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 3, A;
@@ -1546,7 +1546,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 4, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 4, A;
@@ -1586,7 +1586,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 5, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 5, A;
@@ -1626,7 +1626,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 6, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 6, A;
@@ -1666,7 +1666,7 @@ let%expect_test "test all instructions" =
     {
     	inst = BIT 7, (HL);
     	inst_len = 2;
-    	mcycles = (4, 4)
+    	mcycles = (3, 3)
     }
     {
     	inst = BIT 7, A;

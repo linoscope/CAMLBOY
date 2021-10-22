@@ -133,5 +133,5 @@ let%expect_test "instr_timing.gb" =
   [%expect {|
     instr_timing
 
-    CB 46:4-3 CB 4E:4-3 CB 56:4-3 CB 5E:4-3 CB 66:4-3 CB 6E:4-3 CB 76:4-3 CB 7E:4-3
-    Failed |}]
+
+    Passed |}]
