@@ -49,7 +49,8 @@ let render_framebuffer ~texture ~renderer ~fb =
 let () =
   Printexc.record_backtrace true;
   (* let rom_bytes = Read_rom_file.f "./resource/private/mario-land-2.gb" in *)
-  let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
+  (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/tima_reload.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
   let cartridge =
@@ -96,10 +97,10 @@ let () =
   in
   let renderer = create_renderer () in
   let texture = create_texture renderer in
-  let buf = Buffer.create 1500 in
+  (* let buf = Buffer.create 1500 in *)
   while true do
-    Buffer.add_string buf (Camlboy.show camlboy);
-    Printf.bprintf buf " tima:%s" (Camlboy.For_tests.get_tima_count camlboy |> Uints.Uint8.show);
+    (* Buffer.add_string buf (Camlboy.show camlboy); *)
+    (* Printf.bprintf buf " tima:%s" (Camlboy.For_tests.get_tima_count camlboy |> Uints.Uint8.show); *)
     (* Printf.sprintf " LY:$%02x" (Camlboy.For_tests.get_ly camlboy) |> Buffer.add_string buf;
      * Printf.sprintf " LCD_STAT:%s" (Camlboy.For_tests.get_lcd_stat camlboy |> Uints.Uint8.show)
      * |> Buffer.add_string buf;
@@ -111,48 +112,7 @@ let () =
         handle_event ();
         render_framebuffer ~texture ~renderer ~fb:framebuffer;
     end;
-    Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
-    print_string (Buffer.contents buf);
-    Buffer.clear buf;
+    (* Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
+     * print_string (Buffer.contents buf);
+     * Buffer.clear buf; *)
   done
-
-(*  A:$01 F:---- BC:$D826 DE:$0027 HL:$DFF3 SP:$DFED PC:$C2F6 | XOR A, A
- *  A:$00 F:Z--- BC:$D826 DE:$0027 HL:$DFF3 SP:$DFED PC:$C2F7 | LD ($FF00+$05), A
- *  A:$00 F:Z--- BC:$D826 DE:$0027 HL:$DFF3 SP:$DFED PC:$C2F9 | LD A, ($FF00+$05)
- * -A:$01 F:Z--- BC:$D826 DE:$0027 HL:$DFF3 SP:$DFED PC:$C2FB | DEC DE
- * -A:$01 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2FC | OR A, A
- * -A:$01 F:---- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2FD | JR NZ, -9
- * -A:$01 F:---- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2F6 | XOR A, A
- * -A:$00 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2F7 | LD ($FF00+$05), A
- * -A:$00 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2F9 | LD A, ($FF00+$05)
- * -A:$00 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2FB | DEC DE
- * -A:$00 F:Z--- BC:$D826 DE:$0025 HL:$DFF3 SP:$DFED PC:$C2FC | OR A, A
- * -A:$00 F:Z--- BC:$D826 DE:$0025 HL:$DFF3 SP:$DFED PC:$C2FD | JR NZ, -9
- * -A:$00 F:Z--- BC:$D826 DE:$0025 HL:$DFF3 SP:$DFED PC:$C2FF | RET
- * -A:$00 F:Z--- BC:$D826 DE:$0025 HL:$DFF3 SP:$DFEF PC:$C2E4 | LD A, E
- * -A:$25 F:Z--- BC:$D826 DE:$0025 HL:$DFF3 SP:$DFEF PC:$C2E5 | SUB A, $0A
- * -A:$1B F:-NH- BC:$D826 DE:$0025 HL:$DFF3 SP:$DFEF PC:$C2E7 | POP DE
- * -A:$1B F:-NH- BC:$D826 DE:$D826 HL:$DFF3 SP:$DFF1 PC:$C2E8 | RET
- * +A:$00 F:Z--- BC:$D826 DE:$0027 HL:$DFF3 SP:$DFED PC:$C2FB | DEC DE
- * +A:$00 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2FC | OR A, A
- * +A:$00 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2FD | JR NZ, -9
- * +A:$00 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFED PC:$C2FF | RET
- * +A:$00 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFEF PC:$C2E4 | LD A, E
- * +A:$26 F:Z--- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFEF PC:$C2E5 | SUB A, $0A
- * +A:$1C F:-NH- BC:$D826 DE:$0026 HL:$DFF3 SP:$DFEF PC:$C2E7 | POP DE
- * +A:$1C F:-NH- BC:$D826 DE:$D826 HL:$DFF3 SP:$DFF1 PC:$C2E8 | RET
- * +A:$1C F:-NH- BC:$D826 DE:$D826 HL:$DFF3 SP:$DFF3 PC:$C435 | SUB A, $18
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$DFF3 SP:$DFF3 PC:$C437 | RET
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$DFF3 SP:$DFF5 PC:$C3DC | POP HL
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$CC46 SP:$DFF7 PC:$C3DD | RET
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$CC46 SP:$DFF9 PC:$C3B5 | CP A, (HL)
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$CC46 SP:$DFF9 PC:$C3B6 | JR NZ, 9
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$CC46 SP:$DFF9 PC:$C3C1 | PUSH HL
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$CC46 SP:$DFF7 PC:$C3C2 | CALL $C0C2
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$CC46 SP:$DFF5 PC:$C0C2 | POP HL
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$C3C5 SP:$DFF7 PC:$C0C3 | CALL $C0C7
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$C3C5 SP:$DFF5 PC:$C0C7 | PUSH AF
- * +A:$04 F:-N-- BC:$D826 DE:$D826 HL:$C3C5 SP:$DFF3 PC:$C0C8 | JR 3 *)
-(* A\:\$00 F\:Z--- BC\:\$D826 DE\:\$0027 HL\:\$DFF3 SP\:\$DFED PC\:\$C2FB \| DEC DE *)
-
-(* A\:\$04 F\:-N-- BC\:\$D826 DE\:\$D826 HL\:\$CC46 SP\:\$DFF7 PC\:\$C3DD \| RET *)
