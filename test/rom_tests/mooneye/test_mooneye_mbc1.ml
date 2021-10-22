@@ -2,7 +2,7 @@ open Camlboy_lib
 module M = Mooneye_utils.Make(Cartridge_mbc1)
 
 let%expect_test "bits_bank1.gb" =
-  M.run_test_rom_and_print_framebuffer "bits_bank1.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/bits_bank1.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486D
@@ -14,7 +14,7 @@ let%expect_test "bits_bank1.gb" =
     013:----#-----####----###------##--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "bits_bank2.gb" =
-  M.run_test_rom_and_print_framebuffer "bits_bank2.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/bits_bank2.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486D
@@ -26,7 +26,7 @@ let%expect_test "bits_bank2.gb" =
     013:----#-----####----###------##--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "bits_mode.gb" =
-  M.run_test_rom_and_print_framebuffer "bits_mode.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/bits_mode.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486D
@@ -38,7 +38,7 @@ let%expect_test "bits_mode.gb" =
     013:----#-----####----###------##--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "bits_ramg.gb" =
-  M.run_test_rom_and_print_framebuffer "bits_ramg.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/bits_ramg.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$02E6 DE:$42F0 HL:$FF40 SP:$E000 PC:$486D
@@ -56,7 +56,7 @@ let%expect_test "bits_ramg.gb" =
     021:-#---#---#----#--#-----#--###--------------###---#----#--------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "rom_512kb.gb" =
-  M.run_test_rom_and_print_framebuffer "rom_512kb.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/rom_512kb.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0203 DE:$42F1 HL:$FF40 SP:$E000 PC:$486E
@@ -99,7 +99,7 @@ let%expect_test "rom_512kb.gb" =
     053:-#----#---###-------#-----####---#----#--######----------------------------------------------------##------###-------------------------------------------------- |}]
 
 let%expect_test "rom_1Mb.gb" =
-  M.run_test_rom_and_print_framebuffer "rom_1Mb.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/rom_1Mb.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0203 DE:$42F1 HL:$FF40 SP:$E000 PC:$486E
@@ -142,7 +142,7 @@ let%expect_test "rom_1Mb.gb" =
     053:-#----#---###-------#-----####---#----#--######----------------------------------------------------##------###-------------------------------------------------- |}]
 
 let%expect_test "rom_2Mb.gb" =
-  M.run_test_rom_and_print_framebuffer "rom_2Mb.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/rom_2Mb.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0203 DE:$42F1 HL:$FF40 SP:$E000 PC:$486E
@@ -185,7 +185,7 @@ let%expect_test "rom_2Mb.gb" =
     053:-#----#---###-------#-----####---#----#--######----------------------------------------------------##------###-------------------------------------------------- |}]
 
 let%expect_test "rom_4Mb.gb" =
-  M.run_test_rom_and_print_framebuffer "rom_4Mb.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/rom_4Mb.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486E
@@ -197,7 +197,7 @@ let%expect_test "rom_4Mb.gb" =
     013:----#-----####----###------##--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "rom_16Mb.gb" =
-  M.run_test_rom_and_print_framebuffer "rom_16Mb.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/rom_16Mb.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486E
@@ -209,7 +209,7 @@ let%expect_test "rom_16Mb.gb" =
     013:----#-----####----###------##--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "ram_64kb.gb" =
-  M.run_test_rom_and_print_framebuffer "ram_64kb.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/ram_64kb.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486D
@@ -221,7 +221,7 @@ let%expect_test "ram_64kb.gb" =
     013:----#-----####----###------##--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "ram_256kb.gb" =
-  M.run_test_rom_and_print_framebuffer "ram_256kb.gb";
+  M.run_test_rom_and_print_framebuffer "mbc1/ram_256kb.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486D
