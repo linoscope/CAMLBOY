@@ -53,11 +53,7 @@ let () =
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/bits_bank2.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
-  let cartridge =
-    Cartridge_header.create ~rom_bytes
-    |> Cartridge_header.get_cartridge_type
-    |> Cartridge_of_cartridge_type.f
-  in
+  let cartridge = Detect_cartridge.f ~rom_bytes in
   let module Camlboy = Camlboy.Make (val cartridge) in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
   let handle_event () =
