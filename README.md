@@ -24,7 +24,8 @@ A WIP Game Boy emulator written in OCaml.
 - [ ] Cartridges
   - [x] ROM_ONLY
   - [x] MBC1
-  - [ ] MBC3
+  - [x] MBC3
+  - [ ] MBC5
 - [x] Joypad
 - [ ] APU
 
