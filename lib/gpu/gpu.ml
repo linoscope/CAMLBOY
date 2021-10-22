@@ -95,13 +95,15 @@ let render_bg_window_line t ly =
     let wx = Lcd_position.get_wx t.lp - 7 in
     if wy <= ly && ly <= wy + window_wh && wx <= screen_w then
       let window_tile_map_area = Lcd_control.get_window_tile_map_area t.lc in
-      let row_in_tile = (Int.abs (wy - ly)) mod 8 in
-      for lx = wx to screen_w - 1 do
-        let col_in_tile = lx mod 8 in
+      let y_in_w = (Int.abs (ly - wy)) in
+      let row_in_tile = y_in_w mod 8 in
+      for lx = 0 to screen_w - 1 do
+        let x_in_w = Int.abs (lx - wx) in
+        let col_in_tile = x_in_w mod 8 in
         let tile_index = Tile_map.get_tile_index t.tm
             ~area:window_tile_map_area
-            ~y:(Int.abs (ly - wy))
-            ~x:(Int.abs (lx - wx))
+            ~y:y_in_w
+            ~x:x_in_w
         in
         let pixel_color_id = Tile_data.get_pixel t.td
             ~index:tile_index
