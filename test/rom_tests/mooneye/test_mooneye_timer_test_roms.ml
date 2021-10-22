@@ -1,8 +1,8 @@
 open Camlboy_lib
-open Mooneye_utils.Make(Cartridge_mbc1)
+module M = Mooneye_utils.Make(Cartridge_mbc1)
 
 let%expect_test "div_timing.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/div_timing.gb";
+  M.run_test_rom_and_print_framebuffer "div_timing.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$4B2D
@@ -58,7 +58,7 @@ let%expect_test "div_timing.gb" =
     101:-----------------####-------#--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "tim00.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/tim00.gb";
+  M.run_test_rom_and_print_framebuffer "tim00.gb";
 
   [%expect {|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$4B2D
@@ -108,7 +108,7 @@ let%expect_test "tim00.gb" =
     101:-----------------####-------#--------------###---#---#-------------------#####------#--------------###---#---#-------------------------------------------------- |}]
 
 let%expect_test "tim01.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/tim01.gb";
+  M.run_test_rom_and_print_framebuffer "tim01.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$4B2D
@@ -158,7 +158,7 @@ let%expect_test "tim01.gb" =
     101:-----------------####-------#--------------###---#---#-------------------#####------#--------------###---#---#-------------------------------------------------- |}]
 
 let%expect_test "tim10.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/tim10.gb";
+  M.run_test_rom_and_print_framebuffer "tim10.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$4B2D
@@ -208,7 +208,7 @@ let%expect_test "tim10.gb" =
     101:-----------------####-------#--------------###---#---#-------------------#####------#--------------###---#---#-------------------------------------------------- |}]
 
 let%expect_test "tim11.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/tim11.gb";
+  M.run_test_rom_and_print_framebuffer "tim11.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$4B2D
@@ -258,7 +258,7 @@ let%expect_test "tim11.gb" =
     101:-----------------####-------#--------------###---#---#-------------------#####------#--------------###---#---#-------------------------------------------------- |}]
 
 let%expect_test "tima_reload.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/tima_reload.gb";
+  M.run_test_rom_and_print_framebuffer "tima_reload.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$4B2D
@@ -320,7 +320,7 @@ let%expect_test "tima_reload.gb" =
     109:-----------------#----#-----#--------------###---#---#-------------------######-----#--------------###---#---#-------------------------------------------------- |}]
 
 let%expect_test "tima_div_write.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/div_write.gb";
+  M.run_test_rom_and_print_framebuffer "div_write.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$0305 DE:$080D HL:$1522 SP:$E000 PC:$486D
@@ -332,7 +332,7 @@ let%expect_test "tima_div_write.gb" =
     013:----#-----####----###------##--------------###---#---#---------------------------------------------------------------------------------------------------------- |}]
 
 let%expect_test "tima_write_reloading.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/tma_write_reloading.gb";
+  M.run_test_rom_and_print_framebuffer "tma_write_reloading.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$4841 DE:$01B8 HL:$FF40 SP:$E000 PC:$4B2D
@@ -400,7 +400,7 @@ let%expect_test "tima_write_reloading.gb" =
     125:----#-----####----###------##--------------#------###-#-----#------##-----####----###-#------------------------------------------------------------------------- |}]
 
 let%expect_test "rapid_toggle.gb" =
-  run_test_rom_and_print_framebuffer "../../resource/test_roms/mooneye/rapid_toggle.gb";
+  M.run_test_rom_and_print_framebuffer "rapid_toggle.gb";
 
   [%expect{|
     A:$00 F:ZN-- BC:$4841 DE:$020C HL:$FF40 SP:$E000 PC:$4B2D
