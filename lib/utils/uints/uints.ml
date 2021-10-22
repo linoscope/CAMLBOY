@@ -5,6 +5,7 @@ module MakeInfix (B : Uints_intf.Basics) : Uints_intf.Infix with type t := B.t =
   let ( * ) = mul
   let ( / ) = div
   let ( = ) = equal
+  let ( <> ) = (fun a b -> not (equal a b))
   let ( <= ) = le
   let ( mod ) = rem
   let ( land ) = logand

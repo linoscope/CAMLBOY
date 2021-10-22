@@ -13,3 +13,7 @@ val create :
 val run : t -> mcycles:int -> unit
 
 include Addressable_intf.S with type t := t
+
+module For_tests : sig
+  val get_tima_count : t -> uint8
+end

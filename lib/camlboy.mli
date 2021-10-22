@@ -22,6 +22,7 @@ module Make (Cartridge : Cartridge_intf.S) : sig
 
     val get_mcycles_in_mode : t -> int
 
+    val get_tima_count : t -> uint8
   end
 
 end

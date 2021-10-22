@@ -32,6 +32,7 @@ module type Infix = sig
   val ( * ) : t -> t -> t
   val ( / ) : t -> t -> t
   val ( = ) : t -> t -> bool
+  val ( <> ) : t -> t -> bool
   val ( <= ) : t -> t -> bool
   val ( mod ) : t -> t -> t
   val ( land ) : t -> t -> t

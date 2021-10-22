@@ -194,6 +194,8 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
     let get_mcycles_in_mode t = Gpu.For_tests.get_mcycles_in_mode t.gpu
 
+    let get_tima_count t = Timer.For_tests.get_tima_count t.timer
+
   end
 
 end
