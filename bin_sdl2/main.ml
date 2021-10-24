@@ -47,9 +47,8 @@ let render_framebuffer ~texture ~renderer ~fb =
   Sdl.render_present renderer
 
 let () =
-  Printexc.record_backtrace true;
-  let rom_bytes = Read_rom_file.f "./resource/private/pokemon-aka.gb" in
-  (* let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in *)
+  (* let rom_bytes = Read_rom_file.f "./resource/private/pokemon-aka.gb" in *)
+  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/bits_bank2.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
