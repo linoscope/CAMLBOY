@@ -45,6 +45,8 @@ module Uint8 = struct
     let shift_left x y = (x lsl y) land max_int
     let shift_right = (lsr)
     let of_int x = x land max_int
+    let of_char c = Char.code c
+    let to_char t = Char.unsafe_chr t
     external to_int : t -> int = "%identity"
 
     let show = Printf.sprintf "$%02X"

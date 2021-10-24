@@ -1,14 +1,14 @@
 open Uints
-module Bytes = BytesLabels
 
-type t = { rom_bytes : bytes; }
+type t = { rom_bytes : Bigstringaf.t; }
 
 let create ~rom_bytes = { rom_bytes; }
 
 let read_byte t addr =
   let addr = Uint16.to_int addr in
   if (0x0000 <= addr && addr <= 0x7FFF) then
-    Bytes.get_int8 t.rom_bytes addr |> Uint8.of_int
+    Bigstringaf.get t.rom_bytes addr
+    |> Uint8.of_char
   else
     raise @@ Invalid_argument "Address out of bounds"
 

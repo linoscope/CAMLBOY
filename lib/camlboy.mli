@@ -4,7 +4,7 @@ module Make (Cartridge : Cartridge_intf.S) : sig
 
   type t [@@deriving show]
 
-  val create_with_rom : print_serial_port:bool -> rom_bytes:bytes -> t
+  val create_with_rom : print_serial_port:bool -> rom_bytes:Bigstringaf.t -> t
 
   val run_instruction : t -> Gpu.run_result
 

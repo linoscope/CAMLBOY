@@ -7,7 +7,7 @@ type t = {
 let create ~rom_bytes =
   let cartridge_type =
     let open Cartridge_type in
-    match Bytes.get_int8 rom_bytes 0x147 with
+    match Bigstringaf.get rom_bytes 0x147 |> Char.code with
     | 0x00 -> ROM_ONLY
     | 0x01 -> MBC1
     | 0x02 -> MBC1_RAM
@@ -20,7 +20,7 @@ let create ~rom_bytes =
     |    x -> raise @@ Invalid_argument (Printf.sprintf "Unknown rom type : 0x%x" x)
   in
   let rom_bank_count =
-    match Bytes.get_int8 rom_bytes 0x148 with
+    match Bigstringaf.get rom_bytes 0x148 |> Char.code with
     | 0x00 -> 2
     | 0x01 -> 4
     | 0x02 -> 8
@@ -33,7 +33,7 @@ let create ~rom_bytes =
     | _ -> assert false
   in
   let ram_bank_count =
-    match Bytes.get_int8 rom_bytes 0x149 with
+    match Bigstringaf.get rom_bytes 0x149 |> Char.code with
     | 0x00 -> 0
     | 0x01 -> 1
     | 0x02 -> 1
@@ -49,4 +49,3 @@ let get_cartridge_type t = t.cartridge_type
 let get_rom_bank_count t = t.rom_bank_count
 
 let get_ram_bank_count t = t.ram_bank_count
-

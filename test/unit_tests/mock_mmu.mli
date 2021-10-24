@@ -5,7 +5,7 @@ type t
 
 val create : size:int -> t
 
-val load : t -> src:bytes -> dst_pos:uint16 -> unit
+val load : t -> src:Bigstringaf.t -> dst_pos:uint16 -> unit
 
 val dump : t -> unit
 

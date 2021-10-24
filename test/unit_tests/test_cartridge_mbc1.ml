@@ -3,7 +3,9 @@ open Uints
 open StdLabels
 
 let create () =
-  let rom_bytes = Bytes.init 0x16000 ~f:(fun i -> Char.chr ((i lsr 8) land 0xFF)) in
+  let rom_string = String.init 0x16000 ~f:(fun i -> Char.chr ((i lsr 8) land 0xFF)) in
+  let len = String.length rom_string in
+  let rom_bytes = Bigstringaf.of_string ~off:0 ~len rom_string in
   Cartridge_mbc1.create ~rom_bytes
 
 let%expect_test "test rom bank switch" =

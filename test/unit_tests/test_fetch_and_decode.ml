@@ -6,7 +6,7 @@ module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
 
 let disassemble instr_bin_file out  =
   let rom_bytes = Read_rom_file.f instr_bin_file in
-  let rom_len = Bytes.length rom_bytes in
+  let rom_len = Bigstringaf.length rom_bytes in
 
   let mmu = Mmu.create ~size:0x3FF in
   Mmu.load mmu ~src:rom_bytes ~dst_pos:Uint16.zero;

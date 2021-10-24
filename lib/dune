@@ -1,5 +1,6 @@
 (library
  (name camlboy_lib)
+ (libraries bigstringaf)
  (preprocess (pps ppx_deriving.show)))
 
 (include_subdirs unqualified)

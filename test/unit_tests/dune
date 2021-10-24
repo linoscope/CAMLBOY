@@ -1,6 +1,6 @@
 (library
  (name camlboy_unit_test)
- (libraries camlboy_lib base)
+ (libraries camlboy_lib base bigstringaf)
  (inline_tests)
  (preprocess (pps ppx_jane)))
 

@@ -63,7 +63,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
   let lcd_stat_addr = Uint16.of_int 0xFF41
 
-  let create_with_rom ~print_serial_port ~rom_bytes =
+  let create_with_rom ~print_serial_port ~(rom_bytes : Bigstringaf.t) =
     let open Uint16 in
     let cartridge = Cartridge.create ~rom_bytes
     in

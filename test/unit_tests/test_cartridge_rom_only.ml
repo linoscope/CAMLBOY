@@ -4,8 +4,11 @@ open StdLabels
 
 let%expect_test "load then read" =
   let open Uint16 in
-  let rom_bytes = Bytes.init 5 ~f:(fun i -> Char.chr i) in
+  let rom_string = String.init 5 ~f:(fun i -> Char.chr i) in
+  let len = String.length rom_string in
+  let rom_bytes = Bigstringaf.of_string ~off:0 ~len rom_string in
   let catrdige = Cartridge_rom_only.create ~rom_bytes in
+
 
   [ Cartridge_rom_only.read_byte catrdige (of_int 0x00);
     Cartridge_rom_only.read_byte catrdige (of_int 0x01);

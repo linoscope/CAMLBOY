@@ -1,7 +1,7 @@
 
 type t
 
-val create : rom_bytes:bytes -> t
+val create : rom_bytes:Bigstringaf.t -> t
 
 val get_cartridge_type : t -> Cartridge_type.t
 

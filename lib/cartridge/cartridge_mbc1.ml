@@ -1,12 +1,10 @@
 open Uints
-module Bytes = BytesLabels
 
 type mode = F0 | F1
 
-
 type t = {
-  rom_bytes : bytes;
-  ram_bytes : bytes;
+  rom_bytes : Bigstringaf.t;
+  ram_bytes : Bigstringaf.t;
   rom_bank_size : int;
   ram_bank_size : int;
   mutable ram_enabled : bool;
@@ -19,7 +17,7 @@ let create ~rom_bytes =
   let h = Cartridge_header.create ~rom_bytes in
   let rom_bank_size = Cartridge_header.get_rom_bank_count h in
   let ram_bank_size = Cartridge_header.get_ram_bank_count h in
-  let ram_bytes = Bytes.create (ram_bank_size * 0x2000) in
+  let ram_bytes = Bigstringaf.create (ram_bank_size * 0x2000) in
   {
     rom_bytes;
     ram_bytes;
@@ -68,19 +66,19 @@ let read_byte t addr =
   | _ when 0x0000 <= addr && addr <= 0x3FFF ->
     let zero_bank_num = zero_bank_num t in
     (0x4000 * zero_bank_num + addr)
-    |> Bytes.get_int8 t.rom_bytes
-    |> Uint8.of_int
+    |> Bigstringaf.get t.rom_bytes
+    |> Uint8.of_char
   | _ when 0x4000 <= addr && addr <= 0x7FFF ->
     let high_bank_num = high_bank_num t in
     (0x4000 * high_bank_num + (addr - 0x4000))
-    |> Bytes.get_int8 t.rom_bytes
-    |> Uint8.of_int
+    |> Bigstringaf.get t.rom_bytes
+    |> Uint8.of_char
   | _ when 0xA000 <= addr && addr <= 0xBFFF ->
     if t.ram_enabled && t.ram_bank_size > 0 then
       addr
       |> ram_addr_of_addr t
-      |> Bytes.get_int8 t.ram_bytes
-      |> Uint8.of_int
+      |> Bigstringaf.get t.ram_bytes
+      |> Uint8.of_char
     else
       Uint8.of_int 0xFF
   | _ -> assert false
@@ -112,7 +110,7 @@ let write_byte t ~addr ~data =
   | _ when 0xA000 <= addr && addr <= 0xBFFF ->
     if t.ram_enabled && t.ram_bank_size > 0  then
       let ram_addr = addr |> ram_addr_of_addr t in
-      Bytes.set_int8 t.ram_bytes ram_addr data
+      Bigstringaf.set t.ram_bytes ram_addr (Char.unsafe_chr data)
   | _ -> assert false
 
 let accepts _ addr =

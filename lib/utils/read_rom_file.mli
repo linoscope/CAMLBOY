@@ -1,2 +1,2 @@
 
-val f : string -> bytes
+val f : string -> Bigstringaf.t

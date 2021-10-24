@@ -1,4 +1,8 @@
-module Uint8 : Uints_intf.S
+module Uint8 : sig
+  include Uints_intf.S
+  val of_char : char -> t
+  val to_char : t -> char
+end
 
 module Uint16 : sig
   include Uints_intf.S
