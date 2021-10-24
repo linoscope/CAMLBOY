@@ -24,7 +24,6 @@ let create ()=
   let oam_table = Oam_table.create
       ~start_addr:(of_int 0xFE00)
       ~end_addr:(of_int 0xFE9F)
-      ~oam_ram:(Ram.create ~start_addr:(of_int 0xFE00) ~end_addr:(of_int 0xFE9F))
   in
   Interrupt_controller.write_byte ic ~addr:(Uint16.of_int 0xFFFF) ~data:(Uint8.of_int 0xFF);
   Gpu.create

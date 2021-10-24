@@ -18,6 +18,7 @@ let create ~tile_data_ram ~area1_start_addr ~area0_start_addr = {
   area0_start_addr;
 }
 
+(* TODO: Optimize *)
 let get_pixel t ~area ~(index:uint8) ~row ~col =
   let row_offset = 2 * row |> Uint16.of_int in
   let low_bit_row_addr = match area with

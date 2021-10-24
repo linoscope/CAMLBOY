@@ -129,38 +129,38 @@ let render_sprite_line t ly =
     | `_8x16 -> 16
   in
   Oam_table.get_all_sprites t.oam
-  |> List.filter (fun sprite -> sprite.y_pos <= ly && ly <= sprite.y_pos + y_sprite_size - 1)
-  |> List.iter (fun sprite ->
-      let row = ly - sprite.y_pos in
-      let pallete = match sprite.pallete with
-        | `OBP0 -> t.obp0
-        | `OBP1 -> t.obp1
-      in
-      for col = 0 to 7 do
-        let lx = sprite.x_pos + col in
-        if lx < 0 || lx >= screen_w then
-          ()
-        else
-          let color_id = Tile_data.get_pixel t.td
-              ~area:Area1
-              ~index:sprite.tile_index
-              ~row:(if sprite.y_flip then y_sprite_size - row - 1 else row)
-              ~col:(if sprite.x_flip then 7 - col else col)
-          in
-          match color_id with
-          | ID_00 ->
-            () (* transparant *)
-          | ID_01 | ID_10 | ID_11 ->
-            match sprite.priority, t.frame_buffer.(ly).(lx) with
-            | `Sprite_top, _
-            | _, `White ->
-              let color = Pallete.lookup pallete color_id in
-              t.frame_buffer.(ly).(lx) <- color
-            | `Sprite_bottom, `Black
-            | `Sprite_bottom, `Dark_gray
-            | `Sprite_bottom, `Light_gray ->
-              ()
-      done)
+  |> Array.iter (fun sprite ->
+      if sprite.y_pos <= ly && ly <= sprite.y_pos + y_sprite_size - 1 then
+        let row = ly - sprite.y_pos in
+        let pallete = match sprite.pallete with
+          | `OBP0 -> t.obp0
+          | `OBP1 -> t.obp1
+        in
+        for col = 0 to 7 do
+          let lx = sprite.x_pos + col in
+          if lx < 0 || lx >= screen_w then
+            ()
+          else
+            let color_id = Tile_data.get_pixel t.td
+                ~area:Area1
+                ~index:sprite.tile_index
+                ~row:(if sprite.y_flip then y_sprite_size - row - 1 else row)
+                ~col:(if sprite.x_flip then 7 - col else col)
+            in
+            match color_id with
+            | ID_00 ->
+              () (* transparant *)
+            | ID_01 | ID_10 | ID_11 ->
+              match sprite.priority, t.frame_buffer.(ly).(lx) with
+              | `Sprite_top, _
+              | _, `White ->
+                let color = Pallete.lookup pallete color_id in
+                t.frame_buffer.(ly).(lx) <- color
+              | `Sprite_bottom, `Black
+              | `Sprite_bottom, `Dark_gray
+              | `Sprite_bottom, `Light_gray ->
+                ()
+        done)
 
 let render_line t =
   let ly = Lcd_position.get_ly t.lp in
