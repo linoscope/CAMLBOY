@@ -27,8 +27,6 @@ let write_word t ~addr ~data =
 
 let accepts _ _ = true
 
-(* let dump t =
- *   t |> Bytes.iter ~f:(fun c -> Char.code c |> Printf.printf "%02x ") *)
 let dump t =
   for i = 0 to Bigstringaf.length t - 1 do
     let c = Bigstringaf.get t i |> Char.code in
