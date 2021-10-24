@@ -128,7 +128,7 @@ let render_sprite_line t ly =
     | `_8x8  -> 8
     | `_8x16 -> 16
   in
-  Oam_table.get_all_sprite_infos t.oam
+  Oam_table.get_all_sprites t.oam
   |> List.filter (fun sprite -> sprite.y_pos <= ly && ly <= sprite.y_pos + y_sprite_size - 1)
   |> List.iter (fun sprite ->
       let row = ly - sprite.y_pos in

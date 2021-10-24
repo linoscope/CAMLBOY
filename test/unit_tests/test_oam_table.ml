@@ -17,8 +17,9 @@ let%expect_test "test" =
   Oam_table.write_byte t ~addr:Uint16.(offset + of_int 2) ~data:Uint8.(of_int 0x90);
   Oam_table.write_byte t ~addr:Uint16.(offset + of_int 3) ~data:Uint8.(of_int 0x30);
 
-  Oam_table.get_sprite_info t ~index:2
-  |> Oam_table.show_sprite_info
+  Oam_table.get_all_sprites t
+  |> (fun l -> List.nth l 2)
+  |> Oam_table.show_sprite
   |> print_endline;
 
   [%expect {|
