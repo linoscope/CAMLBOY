@@ -10,3 +10,9 @@ type t =
 val of_bits : hi:bool -> lo:bool -> t
 
 val to_int : t -> int
+
+val set_bit : t -> [`Lo | `Hi] -> t
+
+val clear_bit : t -> [`Lo | `Hi] -> t
+
+val get_bit : t -> [`Lo | `Hi] -> bool

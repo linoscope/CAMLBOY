@@ -2,43 +2,35 @@ open Uints
 
 type area = Area1 | Area0
 
-(* TODO:
- *  Maintain a internal representation of the tile set in where
- *  the pixel value has been pre-calculated.
- *  *)
 type t = {
-  tile_data_ram : Ram.t;
-  area1_start_addr : uint16;
-  area0_start_addr : uint16;
+  (* tiles.(i).(row).(col) : (row, col) of the i-th tile *)
+  tiles : Color_id.t array array array;
+  start_addr : uint16;
+  end_addr : uint16;
 }
 
-let create ~tile_data_ram ~area1_start_addr ~area0_start_addr = {
-  tile_data_ram;
-  area1_start_addr;
-  area0_start_addr;
-}
+let create ~start_addr ~end_addr =
+  let tiles = Array.init 384 (fun _ -> Array.make_matrix 8 8 Color_id.ID_00) in
+  {
+    tiles;
+    start_addr;
+    end_addr;
+  }
 
-(* TODO: Optimize *)
+(* TODO: napkin-math why this (and oam fetch) is slow *)
 let get_pixel t ~area ~(index:uint8) ~row ~col =
-  let row_offset = 2 * row |> Uint16.of_int in
-  let low_bit_row_addr = match area with
+  let index = match area with
     | Area1 ->
-      let index = index |> Uint8.to_int in
-      Uint16.(t.area1_start_addr + of_int 16 * of_int index + row_offset)
+      Uint8.to_int index
     | Area0 ->
-      let index = index |> Int8.of_byte |> Int8.to_int in
-      if index < 0 then
-        Uint16.(t.area0_start_addr - of_int 16 * of_int (abs index) + row_offset)
-      else
-        Uint16.(t.area0_start_addr + of_int 16 * of_int index + row_offset)
+      (* interpret unsigned int8 byte as signed int8 *)
+      let signed_index = index |> Int8.of_byte |> Int8.to_int in
+      signed_index + 256
   in
-  let hi_bit_row_addr  = Uint16.(low_bit_row_addr + one) in
-  let low_bit_row = Ram.read_byte t.tile_data_ram low_bit_row_addr |> Uint8.to_int in
-  let hi_bit_row  = Ram.read_byte t.tile_data_ram hi_bit_row_addr |> Uint8.to_int in
-  let i = 7 - col in
-  let hi_bit  = (hi_bit_row lsr i) land 1 = 1 in
-  let low_bit = (low_bit_row lsr i) land 1 = 1 in
-  Color_id.of_bits ~hi:hi_bit ~lo:low_bit
+  if row >= 8 then
+    t.tiles.(index + 1).(row - 8).(col)
+  else
+    t.tiles.(index).(row).(col)
 
 let get_row_pixels t ~area ~index ~row =
   [| 0; 1; 2; 3; 4; 5; 6; 7 |]
@@ -54,12 +46,32 @@ let print_full_pixels t ~area ~index =
       color_ids
       |> Array.map (Color_id.to_int)
       |> Array.iter (print_int);
-      print_newline ()
-    )
+      print_newline ())
 
+let accepts t addr = Uint16.(t.start_addr <= addr && addr <= t.end_addr)
 
-let accepts t addr = Ram.accepts t.tile_data_ram addr
+let read_byte t addr =
+  let offset = Uint16.(addr - t.start_addr) |> Uint16.to_int in
+  let index = offset / 16 in
+  let row = (offset mod 16) / 2 in
+  let hi_or_lo = if offset mod 2 = 0 then `Lo else `Hi in
+  t.tiles.(index).(row)
+  |> Array.map (fun id -> Color_id.get_bit id hi_or_lo)
+  |> Bit_util.byte_of_bitarray
 
-let read_byte t addr = Ram.read_byte t.tile_data_ram addr
-
-let write_byte t ~addr ~data = Ram.write_byte t.tile_data_ram ~addr ~data
+let write_byte t ~addr ~data =
+  let data_bits = Bit_util.bitarray_of_byte data in
+  let offset = Uint16.(addr - t.start_addr) |> Uint16.to_int in
+  let index = offset / 16 in
+  let row = (offset mod 16) / 2 in
+  (* Printf.printf "offset=%d, index=%d, row=%d\n" offset index row; *)
+  let colors_in_row = t.tiles.(index).(row) in
+  let hi_or_lo = if offset mod 2 = 0 then `Lo else `Hi in
+  t.tiles.(index).(row) <-
+    data_bits
+    |> Array.mapi (fun i b ->
+        let id = colors_in_row.(i) in
+        if b then
+          Color_id.set_bit id hi_or_lo
+        else
+          Color_id.clear_bit id hi_or_lo)

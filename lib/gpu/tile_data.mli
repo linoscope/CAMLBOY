@@ -6,9 +6,8 @@ type t
 type area = Area1 | Area0
 
 val create :
-  tile_data_ram:Ram.t ->
-  area1_start_addr:uint16 ->
-  area0_start_addr:uint16 ->
+  start_addr:uint16 ->
+  end_addr:uint16 ->
   t
 
 val get_pixel : t -> area:area -> index:uint8 -> row:int -> col:int -> Color_id.t

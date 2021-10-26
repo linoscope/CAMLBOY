@@ -4,9 +4,8 @@ open Uints
 let create () =
   let open Uint16 in
   Tile_data.create
-    ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
-    ~area1_start_addr:(of_int 0x8000)
-    ~area0_start_addr:(of_int 0x9000)
+    ~start_addr:(of_int 0x8000)
+    ~end_addr:(of_int 0x97FF)
 
 let%expect_test "test area 1, index 0, row 0" =
   let open Uint16 in
@@ -16,8 +15,14 @@ let%expect_test "test area 1, index 0, row 0" =
      (0x8001): [1, 0, 0, 0, 1, 0, 1, 1] *)
   t |> Tile_data.write_byte ~addr:(of_int 0x8000) ~data:(Uint8.of_int 0b01001110);
   t |> Tile_data.write_byte ~addr:(of_int 0x8001) ~data:(Uint8.of_int 0b10001011);
-  let color_ids = t |> Tile_data.get_row_pixels ~area:Area1 ~index:(Uint8.of_int 0) ~row:0 in
 
+  Tile_data.read_byte t (of_int 0x8000) |> Uint8.show |> print_endline;
+  Tile_data.read_byte t (of_int 0x8001) |> Uint8.show |> print_endline;
+  [%expect {|
+    $72
+    $D1 |}];
+
+  let color_ids = t |> Tile_data.get_row_pixels ~area:Area1 ~index:(Uint8.of_int 0) ~row:0 in
   color_ids
   |> Array.map (Color_id.to_int)
   |> Array.iter (print_int);

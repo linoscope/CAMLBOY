@@ -16,3 +16,47 @@ let to_int = function
   | ID_01 -> 1
   | ID_10 -> 2
   | ID_11 -> 3
+
+let set_bit t = function
+  | `Lo ->
+    begin match t with
+      | ID_00 -> ID_01
+      | ID_01 -> ID_01
+      | ID_10 -> ID_11
+      | ID_11 -> ID_11
+    end
+  | `Hi ->
+    begin match t with
+      | ID_00 -> ID_10
+      | ID_01 -> ID_11
+      | ID_10 -> ID_10
+      | ID_11 -> ID_11
+    end
+
+let clear_bit t = function
+  | `Lo ->
+    begin match t with
+      | ID_00 -> ID_00
+      | ID_01 -> ID_00
+      | ID_10 -> ID_10
+      | ID_11 -> ID_10
+    end
+  | `Hi ->
+    begin match t with
+      | ID_00 -> ID_00
+      | ID_01 -> ID_01
+      | ID_10 -> ID_00
+      | ID_11 -> ID_01
+    end
+
+let get_bit t = function
+  | `Lo ->
+    begin match t with
+      | ID_00 | ID_10 -> false
+      | ID_01 | ID_11 -> true
+    end
+  | `Hi ->
+    begin match t with
+      | ID_00 | ID_01 -> false
+      | ID_10 | ID_11 -> true
+    end

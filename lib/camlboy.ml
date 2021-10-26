@@ -92,9 +92,8 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~if_addr:(of_int 0xFF0F)
     in
     let tile_data = Tile_data.create
-        ~tile_data_ram:(Ram.create ~start_addr:(of_int 0x8000) ~end_addr:(of_int 0x97FF))
-        ~area1_start_addr:(of_int 0x8000)
-        ~area0_start_addr:(of_int 0x9000)
+        ~start_addr:(of_int 0x8000)
+        ~end_addr:(of_int 0x97FF)
     in
     let tile_map = Tile_map.create
         ~tile_map_ram:(Ram.create ~start_addr:(Uint16.of_int 0x9800) ~end_addr:(Uint16.of_int 0x9FFF))
