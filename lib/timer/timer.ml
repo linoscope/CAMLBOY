@@ -31,6 +31,8 @@ let create ~div_addr ~tima_addr ~tma_addr ~tac_addr ~ic = {
 (** Takes old and new value of [internal_tcycle_count] and detects if it has a "falling edge"
  ** You can read more on "falling edge" here: https://hacktixme.ga/GBEDG/timers/ *)
 let has_falling_edge t old new_ =
+  let old = Uint16.to_int old in
+  let new_ = Uint16.to_int new_ in
   let bit_to_check =
     let tac = (t.tac |> Uint8.to_int) land 0b11 in
     match tac with
@@ -40,9 +42,8 @@ let has_falling_edge t old new_ =
     | 0b11 -> 7
     | _ -> assert false
   in
-  let open Uint16 in
-  let mask = one lsl bit_to_check in
-  (old land mask <> zero) && (new_ land mask = zero)
+  let mask = 1 lsl bit_to_check in
+  (old land mask <> 0) && (new_ land mask = 0)
 
 let run t ~mcycles =
   let is_tima_enabled = Uint8.(t.tac land of_int 0b100 <> zero) in
