@@ -96,9 +96,10 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~end_addr:(of_int 0x97FF)
     in
     let tile_map = Tile_map.create
-        ~tile_map_ram:(Ram.create ~start_addr:(Uint16.of_int 0x9800) ~end_addr:(Uint16.of_int 0x9FFF))
         ~area0_start_addr:(Uint16.of_int 0x9800)
+        ~area0_end_addr:(Uint16.of_int 0x9BFF)
         ~area1_start_addr:(Uint16.of_int 0x9C00)
+        ~area1_end_addr:(Uint16.of_int 0x9FFF)
     in
     let oam_table = Oam_table.create
         ~start_addr:(of_int 0xFE00)

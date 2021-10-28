@@ -9,9 +9,10 @@ type area =
   | Area1
 
 val create :
-  tile_map_ram:Ram.t ->
   area0_start_addr:uint16 ->
+  area0_end_addr:uint16 ->
   area1_start_addr:uint16 ->
+  area1_end_addr:uint16 ->
   t
 
 val get_tile_index : t -> area:area -> y:int -> x:int -> uint8
