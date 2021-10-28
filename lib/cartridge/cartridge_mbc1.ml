@@ -66,18 +66,18 @@ let read_byte t addr =
   | _ when 0x0000 <= addr && addr <= 0x3FFF ->
     let zero_bank_num = zero_bank_num t in
     (0x4000 * zero_bank_num + addr)
-    |> Bigstringaf.get t.rom_bytes
+    |> Bigstringaf.unsafe_get t.rom_bytes
     |> Uint8.of_char
   | _ when 0x4000 <= addr && addr <= 0x7FFF ->
     let high_bank_num = high_bank_num t in
     (0x4000 * high_bank_num + (addr - 0x4000))
-    |> Bigstringaf.get t.rom_bytes
+    |> Bigstringaf.unsafe_get t.rom_bytes
     |> Uint8.of_char
   | _ when 0xA000 <= addr && addr <= 0xBFFF ->
     if t.ram_enabled && t.ram_bank_size > 0 then
       addr
       |> ram_addr_of_addr t
-      |> Bigstringaf.get t.ram_bytes
+      |> Bigstringaf.unsafe_get t.ram_bytes
       |> Uint8.of_char
     else
       Uint8.of_int 0xFF
@@ -110,7 +110,7 @@ let write_byte t ~addr ~data =
   | _ when 0xA000 <= addr && addr <= 0xBFFF ->
     if t.ram_enabled && t.ram_bank_size > 0  then
       let ram_addr = addr |> ram_addr_of_addr t in
-      Bigstringaf.set t.ram_bytes ram_addr (Char.unsafe_chr data)
+      Bigstringaf.unsafe_set t.ram_bytes ram_addr (Char.unsafe_chr data)
   | _ -> assert false
 
 let accepts _ addr =

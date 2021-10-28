@@ -19,8 +19,8 @@ let accepts t addr = Uint16.(t.start_addr <= addr && addr <= t.end_addr)
 
 let read_byte t addr =
   let offset = Uint16.(addr - t.start_addr) |> Uint16.to_int in
-  Bigstringaf.get t.bytes offset |> Uint8.of_char
+  Bigstringaf.unsafe_get t.bytes offset |> Uint8.of_char
 
 let write_byte t ~addr ~data =
   let offset = Uint16.(addr - t.start_addr) |> Uint16.to_int in
-  Bigstringaf.set t.bytes offset (Uint8.to_char data)
+  Bigstringaf.unsafe_set t.bytes offset (Uint8.to_char data)

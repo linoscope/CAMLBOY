@@ -13,23 +13,23 @@ let load t ~src ~dst_pos =
 
 let read_byte t addr =
   let addr = Uint16.to_int addr in
-  Bigstringaf.get t addr |> Uint8.of_char
+  Bigstringaf.unsafe_get t addr |> Uint8.of_char
 
 let read_word t addr =
   let addr = Uint16.to_int addr in
-  Bigstringaf.get_int16_le t addr |> Uint16.of_int
+  Bigstringaf.unsafe_get_int16_le t addr |> Uint16.of_int
 
 let write_byte t ~addr ~data =
-  Bigstringaf.set t (Uint16.to_int addr) (Uint8.to_char data)
+  Bigstringaf.unsafe_set t (Uint16.to_int addr) (Uint8.to_char data)
 
 let write_word t ~addr ~data =
-  Bigstringaf.set_int16_le t (Uint16.to_int addr) (Uint16.to_int data)
+  Bigstringaf.unsafe_set_int16_le t (Uint16.to_int addr) (Uint16.to_int data)
 
 let accepts _ _ = true
 
 let dump t =
   for i = 0 to Bigstringaf.length t - 1 do
-    let c = Bigstringaf.get t i |> Char.code in
+    let c = Bigstringaf.unsafe_get t i |> Char.code in
     Printf.printf "%02x " c
   done
 
