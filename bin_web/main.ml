@@ -54,11 +54,22 @@ let load_rom_button ctx image_data =
           let module C = Camlboy.Make(val cartridge) in
           let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes in
           Console.profile (Jstr.v "foo");
+          let cnt = ref 0 in
+          let start_time = ref (Performance.now_ms G.performance) in
           let rec run_instr () =
             begin match C.run_instruction t with
               | In_frame ->
                 run_instr ()
               | Frame_ended fb ->
+                incr cnt;
+                if !cnt = 60 then begin
+                  let end_time = Performance.now_ms G.performance in
+                  let sec_per_60_frame = (end_time -. !start_time) /. 1000. in
+                  let fps = 60. /.  sec_per_60_frame in
+                  start_time := end_time;
+                  Console.(log [fps]);
+                  cnt := 0;
+                end;
                 draw_framebuffer ctx image_data fb;
             end;
           in
