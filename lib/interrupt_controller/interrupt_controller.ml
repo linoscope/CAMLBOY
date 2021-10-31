@@ -57,16 +57,18 @@ let clear_all t =
   |> List.iter (fun type_ -> clear t type_)
 
 let next t =
-  let get state = function
-    | VBlank      -> state.vblank
-    | LCD_stat    -> state.lcd_stat
-    | Timer       -> state.timer
-    | Serial_port -> state.serial_port
-    | Joypad      -> state.joypad
-  in
-  let check s1 s2 type_ = get s1 type_ && get s2 type_ in
-  [VBlank; LCD_stat; Timer; Serial_port; Joypad]
-  |> List.find_opt (check t.ie t.if_)
+  if t.ie.vblank && t.if_.vblank then
+    Some VBlank
+  else if t.ie.lcd_stat && t.if_.lcd_stat then
+    Some LCD_stat
+  else if t.ie.timer && t.if_.timer then
+    Some Timer
+  else if t.ie.serial_port && t.if_.serial_port then
+    Some Serial_port
+  else if t.ie.joypad && t.if_.joypad then
+    Some Joypad
+  else
+    None
 
 let accepts t addr = Uint16.(t.ie.addr = addr || t.if_.addr = addr)
 

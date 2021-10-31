@@ -28,14 +28,15 @@ module Make (Cartridge : Addressable_intf.S) = struct
     dt = dma_transfer;
   }
 
+
   let read_byte t addr =
     match addr with
     | _ when Cartridge.accepts t.cartridge addr     -> Cartridge.read_byte t.cartridge addr
     | _ when Ram.accepts t.wram       addr          -> Ram.read_byte t.wram addr
-    | _ when Gpu.accepts t.gpu        addr          -> Gpu.read_byte t.gpu addr
     | _ when Ram.accepts t.zero_page  addr          -> Ram.read_byte t.zero_page addr
-    | _ when Shadow_ram.accepts t.shadow_ram addr   -> Shadow_ram.read_byte t.shadow_ram addr
+    | _ when Gpu.accepts t.gpu        addr          -> Gpu.read_byte t.gpu addr
     | _ when Joypad.accepts t.joypad addr           -> Joypad.read_byte t.joypad addr
+    | _ when Shadow_ram.accepts t.shadow_ram addr   -> Shadow_ram.read_byte t.shadow_ram addr
     | _ when Serial_port.accepts t.serial_port addr -> Serial_port.read_byte t.serial_port addr
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.read_byte t.ic addr
     | _ when Timer.accepts t.timer addr             -> Timer.read_byte t.timer addr
@@ -60,10 +61,10 @@ module Make (Cartridge : Addressable_intf.S) = struct
     match addr with
     | _ when Cartridge.accepts t.cartridge addr     -> Cartridge.write_byte t.cartridge ~addr ~data
     | _ when Ram.accepts t.wram       addr          -> Ram.write_byte t.wram ~addr ~data
-    | _ when Gpu.accepts t.gpu        addr          -> Gpu.write_byte t.gpu ~addr ~data
     | _ when Ram.accepts t.zero_page  addr          -> Ram.write_byte t.zero_page ~addr ~data
-    | _ when Shadow_ram.accepts t.shadow_ram addr   -> Shadow_ram.write_byte t.shadow_ram ~addr ~data
+    | _ when Gpu.accepts t.gpu        addr          -> Gpu.write_byte t.gpu ~addr ~data
     | _ when Joypad.accepts t.joypad addr           -> Joypad.write_byte t.joypad ~addr ~data
+    | _ when Shadow_ram.accepts t.shadow_ram addr   -> Shadow_ram.write_byte t.shadow_ram ~addr ~data
     | _ when Serial_port.accepts t.serial_port addr -> Serial_port.write_byte t.serial_port ~addr ~data
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.write_byte t.ic ~addr ~data
     | _ when Timer.accepts t.timer  addr            -> Timer.write_byte t.timer ~addr ~data
