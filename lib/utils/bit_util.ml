@@ -39,7 +39,7 @@ let bitarray_of_byte x =
   |]
 
 let byte_of_bitarray a =
-  [|7; 6; 5; 4; 3; 2; 1; 0|]
+  [| 0; 1; 2; 3; 4; 5; 6; 7 |]
   |> Array.fold_left ~init:0 ~f:(fun acc i ->
-      acc lor (Bool.to_int a.(i) lsl i))
+      acc lor (Bool.to_int a.(i) lsl (7 - i)))
   |> Uint8.of_int

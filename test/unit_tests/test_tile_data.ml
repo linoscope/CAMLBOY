@@ -19,8 +19,8 @@ let%expect_test "test area 1, index 0, row 0" =
   Tile_data.read_byte t (of_int 0x8000) |> Uint8.show |> print_endline;
   Tile_data.read_byte t (of_int 0x8001) |> Uint8.show |> print_endline;
   [%expect {|
-    $72
-    $D1 |}];
+    $4E
+    $8B |}];
 
   let color_ids = t |> Tile_data.get_row_pixels ~area:Area1 ~index:(Uint8.of_int 0) ~row:0 in
   color_ids
