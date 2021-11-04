@@ -11,4 +11,4 @@
 
 (alias
  (name app)
- (deps main.js main.html))
+ (deps main.js index.html))
