@@ -46,50 +46,50 @@ let render_framebuffer ~texture ~renderer ~fb =
   Sdl.render_copy renderer texture |> or_exit;
   Sdl.render_present renderer
 
+let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (camlboy : a) =
+  let event = Sdl.Event.create () in
+  if Sdl.poll_event (Some event) then begin
+    match Sdl.Event.(get event typ |> enum) with
+    | `Key_down ->
+      let scancode = Sdl.Event.(get event keyboard_scancode) in
+      begin match Sdl.Scancode.enum scancode with
+        | `Return -> Camlboy.press camlboy Start
+        | `Tab    -> Camlboy.press camlboy Select
+        | `Z      -> Camlboy.press camlboy B
+        | `X      -> Camlboy.press camlboy A
+        | `Up     -> Camlboy.press camlboy Up
+        | `Down   -> Camlboy.press camlboy Down
+        | `Left   -> Camlboy.press camlboy Left
+        | `Right  -> Camlboy.press camlboy Right
+        | `Escape -> exit 0
+        | _       -> ()
+      end
+    | `Key_up ->
+      let scancode = Sdl.Event.(get event keyboard_scancode) in
+      begin match Sdl.Scancode.enum scancode with
+        | `Return -> Camlboy.release camlboy Start
+        | `Tab    -> Camlboy.release camlboy Select
+        | `Z      -> Camlboy.release camlboy B
+        | `X      -> Camlboy.release camlboy A
+        | `Up     -> Camlboy.release camlboy Up
+        | `Down   -> Camlboy.release camlboy Down
+        | `Left   -> Camlboy.release camlboy Left
+        | `Right  -> Camlboy.release camlboy Right
+        | _       -> ()
+      end
+    | `Quit -> exit 0
+    | _     -> ()
+  end
+
 let () =
   (* let rom_bytes = Read_rom_file.f "./resource/private/pokemon-aka.gb" in *)
-  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/private/kirby.gb" in
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/bits_bank2.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module Camlboy = Camlboy.Make (val cartridge) in
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
-  let handle_event () =
-    let event = Sdl.Event.create () in
-    if Sdl.poll_event (Some event) then begin
-      match Sdl.Event.(get event typ |> enum) with
-      | `Key_down ->
-        let scancode = Sdl.Event.(get event keyboard_scancode) in
-        begin match Sdl.Scancode.enum scancode with
-          | `Return -> Camlboy.press camlboy Start
-          | `Tab    -> Camlboy.press camlboy Select
-          | `Z      -> Camlboy.press camlboy B
-          | `X      -> Camlboy.press camlboy A
-          | `Up     -> Camlboy.press camlboy Up
-          | `Down   -> Camlboy.press camlboy Down
-          | `Left   -> Camlboy.press camlboy Left
-          | `Right  -> Camlboy.press camlboy Right
-          | `Escape -> exit 0
-          | _       -> ()
-        end
-      | `Key_up ->
-        let scancode = Sdl.Event.(get event keyboard_scancode) in
-        begin match Sdl.Scancode.enum scancode with
-          | `Return -> Camlboy.release camlboy Start
-          | `Tab    -> Camlboy.release camlboy Select
-          | `Z      -> Camlboy.release camlboy B
-          | `X      -> Camlboy.release camlboy A
-          | `Up     -> Camlboy.release camlboy Up
-          | `Down   -> Camlboy.release camlboy Down
-          | `Left   -> Camlboy.release camlboy Left
-          | `Right  -> Camlboy.release camlboy Right
-          | _       -> ()
-        end
-      | `Quit -> exit 0
-      | _     -> ()
-    end
-  in
   let renderer = create_renderer () in
   let texture = create_texture renderer in
   (* let buf = Buffer.create 1500 in *)
@@ -104,7 +104,7 @@ let () =
       | In_frame ->
         ()
       | Frame_ended framebuffer ->
-        handle_event ();
+        handle_event (module Camlboy) camlboy;
         render_framebuffer ~texture ~renderer ~fb:framebuffer;
     end;
     (* Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
