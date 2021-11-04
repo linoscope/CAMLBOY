@@ -1,4 +1,5 @@
 open Uints
+open StdLabels
 
 type state =
   | Enabled
@@ -60,7 +61,7 @@ let create
     mcycles_in_mode = 0;
     state = Enabled;
     ic;
-    frame_buffer = Array.make_matrix screen_h screen_w `White; }
+    frame_buffer = Array.make_matrix ~dimx:screen_h ~dimy:screen_w `White; }
   in
   handle_ly_eq_lyc t;
   t
@@ -76,18 +77,29 @@ let render_bg_window_line t ly =
     let y = (scy + ly) mod bg_wh in
     let bg_tile_map_area  = Lcd_control.get_bg_tile_map_area t.lc in
     let row_in_tile = y mod 8 in
-    for lx = 0 to screen_w - 1 do
-      let x = (scx + lx) mod bg_wh in
+    let lx = ref 0 in
+    while !lx < screen_w do
+      let x = (scx + !lx) mod bg_wh in
       let col_in_tile = x mod 8 in
       let tile_index = Tile_map.get_tile_index t.tm ~area:bg_tile_map_area ~y ~x in
-      let pixel_color_id = Tile_data.get_pixel t.td
+      let tile_pixel_row = Tile_data.get_row_pixels t.td
           ~index:tile_index
           ~area:tile_data_area
           ~row:row_in_tile
-          ~col:col_in_tile
       in
-      let color = Pallete.lookup t.bgp pixel_color_id in
-      t.frame_buffer.(ly).(lx) <- color
+      let len =
+        if col_in_tile > 0 then (* left edge of the view port *)
+          8 - col_in_tile
+        else if screen_w - !lx < 8 then (* right edge of the view port *)
+          screen_w - !lx
+        else
+          8
+      in
+      for i = 0 to len - 1  do
+        let color = Pallete.lookup t.bgp tile_pixel_row.(col_in_tile + i) in
+        t.frame_buffer.(ly).(!lx + i) <- color
+      done;
+      lx := !lx + len;
     done
   in
   let render_window_line t ly tile_data_area =
@@ -97,23 +109,26 @@ let render_bg_window_line t ly =
       let window_tile_map_area = Lcd_control.get_window_tile_map_area t.lc in
       let y_in_w = (Int.abs (ly - wy)) in
       let row_in_tile = y_in_w mod 8 in
-      let lx_start = if wx < 0 then 0 else wx in
-      for lx = lx_start to screen_w - 1 do
-        let x_in_w = Int.abs (lx - wx) in
+      let lx = ref (if wx < 0 then 0 else wx) in
+      while !lx < screen_w do
+        let x_in_w = Int.abs (!lx - wx) in
         let col_in_tile = x_in_w mod 8 in
         let tile_index = Tile_map.get_tile_index t.tm
             ~area:window_tile_map_area
             ~y:y_in_w
             ~x:x_in_w
         in
-        let pixel_color_id = Tile_data.get_pixel t.td
+        let tile_pixel_row = Tile_data.get_row_pixels t.td
             ~index:tile_index
             ~area:tile_data_area
             ~row:row_in_tile
-            ~col:col_in_tile
         in
-        let color = Pallete.lookup t.bgp pixel_color_id in
-        t.frame_buffer.(ly).(lx) <- color
+        let len = if screen_w - !lx < 8 then screen_w - !lx else 8 in
+        for i = col_in_tile to len - 1  do
+          let color = Pallete.lookup t.bgp tile_pixel_row.(i) in
+          t.frame_buffer.(ly).(!lx + i) <- color
+        done;
+        lx := !lx + len;
       done
   in
   let tile_data_area = Lcd_control.get_tile_data_area t.lc in
@@ -129,7 +144,7 @@ let render_sprite_line t ly =
     | `_8x16 -> 16
   in
   Oam_table.get_all_sprites t.oam
-  |> Array.iter (fun sprite ->
+  |> Array.iter ~f:(fun sprite ->
       if sprite.y_pos <= ly && ly <= sprite.y_pos + y_sprite_size - 1 then
         let row = ly - sprite.y_pos in
         let pallete = match sprite.pallete with

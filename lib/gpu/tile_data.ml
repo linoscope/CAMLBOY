@@ -17,8 +17,7 @@ let create ~start_addr ~end_addr =
     end_addr;
   }
 
-(* TODO: napkin-math why this (and oam fetch) is slow *)
-let get_pixel t ~area ~(index:uint8) ~row ~col =
+let get_row_pixels t ~area ~(index:uint8) ~row =
   let index = match area with
     | Area1 ->
       Uint8.to_int index
@@ -28,13 +27,14 @@ let get_pixel t ~area ~(index:uint8) ~row ~col =
       signed_index + 256
   in
   if row >= 8 then
-    t.tiles.(index + 1).(row - 8).(col)
+    t.tiles.(index + 1).(row - 8)
   else
-    t.tiles.(index).(row).(col)
+    t.tiles.(index).(row)
 
-let get_row_pixels t ~area ~index ~row =
-  [| 0; 1; 2; 3; 4; 5; 6; 7 |]
-  |> Array.map (fun col -> get_pixel t ~area ~index ~row ~col)
+(* TODO: napkin-math why this (and oam fetch) was the bottle neck *)
+let get_pixel t ~area ~(index:uint8) ~row ~col =
+  let row = get_row_pixels t ~area ~index ~row in
+  row.(col)
 
 let get_full_pixels t ~area ~index =
   [| 0; 1; 2; 3; 4; 5; 6; 7 |]
