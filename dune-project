@@ -11,5 +11,5 @@
  (depends
   (bigstringaf (>= 0.8.0))
   (ppx_deriving (>= 4.5))
-  (ppx_jane (>= v0.14.0 :with-test))
+  (ppx_jane (and (>= v0.14.0) :with-test))
    dune))
