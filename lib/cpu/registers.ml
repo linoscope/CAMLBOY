@@ -97,13 +97,28 @@ let read_flag t flag =
   | Subtraction -> f land 0b01000000 <> 0
   | Zero        -> f land 0b10000000 <> 0
 
+(* Precompute uint8 masks to reduce calls to Uint8.of_int.
+ * Improves performance of whole emulator by ~1% *)
+let mask_0b00010000 = Uint8.of_int 0b00010000
+let mask_0b11100000 = Uint8.of_int 0b11100000
+let mask_0b00100000 = Uint8.of_int 0b00100000
+let mask_0b11010000 = Uint8.of_int 0b11010000
+let mask_0b01000000 = Uint8.of_int 0b01000000
+let mask_0b10110000 = Uint8.of_int 0b10110000
+let mask_0b10000000 = Uint8.of_int 0b10000000
+let mask_0b01110000 = Uint8.of_int 0b01110000
+let mask_0b11101111 = Uint8.of_int 0b11101111
+let mask_0b11011111 = Uint8.of_int 0b11011111
+let mask_0b10111111 = Uint8.of_int 0b10111111
+let mask_0b01111111 = Uint8.of_int 0b01111111
+
 let set_flag t flag =
   let open Uint8 in
   match flag with
-  | Carry       -> t.f <- t.f lor (of_int 0b00010000)
-  | Half_carry  -> t.f <- t.f lor (of_int 0b00100000)
-  | Subtraction -> t.f <- t.f lor (of_int 0b01000000)
-  | Zero        -> t.f <- t.f lor (of_int 0b10000000)
+  | Carry       -> t.f <- t.f lor mask_0b00010000
+  | Half_carry  -> t.f <- t.f lor mask_0b00100000
+  | Subtraction -> t.f <- t.f lor mask_0b01000000
+  | Zero        -> t.f <- t.f lor mask_0b10000000
 
 let set_flags t
     ?(c = read_flag t Carry)
@@ -112,18 +127,18 @@ let set_flags t
     ?(z = read_flag t Zero)
     () =
   let open Uint8 in
-  if c then t.f <- t.f lor (of_int 0b00010000) else t.f <- t.f land (of_int 0b11100000);
-  if h then t.f <- t.f lor (of_int 0b00100000) else t.f <- t.f land (of_int 0b11010000);
-  if n then t.f <- t.f lor (of_int 0b01000000) else t.f <- t.f land (of_int 0b10110000);
-  if z then t.f <- t.f lor (of_int 0b10000000) else t.f <- t.f land (of_int 0b01110000)
+  if c then t.f <- t.f lor mask_0b00010000 else t.f <- t.f land mask_0b11100000;
+  if h then t.f <- t.f lor mask_0b00100000 else t.f <- t.f land mask_0b11010000;
+  if n then t.f <- t.f lor mask_0b01000000 else t.f <- t.f land mask_0b10110000;
+  if z then t.f <- t.f lor mask_0b10000000 else t.f <- t.f land mask_0b01110000
 
 let unset_flag t flag =
   let open Uint8 in
   match flag with
-  | Carry       -> t.f <- t.f land (of_int 0b11101111)
-  | Half_carry  -> t.f <- t.f land (of_int 0b11011111)
-  | Subtraction -> t.f <- t.f land (of_int 0b10111111)
-  | Zero        -> t.f <- t.f land (of_int 0b01111111)
+  | Carry       -> t.f <- t.f land mask_0b11101111
+  | Half_carry  -> t.f <- t.f land mask_0b11011111
+  | Subtraction -> t.f <- t.f land mask_0b10111111
+  | Zero        -> t.f <- t.f land mask_0b01111111
 
 let clear_flags t = t.f <- Uint8.zero
 
