@@ -83,7 +83,7 @@ let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (cam
 
 let () =
   (* let rom_bytes = Read_rom_file.f "./resource/private/pokemon-aka.gb" in *)
-  let rom_bytes = Read_rom_file.f "./resource/private/kirby.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/bits_bank2.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
@@ -92,6 +92,8 @@ let () =
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
   let renderer = create_renderer () in
   let texture = create_texture renderer in
+  let cnt = ref 0 in
+  let start_time = ref (Unix.gettimeofday ()) in
   (* let buf = Buffer.create 1500 in *)
   while true do
     (* Buffer.add_string buf (Camlboy.show camlboy); *)
@@ -104,8 +106,18 @@ let () =
       | In_frame ->
         ()
       | Frame_ended framebuffer ->
+        incr cnt;
+        if !cnt = 60 then begin
+          let end_time = Unix.gettimeofday () in
+          let sec_per_60_frame = (end_time -. !start_time) in
+          let fps = 60. /. sec_per_60_frame in
+          start_time := end_time;
+          Printf.printf "fps=%f\n" fps; flush_all ();
+          cnt := 0;
+        end;
         handle_event (module Camlboy) camlboy;
         render_framebuffer ~texture ~renderer ~fb:framebuffer;
+
     end;
     (* Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
      * print_string (Buffer.contents buf);
