@@ -41,18 +41,64 @@ let draw_framebuffer ctx image_data fb =
   done;
   C2d.put_image_data ctx image_data ~x:0 ~y:0
 
-let run_id = ref None
+(** Manages state that need to be re-set when we load a new rom *)
+module State = struct
+  let run_id = ref None
+  let key_down_listener = ref None
+  let key_up_listener = ref None
+  let clear () =
+    begin match !run_id with
+      | None -> ()
+      | Some timer_id ->
+        G.stop_timer timer_id
+    end;
+    begin match !key_down_listener with
+      | None -> ()
+      | Some lister -> Ev.unlisten Ev.keydown lister G.target
+    end;
+    begin match !key_up_listener with
+      | None -> ()
+      | Some lister -> Ev.unlisten Ev.keyup lister G.target
+    end;
+end
 
 let run_rom rom_bytes ctx image_data =
-  (* Cancel previous rom's run before running new rom *)
-  begin match !run_id with
-    | None -> ()
-    | Some timer_id ->
-      G.stop_timer timer_id
-  end;
+  State.clear ();
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
   let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes in
+  let key_down_listener ev =
+    let key_ev = Ev.as_type ev in
+    let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
+    match key_name with
+    | "Enter" -> C.press t Start
+    | "Shift" -> C.press t Select
+    | "j"     -> C.press t B
+    | "k"     -> C.press t A
+    | "w"     -> C.press t Up
+    | "a"     -> C.press t Left
+    | "s"     -> C.press t Down
+    | "d"     -> C.press t Right
+    | _ -> ()
+  in
+  let key_up_listener ev =
+    let key_ev = Ev.as_type ev in
+    let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
+    match key_name with
+    | "Enter" -> C.release t Start
+    | "Shift" -> C.release t Select
+    | "j"     -> C.release t B
+    | "k"     -> C.release t A
+    | "w"     -> C.release t Up
+    | "a"     -> C.release t Left
+    | "s"     -> C.release t Down
+    | "d"     -> C.release t Right
+    | _ -> ()
+  in
+  State.key_down_listener := Some key_down_listener;
+  State.key_up_listener := Some key_up_listener;
+  Ev.listen Ev.keydown (key_down_listener) G.target;
+  Ev.listen Ev.keyup (key_up_listener) G.target;
   let cnt = ref 0 in
   let start_time = ref (Performance.now_ms G.performance) in
   let set_fps fps =
@@ -78,7 +124,7 @@ let run_rom rom_bytes ctx image_data =
         draw_framebuffer ctx image_data fb;
     end;
   in
-  run_id := Some (G.set_interval ~ms:1 main_loop)
+  State.run_id := Some (G.set_interval ~ms:1 main_loop)
 
 let on_rom_change ctx image_data input_el =
   let file = El.Input.files input_el |> List.hd in
