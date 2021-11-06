@@ -5,14 +5,40 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <script type="text/javascript" defer="defer" src="index.js"></script>
   <title>CAMLBOY</title>
+  <style>
+    body {
+        background-color: #ffbc09;
+    }
+    .container {
+        display:flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .gameboy {
+        background-color: #f2af00;
+        height: 480px;
+        width: 300px; 
+    }
+    .display {
+        display:flex;
+        justify-content: center;
+    }
+    #canvas {
+        padding-top: 40px;
+    }
+  </style>
 </head>
 <body>
-  <div class="gameboy">
-    <canvas id="canvas" width="160" height="144"></canvas>
-  </div>
-  <div class="load-rom-btn">
-    <input id="load-rom" type="file" style="display: none;">
-    <label for="load-rom">Load Rom</label>
+  <div class="container">
+    <div class="gameboy">
+      <div class="display">
+        <canvas id="canvas" width="160" height="144"></canvas>
+      </div>
+    </div>
+    <div class="load-rom-btn">
+      <input id="load-rom" type="file" style="display: none;">
+      <label for="load-rom">Load Rom</label>
+    </div>
   </div>
 </body>
 </html>
