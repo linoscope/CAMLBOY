@@ -41,19 +41,25 @@ let draw_framebuffer ctx image_data fb =
   done;
   C2d.put_image_data ctx image_data ~x:0 ~y:0
 
-let set_fps fps =
-  let fps_str = Printf.sprintf "%.2f" fps in
-  let fps_el = find_el_by_id "fps" in
-  El.set_children fps_el [El.txt (Jstr.v fps_str)]
-
 let run_id = ref None
 
 let run_rom rom_bytes ctx image_data =
+  (* Cancel previous rom's run before running new rom *)
+  begin match !run_id with
+    | None -> ()
+    | Some timer_id ->
+      G.stop_timer timer_id
+  end;
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
   let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes in
   let cnt = ref 0 in
   let start_time = ref (Performance.now_ms G.performance) in
+  let set_fps fps =
+    let fps_str = Printf.sprintf "%.2f" fps in
+    let fps_el = find_el_by_id "fps" in
+    El.set_children fps_el [El.txt (Jstr.v fps_str)]
+  in
   let rec main_loop () =
     begin match C.run_instruction t with
       | In_frame ->
@@ -86,12 +92,6 @@ let on_rom_change ctx image_data input_el =
           (* Convert uint8 bigarray to char bigarray *)
           |> Obj.magic
         in
-        begin match !run_id with
-          | None -> ()
-          | Some timer_id ->
-            (* Cancel previous rom's run before running new rom *)
-            G.stop_timer timer_id
-        end;
         run_rom rom_bytes ctx image_data
       | Error e ->
         Console.(log [Jv.Error.message e]))
