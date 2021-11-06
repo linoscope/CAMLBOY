@@ -12,19 +12,19 @@ let draw_framebuffer ctx image_data fb =
       let off = 4 * (y * gb_w + x) in
       match fb.(y).(x) with
       | `White ->
-        Tarray.set d (off    ) 0xFF;
-        Tarray.set d (off + 1) 0xFF;
-        Tarray.set d (off + 2) 0xFF;
+        Tarray.set d (off    ) 0xF0;
+        Tarray.set d (off + 1) 0xF0;
+        Tarray.set d (off + 2) 0xF0;
         Tarray.set d (off + 3) 0xFF;
       | `Light_gray ->
-        Tarray.set d (off    ) 0xAA;
-        Tarray.set d (off + 1) 0xAA;
-        Tarray.set d (off + 2) 0xAA;
+        Tarray.set d (off    ) 0x94;
+        Tarray.set d (off + 1) 0x94;
+        Tarray.set d (off + 2) 0x94;
         Tarray.set d (off + 3) 0xFF;
       | `Dark_gray ->
-        Tarray.set d (off    ) 0x77;
-        Tarray.set d (off + 1) 0x77;
-        Tarray.set d (off + 2) 0x77;
+        Tarray.set d (off    ) 0x52;
+        Tarray.set d (off + 1) 0x52;
+        Tarray.set d (off + 2) 0x52;
         Tarray.set d (off + 3) 0xFF;
       | `Black ->
         Tarray.set d (off    ) 0x00;
@@ -87,3 +87,4 @@ let () =
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
   Ev.listen Ev.change (fun _ -> on_rom_change ctx image_data input_el) (El.as_target input_el)
+
