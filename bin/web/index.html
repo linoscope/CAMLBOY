@@ -34,14 +34,45 @@
     #canvas {
         display: block;
     }
-    .bottom-bar {
+    .bar {
         width: 300px; 
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
+        justify-content: space-between;        
     }
     #fps {
         font-size: 16px;
+    }
+    .keymap {
+        margin-top: 48px;
+        width: 300px;
+        border: 1px solid black;
+        padding: 4px;
+    }
+    @media screen and (max-width: 600px) {
+        .keymap {
+            display: none;
+        }
+    }
+    h4 {
+      margin-bottom: 8px;
+      margin-top: 8px;
+    }
+    td {
+      padding: 0 3px;
+    }
+    kbd {
+        background-color: #eee;
+        border-radius: 3px;
+        border: 1px solid #b4b4b4;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+        color: #333;
+        display: inline-block;
+        font-size: .85em;
+        font-weight: 700;
+        line-height: 1;
+        padding: 2px 4px;
+        white-space: nowrap;
     }
   </style>
 </head>
@@ -54,7 +85,7 @@
         </div>
       </div>
     </div>
-    <div class="bottom-bar">
+    <div class="bar">
       <div id="fps">
         0.00
       </div>
@@ -62,6 +93,25 @@
         <input id="load-rom" type="file" style="display: none;">
         <label for="load-rom">Load Rom</label>
       </button>
+    </div>
+    <div class="keymap">
+      <h4>Keymap:</h4>
+      <table>
+        <tbody>
+          <tr>
+            <td><kbd>w</kbd>/<kbd>a</kbd>/<kbd>s</kbd>/<kbd>d</kbd></td>
+            <td>Up/Left/Down/Right</td>
+          </tr>
+          <tr>
+            <td><kbd>k</kbd>/<kbd>j</kbd></td>
+            <td>A/B</td>
+          </tr>
+          <tr>
+            <td><kbd>Enter</kbd>/<kbd>Shift</kbd></td>
+            <td>Start/Select</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </body>
