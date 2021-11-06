@@ -1,14 +1,14 @@
 (executables
- (names main)
+ (names index)
  (libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib)
  (link_flags (:standard -no-check-prims))
  (modes js))
 
 (rule
- (targets main.js)
- (deps main.bc.js)
+ (targets index.js)
+ (deps index.bc.js)
  (action (run cp %{deps} %{targets})))
 
 (alias
  (name app)
- (deps main.js index.html))
+ (deps index.js index.html))
