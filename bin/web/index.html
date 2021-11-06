@@ -26,6 +26,15 @@
     #canvas {
         padding-top: 40px;
     }
+    .bottom-bar {
+        width: 300px; 
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    #fps {
+        font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -35,9 +44,14 @@
         <canvas id="canvas" width="160" height="144"></canvas>
       </div>
     </div>
-    <div class="load-rom-btn">
-      <input id="load-rom" type="file" style="display: none;">
-      <label for="load-rom">Load Rom</label>
+    <div class="bottom-bar">
+      <div id="fps">
+        0.00
+      </div>
+      <button class="load-rom-btn">
+        <input id="load-rom" type="file" style="display: none;">
+        <label for="load-rom">Load Rom</label>
+      </button>
     </div>
   </div>
 </body>
