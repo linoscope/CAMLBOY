@@ -41,11 +41,15 @@ let draw_framebuffer ctx image_data fb =
   done;
   C2d.put_image_data ctx image_data ~x:0 ~y:0
 
-(** Manages state that need to be re-set when we load a new rom *)
+(** Manages state that need to be re-set when loading a new rom *)
 module State = struct
   let run_id = ref None
   let key_down_listener = ref None
   let key_up_listener = ref None
+  let set id down up =
+    run_id := Some id;
+    key_down_listener := Some down;
+    key_up_listener := Some up
   let clear () =
     begin match !run_id with
       | None -> ()
@@ -95,8 +99,6 @@ let run_rom rom_bytes ctx image_data =
     | "d"     -> C.release t Right
     | _ -> ()
   in
-  State.key_down_listener := Some key_down_listener;
-  State.key_up_listener := Some key_up_listener;
   Ev.listen Ev.keydown (key_down_listener) G.target;
   Ev.listen Ev.keyup (key_up_listener) G.target;
   let cnt = ref 0 in
@@ -124,7 +126,8 @@ let run_rom rom_bytes ctx image_data =
         draw_framebuffer ctx image_data fb;
     end;
   in
-  State.run_id := Some (G.set_interval ~ms:1 main_loop)
+  let run_id = G.set_interval ~ms:1 main_loop in
+  State.set run_id key_down_listener key_up_listener
 
 let on_rom_change ctx image_data input_el =
   let file = El.Input.files input_el |> List.hd in
