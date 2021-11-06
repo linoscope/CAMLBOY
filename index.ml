@@ -5,6 +5,10 @@ open Brr_canvas
 let gb_w = 160
 let gb_h = 144
 
+let alert v =
+  let alert = Jv.get Jv.global "alert" in
+  ignore @@ Jv.apply alert Jv.[| of_string v |]
+
 let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
 
 let draw_framebuffer ctx image_data fb =
@@ -43,6 +47,8 @@ let set_fps fps =
   let fps_str = Printf.sprintf "%.2f" fps in
   El.set_children fps_el [El.txt (Jstr.v fps_str)]
 
+let run_id = ref None
+
 let run_rom rom_bytes ctx image_data =
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
@@ -67,7 +73,7 @@ let run_rom rom_bytes ctx image_data =
         draw_framebuffer ctx image_data fb;
     end;
   in
-  ignore @@ G.set_interval ~ms:1 main_loop
+  run_id := Some (G.set_interval ~ms:1 main_loop)
 
 let on_rom_change ctx image_data input_el =
   let file = El.Input.files input_el |> List.hd in
@@ -81,6 +87,12 @@ let on_rom_change ctx image_data input_el =
           (* Convert uint8 bigarray to char bigarray *)
           |> Obj.magic
         in
+        begin match !run_id with
+          | None -> ()
+          | Some timer_id ->
+            (* Cancel previous rom's run before running new rom *)
+            G.stop_timer timer_id
+        end;
         run_rom rom_bytes ctx image_data
       | Error e ->
         Console.(log [Jv.Error.message e]))
