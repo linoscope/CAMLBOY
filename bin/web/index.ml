@@ -60,37 +60,30 @@ let run_rom rom_bytes ctx image_data =
   in
   ignore @@ G.set_interval ~ms:1 main_loop
 
-let load_rom_button ctx image_data =
-  let on_change input_el =
-    let file = El.Input.files input_el |> List.hd in
-    let blob = File.as_blob file in
-    let buf_fut = Blob.array_buffer blob in
-    Fut.await buf_fut (function
-        | Ok buf ->
-          let rom_bytes =
-            Tarray.of_buffer Uint8 buf
-            |> Tarray.to_bigarray1
-            (* Convert uint8 bigarray to char bigarray *)
-            |> Obj.magic
-          in
-          run_rom rom_bytes ctx image_data
-        | Error e ->
-          Console.(log [Jv.Error.message e]))
-  in
-  let input_el = El.input ~at:At.[type' (Jstr.v "file")] () in
-  let button_el = El.button [ El.txt' "Load Rom" ] in
-  El.set_inline_style El.Style.display (Jstr.v "none") input_el;
-  Ev.listen Ev.click (fun _ -> El.click input_el) (El.as_target button_el);
-  Ev.listen Ev.change (fun _ -> on_change input_el) (El.as_target input_el);
-  El.span [input_el; button_el]
+let on_rom_change ctx image_data input_el =
+  let file = El.Input.files input_el |> List.hd in
+  let blob = File.as_blob file in
+  let buf_fut = Blob.array_buffer blob in
+  Fut.await buf_fut (function
+      | Ok buf ->
+        let rom_bytes =
+          Tarray.of_buffer Uint8 buf
+          |> Tarray.to_bigarray1
+          (* Convert uint8 bigarray to char bigarray *)
+          |> Obj.magic
+        in
+        run_rom rom_bytes ctx image_data
+      | Error e ->
+        Console.(log [Jv.Error.message e]))
 
 let () =
-  let cnv = Canvas.create ~w:gb_w ~h:gb_h ~at:At.[id (Jstr.v "screen")] [] in
-  let ctx = C2d.create cnv in
+  let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get in
+  (* Set up canvas *)
+  let canvas = find_el_by_id "canvas" |> Canvas.of_el in
+  let ctx = C2d.create canvas in
   let image_data = C2d.create_image_data ctx ~w:gb_w ~h:gb_h in
   let fb = Array.make_matrix gb_h gb_w `Dark_gray in
   draw_framebuffer ctx image_data fb;
-  El.set_children (Document.body G.document) [
-    Canvas.to_el cnv;
-    load_rom_button ctx image_data;
-  ]
+  (* Set up load rom button *)
+  let input_el = find_el_by_id "load-rom" in
+  Ev.listen Ev.change (fun _ -> on_rom_change ctx image_data input_el) (El.as_target input_el)
