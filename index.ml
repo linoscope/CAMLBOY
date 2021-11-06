@@ -5,6 +5,8 @@ open Brr_canvas
 let gb_w = 160
 let gb_h = 144
 
+let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
+
 let draw_framebuffer ctx image_data fb =
   let d = C2d.Image_data.data image_data in
   for y = 0 to gb_h - 1 do
@@ -35,6 +37,12 @@ let draw_framebuffer ctx image_data fb =
   done;
   C2d.put_image_data ctx image_data ~x:0 ~y:0
 
+let fps_el = find_el_by_id "fps"
+
+let set_fps fps =
+  let fps_str = Printf.sprintf "%.2f" fps in
+  El.set_children fps_el [El.txt (Jstr.v fps_str)]
+
 let run_rom rom_bytes ctx image_data =
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
@@ -52,6 +60,7 @@ let run_rom rom_bytes ctx image_data =
           let sec_per_60_frame = (end_time -. !start_time) /. 1000. in
           let fps = 60. /.  sec_per_60_frame in
           start_time := end_time;
+          set_fps fps;
           Console.(log [fps]);
           cnt := 0;
         end;
@@ -77,7 +86,6 @@ let on_rom_change ctx image_data input_el =
         Console.(log [Jv.Error.message e]))
 
 let () =
-  let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get in
   (* Set up canvas *)
   let canvas = find_el_by_id "canvas" |> Canvas.of_el in
   let ctx = C2d.create canvas in
@@ -86,5 +94,5 @@ let () =
   draw_framebuffer ctx image_data fb;
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
-  Ev.listen Ev.change (fun _ -> on_rom_change ctx image_data input_el) (El.as_target input_el)
-
+  Ev.listen Ev.change (fun _ -> on_rom_change ctx image_data input_el) (El.as_target input_el);
+  (* Set up joypad input *)
