@@ -6,25 +6,33 @@
   <script type="text/javascript" defer="defer" src="index.js"></script>
   <title>CAMLBOY</title>
   <style>
-    body {
+    html, body {
+        height: 100%;
         background-color: #ffbc09;
     }
     .container {
+        height: 100%;
         display:flex;
         flex-direction: column;
         align-items: center;
+        justify-content: center;
     }
     .gameboy {
         background-color: #f2af00;
         height: 480px;
-        width: 300px; 
+        width: 300px;
+        padding-top: 40px;
     }
     .display {
         display:flex;
         justify-content: center;
     }
+    .canvas-frame {
+        background-color: #283136;
+        padding: 20px;
+    }
     #canvas {
-        padding-top: 40px;
+        display: block;
     }
     .bottom-bar {
         width: 300px; 
@@ -41,7 +49,9 @@
   <div class="container">
     <div class="gameboy">
       <div class="display">
-        <canvas id="canvas" width="160" height="144"></canvas>
+        <div class="canvas-frame">
+          <canvas id="canvas" width="160" height="144"></canvas>
+        </div>
       </div>
     </div>
     <div class="bottom-bar">

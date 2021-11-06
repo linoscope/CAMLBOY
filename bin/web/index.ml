@@ -102,7 +102,7 @@ let () =
   let canvas = find_el_by_id "canvas" |> Canvas.of_el in
   let ctx = C2d.create canvas in
   let image_data = C2d.create_image_data ctx ~w:gb_w ~h:gb_h in
-  let fb = Array.make_matrix gb_h gb_w `Dark_gray in
+  let fb = Array.make_matrix gb_h gb_w `Light_gray in
   draw_framebuffer ctx image_data fb;
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
