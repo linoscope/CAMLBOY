@@ -115,22 +115,23 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
     find_el_by_id "up", find_el_by_id "down", find_el_by_id "left", find_el_by_id "right" in
   let a_el, b_el = find_el_by_id "a", find_el_by_id "b" in
   let start_el, select_el = find_el_by_id "start", find_el_by_id "select" in
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Up)     (El.as_target up_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Down)   (El.as_target down_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Left)   (El.as_target left_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Right)  (El.as_target right_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t A)      (El.as_target a_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t B)      (El.as_target b_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Start)  (El.as_target start_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Select) (El.as_target select_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t Up)     (El.as_target up_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t Down)   (El.as_target down_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t Left)   (El.as_target left_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t Right)  (El.as_target right_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t A)      (El.as_target a_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t B)      (El.as_target b_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t Start)  (El.as_target start_el);
-  Ev.listen Ev.pointerout (fun _ -> C.release t Select) (El.as_target select_el)
+  (* TODO: unlisten these listener when rom change *)
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Up)       (El.as_target up_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Down)     (El.as_target down_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Left)     (El.as_target left_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Right)    (El.as_target right_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t A)        (El.as_target a_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t B)        (El.as_target b_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Start)    (El.as_target start_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Select)   (El.as_target select_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t Up)     (El.as_target up_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t Down)   (El.as_target down_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t Left)   (El.as_target left_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t Right)  (El.as_target right_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t A)      (El.as_target a_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t B)      (El.as_target b_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t Start)  (El.as_target start_el);
+  Ev.listen Ev.pointerout  (fun _ -> C.release t Select) (El.as_target select_el)
 
 let throttled = ref true
 
