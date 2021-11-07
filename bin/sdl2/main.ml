@@ -54,13 +54,13 @@ let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (cam
       let scancode = Sdl.Event.(get event keyboard_scancode) in
       begin match Sdl.Scancode.enum scancode with
         | `Return -> Camlboy.press camlboy Start
-        | `Tab    -> Camlboy.press camlboy Select
-        | `Z      -> Camlboy.press camlboy B
-        | `X      -> Camlboy.press camlboy A
-        | `Up     -> Camlboy.press camlboy Up
-        | `Down   -> Camlboy.press camlboy Down
-        | `Left   -> Camlboy.press camlboy Left
-        | `Right  -> Camlboy.press camlboy Right
+        | `Lshift -> Camlboy.press camlboy Select
+        | `J      -> Camlboy.press camlboy B
+        | `K      -> Camlboy.press camlboy A
+        | `W      -> Camlboy.press camlboy Up
+        | `S      -> Camlboy.press camlboy Down
+        | `A      -> Camlboy.press camlboy Left
+        | `D      -> Camlboy.press camlboy Right
         | `Escape -> exit 0
         | _       -> ()
       end
@@ -68,13 +68,13 @@ let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (cam
       let scancode = Sdl.Event.(get event keyboard_scancode) in
       begin match Sdl.Scancode.enum scancode with
         | `Return -> Camlboy.release camlboy Start
-        | `Tab    -> Camlboy.release camlboy Select
-        | `Z      -> Camlboy.release camlboy B
-        | `X      -> Camlboy.release camlboy A
-        | `Up     -> Camlboy.release camlboy Up
-        | `Down   -> Camlboy.release camlboy Down
-        | `Left   -> Camlboy.release camlboy Left
-        | `Right  -> Camlboy.release camlboy Right
+        | `Lshift -> Camlboy.release camlboy Select
+        | `J      -> Camlboy.release camlboy B
+        | `K      -> Camlboy.release camlboy A
+        | `W      -> Camlboy.release camlboy Up
+        | `S      -> Camlboy.release camlboy Down
+        | `A      -> Camlboy.release camlboy Left
+        | `D      -> Camlboy.release camlboy Right
         | _       -> ()
       end
     | `Quit -> exit 0
@@ -82,8 +82,8 @@ let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (cam
   end
 
 let () =
-  (* let rom_bytes = Read_rom_file.f "./resource/private/pokemon-aka.gb" in *)
-  let rom_bytes = Read_rom_file.f "./resource/private/tobu.gb" in
+  let rom_bytes = Read_rom_file.f "./resource/private/zelda.gb" in
+  (* let rom_bytes = Read_rom_file.f "./resource/private/mario-land-2.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/bits_bank2.gb" in *)
   (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
