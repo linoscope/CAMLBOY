@@ -8,6 +8,12 @@ open Fut.Syntax
 let gb_w = 160
 let gb_h = 144
 
+type rom_option = {name : string; path : string}
+let rom_options = [
+  {name = "The Bouncing Ball"; path = "./the-bouncing-ball.gb"};
+  {name = "Tobu Tobu Girl"; path =  "./tobu.gb"};
+]
+
 let alert v =
   let alert = Jv.get Jv.global "alert" in
   ignore @@ Jv.apply alert Jv.[| of_string v |]
@@ -146,13 +152,13 @@ let run_rom_blob ctx image_data rom_blob =
   | Error e ->
     Fut.return @@ Console.(log [Jv.Error.message e])
 
-let on_rom_change ctx image_data input_el =
+let on_load_rom ctx image_data input_el =
   let file = El.Input.files input_el |> List.hd in
   let blob = File.as_blob file in
   Fut.await (run_rom_blob ctx image_data blob) (fun () -> ())
 
-let run_initial_rom ctx image_data rom_name =
-  let* result = Fetch.url (Jstr.v rom_name) in
+let run_selected_rom ctx image_data rom_path =
+  let* result = Fetch.url (Jstr.v rom_path) in
   match result with
   | Ok response ->
     let body = Fetch.Response.as_body response in
@@ -162,6 +168,19 @@ let run_initial_rom ctx image_data rom_name =
       | Error e  -> Fut.return @@ Console.(log [Jv.Error.message e])
     end
   | Error e  -> Fut.return @@ Console.(log [Jv.Error.message e])
+
+let set_up_rom_selector ctx image_data selector_el =
+  rom_options
+  |> List.map (fun rom_option ->
+      El.option
+        ~at:At.[value (Jstr.v rom_option.path)]
+        [El.txt' rom_option.name])
+  |> El.append_children selector_el;
+  let on_change _ =
+    let rom_path = El.prop (El.Prop.value) selector_el |> Jstr.to_string in
+    Fut.await (run_selected_rom ctx image_data rom_path) (fun () -> ())
+  in
+  Ev.listen Ev.change on_change (El.as_target selector_el)
 
 let () =
   (* Set up canvas *)
@@ -173,7 +192,11 @@ let () =
   draw_framebuffer ctx image_data fb;
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
-  Ev.listen Ev.change (fun _ -> on_rom_change ctx image_data input_el) (El.as_target input_el);
+  Ev.listen Ev.change (fun _ -> on_load_rom ctx image_data input_el) (El.as_target input_el);
+  (* Set up rom selector *)
+  let selector_el = find_el_by_id "rom-selector" in
+  set_up_rom_selector ctx image_data selector_el;
   (* Load initial rom *)
-  let fut = run_initial_rom ctx image_data "./the-bouncing-ball.gb" in
+  let rom = List.hd rom_options in
+  let fut = run_selected_rom ctx image_data rom.path in
   Fut.await fut (fun () -> ())
