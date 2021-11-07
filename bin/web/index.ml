@@ -57,8 +57,7 @@ module State = struct
   let run_id = ref None
   let key_down_listener = ref None
   let key_up_listener = ref None
-  let set id down up =
-    run_id := Some id;
+  let set_listener down up =
     key_down_listener := Some down;
     key_up_listener := Some up
   let clear () =
@@ -76,6 +75,8 @@ module State = struct
       | Some lister -> Ev.unlisten Ev.keyup lister G.target
     end;
 end
+
+let throttled = ref true
 
 let run_rom_bytes ctx image_data rom_bytes =
   State.clear ();
@@ -112,6 +113,7 @@ let run_rom_bytes ctx image_data rom_bytes =
   in
   Ev.listen Ev.keydown (key_down_listener) G.target;
   Ev.listen Ev.keyup (key_up_listener) G.target;
+  State.set_listener key_down_listener key_up_listener;
   let cnt = ref 0 in
   let start_time = ref (Performance.now_ms G.performance) in
   let set_fps fps =
@@ -135,10 +137,13 @@ let run_rom_bytes ctx image_data rom_bytes =
           cnt := 0;
         end;
         draw_framebuffer ctx image_data fb;
+        if not !throttled then
+          State.run_id := Some (G.set_timeout ~ms:0 main_loop)
+        else
+          State.run_id := Some (G.request_animation_frame (fun _ -> main_loop ()))
     end;
   in
-  let run_id = G.set_interval ~ms:1 main_loop in
-  State.set run_id key_down_listener key_up_listener
+  main_loop ()
 
 let run_rom_blob ctx image_data rom_blob =
   let* result = Blob.array_buffer rom_blob in
@@ -184,6 +189,10 @@ let set_up_rom_selector ctx image_data selector_el =
   in
   Ev.listen Ev.change on_change (El.as_target selector_el)
 
+let on_checkbox_change checkbox_el =
+  let checked = El.prop (El.Prop.checked) checkbox_el in
+  throttled := checked
+
 let () =
   (* Set up canvas *)
   let canvas = find_el_by_id "canvas" |> Canvas.of_el in
@@ -192,6 +201,9 @@ let () =
   let image_data = C2d.create_image_data ctx ~w:gb_w ~h:gb_h in
   let fb = Array.make_matrix gb_h gb_w `Light_gray in
   draw_framebuffer ctx image_data fb;
+  (* Set up throttle checkbox *)
+  let checkbox_el = find_el_by_id "throttle" in
+  Ev.listen Ev.change (fun _ -> on_checkbox_change checkbox_el) (El.as_target checkbox_el);
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
   Ev.listen Ev.change (fun _ -> on_load_rom ctx image_data input_el) (El.as_target input_el);

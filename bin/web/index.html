@@ -49,12 +49,12 @@
         image-rendering: pixelated
     }
     .bar {
-        width: 300px; 
+        width: 320px; 
         display: flex;
         flex-direction: row;
         justify-content: space-between;        
     }
-    #rom-selector, #fps, .load-rom-button {
+    #rom-selector, #fps-and-throttle, .load-rom-button {
         font-size: 16px;
     }
     .keymap {
@@ -69,7 +69,7 @@
         .keymap {
             display: block;
             margin-top: 12px;
-            width: 300px;
+            width: 320px;
             border: 1px solid black;
             padding: 4px;
         }
@@ -106,8 +106,12 @@
       </div>
     </div>
     <div class="bar">
-      <div id="fps">
-        0.00
+      <div id="fps-and-throttle">
+        <span id="fps">0.00</span> FPS
+        <div>
+          <label for="throttle">Throttle</label>
+          <input type="checkbox" id="throttle" checked></input>
+        </div>
       </div>
       <select id="rom-selector"></select>
       <button class="load-rom-btn">
