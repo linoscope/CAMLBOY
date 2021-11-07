@@ -112,7 +112,6 @@ let render_bg_window_line t ly =
       let lx = ref (if wx < 0 then 0 else wx) in
       while !lx < screen_w do
         let x_in_w = Int.abs (!lx - wx) in
-        let col_in_tile = x_in_w mod 8 in
         let tile_index = Tile_map.get_tile_index t.tm
             ~area:window_tile_map_area
             ~y:y_in_w
@@ -124,7 +123,7 @@ let render_bg_window_line t ly =
             ~row:row_in_tile
         in
         let len = if screen_w - !lx < 8 then screen_w - !lx else 8 in
-        for i = col_in_tile to len - 1  do
+        for i = 0 to len - 1  do
           let color = Pallete.lookup t.bgp tile_pixel_row.(i) in
           t.frame_buffer.(ly).(!lx + i) <- color
         done;
