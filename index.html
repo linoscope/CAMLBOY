@@ -122,12 +122,19 @@
                 display: flex;
                 flex-direction: row;
                 justify-content: space-between;        
-            }
+            }            
             #rom-selector, #fps-and-throttle, .load-rom-button {
                 font-size: 16px;
             }
             #keymap {
                 display: none;
+            }
+            #link-to-github {
+                position: fixed;
+                margin-right: 2px;
+                margin-bottom: 2px;
+                bottom: 0;
+                right: 0;
             }
             @media screen and (min-width: 1025px) {
                 .gameboy {
@@ -197,11 +204,11 @@
                         <div id="ab-keys">
                             <div class="ab-keys-col b-col">
                                 <span id="b" class="key"><span class="inner"></span></span>
-                                <span>B</span>
+                                <!-- <span>B</span> -->
                             </div>
                             <div class="ab-keys-col a-col">
                                 <span id="a" class="key"><span class="inner"></span></span>
-                                <span>A</span>
+                                <!-- <span>A</span> -->
                             </div>
                         </div>
                     </div>
@@ -212,7 +219,6 @@
                 </div>
                 <div id="keymap">
                     <div id="keymap-inner">
-                        <h4>Keymap:</h4>
                         <table>
                             <tbody>
                                 <tr>
@@ -247,5 +253,8 @@
                 </button>
             </div>
         </div>
+        <a id="link-to-github" href="https://github.com/linoscope/CAMLBOY">
+            GitHub
+        </a>
     </body>
 </html>
