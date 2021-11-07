@@ -19,6 +19,11 @@
  (deps ../../resource/games/the-bouncing-ball.gb)
  (action (run cp %{deps} %{targets})))
 
+(rule
+ (targets dreaming-sarah.gb)
+ (deps ../../resource/games/dreaming-sarah.gb)
+ (action (run cp %{deps} %{targets})))
+
 (alias
  (name app)
  (deps index.js index.html))

@@ -10,8 +10,9 @@ let gb_h = 144
 
 type rom_option = {name : string; path : string}
 let rom_options = [
-  {name = "The Bouncing Ball"; path = "./the-bouncing-ball.gb"};
-  {name = "Tobu Tobu Girl"; path =  "./tobu.gb"};
+  {name = "The Bouncing Ball" ; path = "./the-bouncing-ball.gb"};
+  {name = "Tobu Tobu Girl"    ; path =  "./tobu.gb"};
+  {name = "Dreaming Sarah"    ; path =  "./dreaming-sarah.gb"};
 ]
 
 let alert v =
