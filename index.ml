@@ -52,7 +52,7 @@ let draw_framebuffer ctx image_data fb =
   done;
   C2d.put_image_data ctx image_data ~x:0 ~y:0
 
-(** Manages state that need to be re-set when loading a new rom *)
+(** Manages state that need to be reset when loading a new rom *)
 module State = struct
   let run_id = ref None
   let key_down_listener = ref None
@@ -74,16 +74,10 @@ module State = struct
     begin match !key_up_listener with
       | None -> ()
       | Some lister -> Ev.unlisten Ev.keyup lister G.target
-    end;
+    end
 end
 
-let throttled = ref true
-
-let run_rom_bytes ctx image_data rom_bytes =
-  State.clear ();
-  let cartridge = Detect_cartridge.f ~rom_bytes in
-  let module C = Camlboy.Make(val cartridge) in
-  let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes in
+let set_up_keyboard (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   let key_down_listener ev =
     let key_ev = Ev.as_type ev in
     let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
@@ -96,7 +90,7 @@ let run_rom_bytes ctx image_data rom_bytes =
     | "a"     -> C.press t Left
     | "s"     -> C.press t Down
     | "d"     -> C.press t Right
-    | _ -> ()
+    | _       -> ()
   in
   let key_up_listener ev =
     let key_ev = Ev.as_type ev in
@@ -110,11 +104,43 @@ let run_rom_bytes ctx image_data rom_bytes =
     | "a"     -> C.release t Left
     | "s"     -> C.release t Down
     | "d"     -> C.release t Right
-    | _ -> ()
+    | _       -> ()
   in
   Ev.listen Ev.keydown (key_down_listener) G.target;
   Ev.listen Ev.keyup (key_up_listener) G.target;
-  State.set_listener key_down_listener key_up_listener;
+  State.set_listener key_down_listener key_up_listener
+
+let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
+  let up_el, down_el, left_el, right_el =
+    find_el_by_id "up", find_el_by_id "down", find_el_by_id "left", find_el_by_id "right" in
+  let a_el, b_el = find_el_by_id "a", find_el_by_id "b" in
+  let start_el, select_el = find_el_by_id "start", find_el_by_id "select" in
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Up)     (El.as_target up_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Down)   (El.as_target down_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Left)   (El.as_target left_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Right)  (El.as_target right_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t A)      (El.as_target a_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t B)      (El.as_target b_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Start)  (El.as_target start_el);
+  Ev.listen Ev.pointerdown (fun _ -> C.press t Select) (El.as_target select_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t Up)     (El.as_target up_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t Down)   (El.as_target down_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t Left)   (El.as_target left_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t Right)  (El.as_target right_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t A)      (El.as_target a_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t B)      (El.as_target b_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t Start)  (El.as_target start_el);
+  Ev.listen Ev.pointerout (fun _ -> C.release t Select) (El.as_target select_el)
+
+let throttled = ref true
+
+let run_rom_bytes ctx image_data rom_bytes =
+  State.clear ();
+  let cartridge = Detect_cartridge.f ~rom_bytes in
+  let module C = Camlboy.Make(val cartridge) in
+  let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes in
+  set_up_keyboard (module C) t;
+  set_up_joypad (module C) t;
   let cnt = ref 0 in
   let start_time = ref (Performance.now_ms G.performance) in
   let set_fps fps =
@@ -134,7 +160,6 @@ let run_rom_bytes ctx image_data rom_bytes =
           let fps = 60. /.  sec_per_60_frame in
           start_time := end_time;
           set_fps fps;
-          Console.(log [fps]);
           cnt := 0;
         end;
         draw_framebuffer ctx image_data fb;
