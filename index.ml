@@ -64,7 +64,8 @@ module State = struct
     begin match !run_id with
       | None -> ()
       | Some timer_id ->
-        G.stop_timer timer_id
+        G.stop_timer timer_id;
+        G.cancel_animation_frame timer_id;
     end;
     begin match !key_down_listener with
       | None -> ()

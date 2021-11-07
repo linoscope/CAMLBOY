@@ -1,143 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <script type="text/javascript" defer="defer" src="index.js"></script>
-  <title>CAMLBOY</title>
-  <style>
-    html, body {
-        background-color: #FED154;
-        height: 100%;
-        margin: 0;
-    }
-    .container {
-        height: 100%;
-        display:flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    .gameboy {
-        margin-top: 4px;
-        margin-bottom: 4px;
-        background-color: #FEBE43;
-        height: 520px;
-        width: 320px;
-        border-radius: 10px 10px 50px 10px;
-    }
-    .display {
-        display:flex;
-        justify-content: center;
-    }
-    .canvas-frame {
-        margin-top: 8%;
-        margin-left: 7%;
-        margin-right: 7%;
-        background-color: #283136;
-        padding: 8% 12%;
-        width: 100%;
-        height: 100%;
-        border-radius: 10px 10px 50px 10px;;
-    }
-    #canvas {
-        width: 100%;
-        height: 100%;
-        /* height: 199.2px; */
-        /* width: 172.8px; */
-        display: block;
-        image-rendering: pixelated
-    }
-    .bar {
-        width: 320px; 
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;        
-    }
-    #rom-selector, #fps-and-throttle, .load-rom-button {
-        font-size: 16px;
-    }
-    .keymap {
-        display: none;
-    }
-    @media screen and (min-width: 1025px) {
-        .gameboy {
-            background-color: #FEBE43;
-            height: 864px;
-            width: 504px;
-        }
-        .keymap {
-            display: block;
-            margin-top: 12px;
-            width: 320px;
-            border: 1px solid black;
-            padding: 4px;
-        }
-        h4 {
-            margin-bottom: 8px;
-            margin-top: 8px;
-        }
-        td {
-            padding: 0 3px;
-        }
-        kbd {
-            background-color: #eee;
-            border-radius: 3px;
-            border: 1px solid #b4b4b4;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
-            color: #333;
-            display: inline-block;
-            font-size: .85em;
-            font-weight: 700;
-            line-height: 1;
-            padding: 2px 4px;
-            white-space: nowrap;
-        }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="gameboy">
-      <div class="display">
-        <div class="canvas-frame">
-          <canvas id="canvas" width="160" height="144"></canvas>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <script type="text/javascript" defer="defer" src="index.js"></script>
+        <title>CAMLBOY</title>
+        <style>
+            html, body {
+                background-color: #FED154;
+                height: 100%;
+                margin: 0;
+            }
+            .container {
+                height: 100%;
+                display:flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .gameboy {
+                margin-top: 4px;
+                margin-bottom: 4px;
+                background-color: #FEBE43;
+                height: 520px;
+                width: 320px;
+                border-radius: 10px 10px 50px 10px;
+            }
+            .display {
+                display:flex;
+                justify-content: center;
+            }
+            .canvas-frame {
+                margin-top: 8%;
+                margin-left: 7%;
+                margin-right: 7%;
+                background-color: #283136;
+                padding: 8% 12%;
+                width: 100%;
+                height: 100%;
+                border-radius: 10px 10px 50px 10px;;
+            }
+            #canvas {
+                width: 100%;
+                height: 100%;
+                display: block;
+                image-rendering: pixelated
+            }
+            #main-buttons {
+                margin-top: 15%;
+                margin-left:7%;
+                margin-right:7%;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            #direction-keys {
+                display: flex;
+                flex-direction: column;
+                width: 90px;
+                height: 90px;
+                justify-content: stretch;
+            }
+            #direction-keys .row {
+                width:100%;
+                height:100%;
+                display: flex;
+                justify-content: center;
+                align-items: stretch;
+            }
+            #direction-keys .inner {
+                display: block;
+                background-color: #283136;
+                width: 30px;
+                height: 30px;
+            }
+            #direction-keys .key {
+                display: block;
+                padding: 10px;
+                margin: -10px;
+            }
+            #ab-keys {
+                width: 100px;
+                height: 100px;
+                display: flex;
+                justify-content: space-around;
+            }
+            #ab-keys .ab-keys-col {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            #ab-keys .b-col {
+                margin-top: 30%;
+            }
+            #ab-keys .inner {
+                background-color: #283136;
+                width: 40px;
+                height: 40px;
+                display: block;
+                border-radius: 100%;
+            }
+            #ab-keys .key {
+                display: block;
+                padding: 10px;
+            }
+            #start-select-keys {
+                margin-top: 20%;
+                display: flex;
+                justify-content: center;
+            }
+            #start-select-keys .key {
+                margin-right: 5px;
+                display: block;
+                height: 10px;
+                width: 40px;
+                background-color: #283136;
+                border-radius: 10px 10px 10px 10px;
+            }
+            .bar {
+                width: 320px; 
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;        
+            }
+            #rom-selector, #fps-and-throttle, .load-rom-button {
+                font-size: 16px;
+            }
+            #keymap {
+                display: none;
+            }
+            @media screen and (min-width: 1025px) {
+                .gameboy {
+                    background-color: #FEBE43;
+                    height: 864px;
+                    width: 504px;
+                }
+                #buttons {
+                    display: none;
+                }
+                #keymap {
+                    display: flex;
+                    margin-top: 150px;
+                    justify-content: center;
+                    width: 100%;
+                    height: 100%;
+                    padding: 4px;
+                }
+                #keymap-inner {
+                    
+                }
+                h4 {
+                    margin-bottom: 8px;
+                    margin-top: 8px;
+                }
+                td {
+                    padding: 0 3px;
+                }
+                kbd {
+                    background-color: #eee;
+                    border-radius: 3px;
+                    border: 1px solid #b4b4b4;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, .2), 0 2px 0 0 rgba(255, 255, 255, .7) inset;
+                    color: #333;
+                    display: inline-block;
+                    font-size: .85em;
+                    font-weight: 700;
+                    line-height: 1;
+                    padding: 2px 4px;
+                    white-space: nowrap;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="gameboy">
+                <div class="display">
+                    <div class="canvas-frame">
+                        <canvas id="canvas" width="160" height="144"></canvas>
+                    </div>
+                </div>
+                <div id="buttons">
+                    <div id="main-buttons">
+                        <div id="direction-keys">
+                            <div class="row">
+                                <span id="up" class="key"><span class="inner"></span></span>
+                            </div>
+                            <div class="row">
+                                <span id="left" class="key"><span class="inner"></span></span>
+                                <span class="inner"></span>
+                                <span id="right" class="key"><span class="inner"></span></span>
+                            </div>
+                            <div class="row">
+                                <span id="down" class="key"><span class="inner"></span></span>
+                            </div>
+                        </div>
+                        <div id="ab-keys">
+                            <div class="ab-keys-col b-col">
+                                <span id="b" class="key"><span class="inner"></span></span>
+                                <span>B</span>
+                            </div>
+                            <div class="ab-keys-col a-col">
+                                <span id="a" class="key"><span class="inner"></span></span>
+                                <span>A</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="start-select-keys">
+                        <span id="start" class="key"></span>
+                        <span id="select" class="key"></span>
+                    </div>
+                </div>
+                <div id="keymap">
+                    <div id="keymap-inner">
+                        <h4>Keymap:</h4>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td><kbd>w</kbd>/<kbd>a</kbd>/<kbd>s</kbd>/<kbd>d</kbd></td>
+                                    <td>Up/Left/Down/Right</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>k</kbd>/<kbd>j</kbd></td>
+                                    <td>A/B</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>Enter</kbd>/<kbd>Shift</kbd></td>
+                                    <td>Start/Select</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="bar">
+                <div id="fps-and-throttle">
+                    <span id="fps">0.00</span> FPS
+                    <div>
+                        <label for="throttle">Throttle</label>
+                        <input type="checkbox" id="throttle" checked></input>
+                    </div>
+                </div>
+                <select id="rom-selector"></select>
+                <button class="load-rom-btn">
+                    <input id="load-rom" type="file" style="display: none;">
+                    <label for="load-rom">Upload</label>
+                </button>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="bar">
-      <div id="fps-and-throttle">
-        <span id="fps">0.00</span> FPS
-        <div>
-          <label for="throttle">Throttle</label>
-          <input type="checkbox" id="throttle" checked></input>
-        </div>
-      </div>
-      <select id="rom-selector"></select>
-      <button class="load-rom-btn">
-        <input id="load-rom" type="file" style="display: none;">
-        <label for="load-rom">Upload</label>
-      </button>
-    </div>
-    <div class="keymap">
-      <h4>Keymap:</h4>
-      <table>
-        <tbody>
-          <tr>
-            <td><kbd>w</kbd>/<kbd>a</kbd>/<kbd>s</kbd>/<kbd>d</kbd></td>
-            <td>Up/Left/Down/Right</td>
-          </tr>
-          <tr>
-            <td><kbd>k</kbd>/<kbd>j</kbd></td>
-            <td>A/B</td>
-          </tr>
-          <tr>
-            <td><kbd>Enter</kbd>/<kbd>Shift</kbd></td>
-            <td>Start/Select</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</body>
+    </body>
 </html>
