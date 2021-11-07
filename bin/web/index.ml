@@ -13,6 +13,7 @@ let rom_options = [
   {name = "The Bouncing Ball" ; path = "./the-bouncing-ball.gb"};
   {name = "Tobu Tobu Girl"    ; path =  "./tobu.gb"};
   {name = "Dreaming Sarah"    ; path =  "./dreaming-sarah.gb"};
+  {name = "SHEEP IT UP"       ; path =  "./sheep-it-up.gb"};
 ]
 
 let alert v =

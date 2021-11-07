@@ -24,6 +24,11 @@
  (deps ../../resource/games/dreaming-sarah.gb)
  (action (run cp %{deps} %{targets})))
 
+(rule
+ (targets sheep-it-up.gb)
+ (deps ../../resource/games/sheep-it-up.gb)
+ (action (run cp %{deps} %{targets})))
+
 (alias
  (name app)
  (deps index.js index.html))
