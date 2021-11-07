@@ -11,8 +11,9 @@ let gb_h = 144
 type rom_option = {name : string; path : string}
 let rom_options = [
   {name = "The Bouncing Ball" ; path = "./the-bouncing-ball.gb"};
-  {name = "Tobu Tobu Girl"    ; path =  "./tobu.gb"};
-  {name = "Dreaming Sarah"    ; path =  "./dreaming-sarah.gb"};
+  {name = "Tobu Tobu Girl"    ; path = "./tobu.gb"};
+  {name = "Dreaming Sarah"    ; path = "./dreaming-sarah.gb"};
+  {name = "SHEEP IT UP"       ; path = "./sheep-it-up.gb"};
 ]
 
 let alert v =
@@ -86,7 +87,7 @@ let run_rom_bytes ctx image_data rom_bytes =
     let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
     match key_name with
     | "Enter" -> C.press t Start
-    | "Tab"   -> C.press t Select
+    | "Shift" -> C.press t Select
     | "j"     -> C.press t B
     | "k"     -> C.press t A
     | "w"     -> C.press t Up
@@ -100,7 +101,7 @@ let run_rom_bytes ctx image_data rom_bytes =
     let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
     match key_name with
     | "Enter" -> C.release t Start
-    | "Tab"   -> C.release t Select
+    | "Shift" -> C.release t Select
     | "j"     -> C.release t B
     | "k"     -> C.release t A
     | "w"     -> C.release t Up
