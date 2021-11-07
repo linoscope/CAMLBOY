@@ -9,6 +9,16 @@
  (deps index.bc.js)
  (action (run cp %{deps} %{targets})))
 
+(rule
+ (targets tobu.gb)
+ (deps ../../resource/games/tobu.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets the-bouncing-ball.gb)
+ (deps ../../resource/games/the-bouncing-ball.gb)
+ (action (run cp %{deps} %{targets})))
+
 (alias
  (name app)
  (deps index.js index.html))

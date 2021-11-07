@@ -1,6 +1,9 @@
 open Camlboy_lib
 open Brr
 open Brr_canvas
+open Brr_io
+open Fut.Syntax
+
 
 let gb_w = 160
 let gb_h = 144
@@ -66,7 +69,7 @@ module State = struct
     end;
 end
 
-let run_rom rom_bytes ctx image_data =
+let run_rom_bytes ctx image_data rom_bytes =
   State.clear ();
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
@@ -76,7 +79,7 @@ let run_rom rom_bytes ctx image_data =
     let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
     match key_name with
     | "Enter" -> C.press t Start
-    | "Shift" -> C.press t Select
+    | "Tab"   -> C.press t Select
     | "j"     -> C.press t B
     | "k"     -> C.press t A
     | "w"     -> C.press t Up
@@ -90,7 +93,7 @@ let run_rom rom_bytes ctx image_data =
     let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
     match key_name with
     | "Enter" -> C.release t Start
-    | "Shift" -> C.release t Select
+    | "Tab"   -> C.release t Select
     | "j"     -> C.release t B
     | "k"     -> C.release t A
     | "w"     -> C.release t Up
@@ -129,30 +132,48 @@ let run_rom rom_bytes ctx image_data =
   let run_id = G.set_interval ~ms:1 main_loop in
   State.set run_id key_down_listener key_up_listener
 
+let run_rom_blob ctx image_data rom_blob =
+  let* result = Blob.array_buffer rom_blob in
+  match result with
+  | Ok buf ->
+    let rom_bytes =
+      Tarray.of_buffer Uint8 buf
+      |> Tarray.to_bigarray1
+      (* Convert uint8 bigarray to char bigarray *)
+      |> Obj.magic
+    in
+    Fut.return @@ run_rom_bytes ctx image_data rom_bytes
+  | Error e ->
+    Fut.return @@ Console.(log [Jv.Error.message e])
+
 let on_rom_change ctx image_data input_el =
   let file = El.Input.files input_el |> List.hd in
   let blob = File.as_blob file in
-  let buf_fut = Blob.array_buffer blob in
-  Fut.await buf_fut (function
-      | Ok buf ->
-        let rom_bytes =
-          Tarray.of_buffer Uint8 buf
-          |> Tarray.to_bigarray1
-          (* Convert uint8 bigarray to char bigarray *)
-          |> Obj.magic
-        in
-        run_rom rom_bytes ctx image_data
-      | Error e ->
-        Console.(log [Jv.Error.message e]))
+  Fut.await (run_rom_blob ctx image_data blob) (fun () -> ())
+
+let run_initial_rom ctx image_data rom_name =
+  let* result = Fetch.url (Jstr.v rom_name) in
+  match result with
+  | Ok response ->
+    let body = Fetch.Response.as_body response in
+    let* result = Fetch.Body.blob body in
+    begin match result with
+      | Ok blob -> run_rom_blob ctx image_data blob
+      | Error e  -> Fut.return @@ Console.(log [Jv.Error.message e])
+    end
+  | Error e  -> Fut.return @@ Console.(log [Jv.Error.message e])
 
 let () =
   (* Set up canvas *)
   let canvas = find_el_by_id "canvas" |> Canvas.of_el in
   let ctx = C2d.create canvas in
+  C2d.scale ctx ~sx:1.5 ~sy:1.5;
   let image_data = C2d.create_image_data ctx ~w:gb_w ~h:gb_h in
   let fb = Array.make_matrix gb_h gb_w `Light_gray in
   draw_framebuffer ctx image_data fb;
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
   Ev.listen Ev.change (fun _ -> on_rom_change ctx image_data input_el) (El.as_target input_el);
-  (* Set up joypad input *)
+  (* Load initial rom *)
+  let fut = run_initial_rom ctx image_data "./the-bouncing-ball.gb" in
+  Fut.await fut (fun () -> ())
