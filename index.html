@@ -130,11 +130,12 @@
                 display: none;
             }
             #link-to-github {
-                position: fixed;
-                margin-right: 2px;
-                margin-bottom: 2px;
-                bottom: 0;
-                right: 0;
+                position: absolute;
+                margin-top:2px;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                bottom: 10px;
             }
             @media screen and (min-width: 1025px) {
                 .gameboy {
@@ -254,7 +255,7 @@
             </div>
         </div>
         <a id="link-to-github" href="https://github.com/linoscope/CAMLBOY">
-            GitHub
+            <span>GitHub</span>
         </a>
     </body>
 </html>
