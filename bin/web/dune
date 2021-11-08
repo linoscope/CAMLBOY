@@ -29,6 +29,11 @@
  (deps ../../resource/games/sheep-it-up.gb)
  (action (run cp %{deps} %{targets})))
 
+(rule
+ (targets rocket-man-demo.gb)
+ (deps ../../resource/games/rocket-man-demo.gb)
+ (action (run cp %{deps} %{targets})))
+
 (alias
  (name app)
  (deps index.js index.html))
