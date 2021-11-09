@@ -117,22 +117,33 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   let a_el, b_el = find_el_by_id "a", find_el_by_id "b" in
   let start_el, select_el = find_el_by_id "start", find_el_by_id "select" in
   (* TODO: unlisten these listener when rom change *)
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Up)       (El.as_target up_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Down)     (El.as_target down_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Left)     (El.as_target left_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Right)    (El.as_target right_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t A)        (El.as_target a_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t B)        (El.as_target b_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Start)    (El.as_target start_el);
-  Ev.listen Ev.pointerdown (fun _ -> C.press t Select)   (El.as_target select_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t Up)     (El.as_target up_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t Down)   (El.as_target down_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t Left)   (El.as_target left_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t Right)  (El.as_target right_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t A)      (El.as_target a_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t B)      (El.as_target b_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t Start)  (El.as_target start_el);
-  Ev.listen Ev.pointerout  (fun _ -> C.release t Select) (El.as_target select_el)
+  let press ev t key = Ev.prevent_default ev; C.press t key in
+  let release ev t key = Ev.prevent_default ev; C.release t key in
+  let listen_ops = Ev.listen_opts ~capture:true () in
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el);
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Down)   (El.as_target down_el);
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Left)   (El.as_target left_el);
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Right)  (El.as_target right_el);
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t A)      (El.as_target a_el);
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t B)      (El.as_target b_el);
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Start)  (El.as_target start_el);
+  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Select) (El.as_target select_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Up)     (El.as_target up_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Down)   (El.as_target down_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Left)   (El.as_target left_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Right)  (El.as_target right_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el);
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Up)     (El.as_target up_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Down)   (El.as_target down_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Left)   (El.as_target left_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Right)  (El.as_target right_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el);
+  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el)
 
 let throttled = ref true
 
