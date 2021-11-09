@@ -135,15 +135,7 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el);
   Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el);
   Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el);
-  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Up)     (El.as_target up_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Down)   (El.as_target down_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Left)   (El.as_target left_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Right)  (El.as_target right_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el);
-  Ev.listen Ev.pointerout ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el)
+  Ev.listen Ev.pointerup ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el)
 
 let throttled = ref true
 
