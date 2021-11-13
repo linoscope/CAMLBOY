@@ -1,5 +1,4 @@
 (* Ref: https://hacktixme.ga/GBEDG/timers/ *)
-
 open Uints
 
 type t = {
