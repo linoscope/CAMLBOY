@@ -19,6 +19,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - run: |
+          sudo sed -i 's/azure\.//' /etc/apt/sources.list
+          sudo apt-get upgrade
+
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -26,10 +30,6 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-
-      - run: |
-          sudo apt-get upgrade
-          apt-get install libsdl2-dev
 
       - run: opam install . --deps-only --with-test
 
