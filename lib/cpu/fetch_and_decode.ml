@@ -22,8 +22,9 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   let f mmu ~pc : uint16 * (int * int) * Instruction.t =
     let open Instruction_length in
-    let next_byte () = Mmu.read_byte mmu Uint16.(succ pc) in
-    let next_word () = Mmu.read_word mmu Uint16.(succ pc) in
+    let addr_after_pc = Uint16.(succ pc) in
+    let next_byte () = Mmu.read_byte mmu addr_after_pc in
+    let next_word () = Mmu.read_word mmu addr_after_pc in
     let op = Mmu.read_byte mmu pc |> Uint8.to_int in
     match op with
     | 0x00 -> l1, (1, 1), NOP
