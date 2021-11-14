@@ -27,6 +27,10 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
+      - run: |
+          sudo apt-get upgrade
+          apt-get install libsdl2-dev
+
       - run: opam install . --deps-only --with-test
 
       - run: opam exec -- dune build --profile release
