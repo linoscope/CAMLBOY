@@ -146,11 +146,15 @@
                 margin-top: 2px;
                 font-size: 0.8em;
             }
-            .throttle {
-                margin: 0px;
+            #throttle-box {
+                display: flex;
+                align-items: center;
             }
             input[type='checkbox'] {
-                filter: grayscale(1)
+                filter: grayscale(1);
+                padding: 0px;
+                margin: 0px;
+                margin-left: 3px;
             }
             #keymap {
                 display: none;
@@ -263,7 +267,7 @@
             <div class="bar">
                 <div id="fps-and-throttle">
                     <span id="fps">0.00</span> FPS
-                    <div>
+                    <div id="throttle-box">
                         <label for="throttle">Throttle</label>
                         <input type="checkbox" id="throttle" checked></input>
                     </div>
