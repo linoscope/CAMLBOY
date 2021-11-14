@@ -7,6 +7,11 @@ A WIP Game Boy emulator written in OCaml.
 
 ## Screenshots
 
+<div style="display:flex">
+  <img src="/screenshot/phone-ui.jpg" height="350"/>
+  <img src="/screenshot/desktop-ui.png" height="350" />
+</div>
+
 ![Pokemon](./screenshot/pokemon.png)
 ![Zelda](./screenshot/zelda.png)
 ![Kirby](./screenshot/kirby.png)
