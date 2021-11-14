@@ -34,6 +34,16 @@
  (deps ../../resource/games/rocket-man-demo.gb)
  (action (run cp %{deps} %{targets})))
 
+(rule
+ (targets retroid.gb)
+ (deps ../../resource/games/retroid.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets into-the-blue.gb)
+ (deps ../../resource/games/into-the-blue.gb)
+ (action (run cp %{deps} %{targets})))
+
 (alias
  (name app)
  (deps index.js index.html))
