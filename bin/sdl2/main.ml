@@ -32,10 +32,10 @@ let render_framebuffer ~texture ~renderer ~fb =
       for x = 0 to gb_w - 1 do
         let index = (y * gb_w) + x in
         match fb.(y).(x) with
-        | `White      -> pixels.{index} <- 0xFFFFFFl
-        | `Black      -> pixels.{index} <- 0x000000l
-        | `Light_gray -> pixels.{index} <- 0xAAAAAAl
-        | `Dark_gray  -> pixels.{index} <- 0x777777l
+        | `White      -> pixels.{index} <- 0xE5FBF4l
+        | `Light_gray -> pixels.{index} <- 0x97AEB8l
+        | `Dark_gray  -> pixels.{index} <- 0x61687Dl
+        | `Black      -> pixels.{index} <- 0x221E31l
       done
     done
   in
