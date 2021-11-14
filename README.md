@@ -7,9 +7,10 @@ A WIP Game Boy emulator written in OCaml.
 
 ## Screenshots
 
-![Tetris](./screenshot/tetris.png)
 ![Pokemon](./screenshot/pokemon.png)
 ![Zelda](./screenshot/zelda.png)
+![Kirby](./screenshot/kirby.png)
+![Tetris](./screenshot/tetris.png)
 
 ## TODO
 
