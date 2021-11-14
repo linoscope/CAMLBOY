@@ -124,7 +124,7 @@ let%expect_test "when tma changed while running then internal mcycles is carried
     $03
     $04 |}]
 
-let%expect_test "when tma overflows then after 1 mcycle resets to tma value" =
+let%expect_test "when tima overflows then resets to tma" =
   let t = create () in
 
   set_tima t 0b100;
@@ -136,4 +136,4 @@ let%expect_test "when tma overflows then after 1 mcycle resets to tma value" =
 
   [%expect {|
     $00
-    $F0 |}]
+    $00 |}]

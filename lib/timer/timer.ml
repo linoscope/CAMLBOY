@@ -1,17 +1,24 @@
 (* Ref: https://hacktixme.ga/GBEDG/timers/ *)
 open Uints
 
+type frequency =
+  | F_4096Hz
+  | F_262144Hz
+  | F_65536Hz
+  | F_16384Hz
+
 type t = {
-  div_addr : uint16;
+  div_addr  : uint16;
   tima_addr : uint16;
-  tma_addr : uint16;
-  tac_addr : uint16;
-  ic : Interrupt_controller.t;
-  mutable internal_tcycle_count : uint16;
-  mutable tima : uint8;
-  mutable tma : uint8;
-  mutable tac : uint8;
-  mutable reload_tima_on_next_mcycle : bool;
+  tma_addr  : uint16;
+  tac_addr  : uint16;
+  ic        : Interrupt_controller.t;
+  mutable internal_mcycle_count : uint16;
+  mutable div_counter           : uint8;
+  mutable tima_enabled          : bool;
+  mutable tima_frequency        : frequency;
+  mutable tima_tma              : uint8;
+  mutable tima_counter          : uint8;
 }
 
 let create ~div_addr ~tima_addr ~tma_addr ~tac_addr ~ic = {
@@ -20,86 +27,91 @@ let create ~div_addr ~tima_addr ~tma_addr ~tac_addr ~ic = {
   tma_addr;
   tac_addr;
   ic;
-  internal_tcycle_count = Uint16.zero;
-  tima = Uint8.zero;
-  tma = Uint8.zero;
-  tac = Uint8.zero;
-  reload_tima_on_next_mcycle = false;
+  internal_mcycle_count = Uint16.zero;
+  div_counter           = Uint8.zero;
+  tima_enabled          = false;
+  tima_frequency        = F_4096Hz;
+  tima_counter          = Uint8.zero;
+  tima_tma              = Uint8.zero;
 }
 
-(** Takes old and new value of [internal_tcycle_count] and detects if it has a "falling edge"
- ** You can read more on "falling edge" here: https://hacktixme.ga/GBEDG/timers/ *)
-let has_falling_edge t old new_ =
-  let old = Uint16.to_int old in
-  let new_ = Uint16.to_int new_ in
-  let bit_to_check =
-    let tac = (t.tac |> Uint8.to_int) land 0b11 in
-    match tac with
-    | 0b00 -> 9
-    | 0b01 -> 3
-    | 0b10 -> 5
-    | 0b11 -> 7
-    | _ -> assert false
-  in
-  let mask = 1 lsl bit_to_check in
-  (old land mask <> 0) && (new_ land mask = 0)
+let quotient_diff modulo before after =
+  let open Uint16 in
+  let divider = of_int modulo in
+  (after / divider - before / divider) |> to_uint8
+let quotient_diff256 = quotient_diff 256
+let quotient_diff64  = quotient_diff 64
+let quotient_diff16  = quotient_diff 16
+let quotient_diff4   = quotient_diff 4
+let quotient_diff_of_frequency = function
+  | F_4096Hz   -> quotient_diff256
+  | F_262144Hz -> quotient_diff4
+  | F_65536Hz  -> quotient_diff16
+  | F_16384Hz  -> quotient_diff64
 
 let run t ~mcycles =
-  let is_tima_enabled = Uint8.(t.tac land of_int 0b100 <> zero) in
-  for _ = 0 to mcycles - 1 do
-    if t.reload_tima_on_next_mcycle then begin
-      t.reload_tima_on_next_mcycle <- false;
-      t.tima <- t.tma;
+  let before_mcycle_count = t.internal_mcycle_count in
+  t.internal_mcycle_count <- Uint16.(t.internal_mcycle_count + of_int mcycles);
+  let after_mcycle_count = t.internal_mcycle_count in
+  t.div_counter <- Uint8.(t.div_counter + quotient_diff64 before_mcycle_count after_mcycle_count);
+  if t.tima_enabled then begin
+    let quotient_diff = quotient_diff_of_frequency t.tima_frequency in
+    let before_tima_counter = t.tima_counter in
+    t.tima_counter <- Uint8.(t.tima_counter + quotient_diff before_mcycle_count after_mcycle_count);
+    let after_tima_counter = t.tima_counter in
+    if (after_tima_counter < before_tima_counter) then begin
       Interrupt_controller.request t.ic Timer;
-    end;
-    let old = t.internal_tcycle_count in
-    t.internal_tcycle_count <- Uint16.(t.internal_tcycle_count + of_int 4);
-    let new_ = t.internal_tcycle_count in
-    if is_tima_enabled then
-      if has_falling_edge t old new_ then begin
-        t.tima <- Uint8.succ t.tima;
-        if Uint8.(t.tima = zero) then
-          (* Quote from https://hacktixme.ga/GBEDG/timers/ *)
-          (*  After overflowing the TIMA register contains
-           *  a zero value for a duration of 4 T-cycles.
-           *  Only after these have elapsed it is reloaded with the value of TMA at $FF06,
-           *  and only then a Timer Interrupt is requested. *)
-          t.reload_tima_on_next_mcycle <- true
-      end
-  done
+      t.tima_counter <- t.tima_tma;
+    end
+  end
+;;
 
 let accepts t addr =
   addr = t.div_addr || addr = t.tima_addr || addr = t.tma_addr || addr = t.tac_addr
 
 let read_byte t addr =
-  let open Uint16 in
+  let byte_of_frequency = function
+    | F_4096Hz   -> Uint8.of_int 0b00
+    | F_262144Hz -> Uint8.of_int 0b01
+    | F_65536Hz  -> Uint8.of_int 0b10
+    | F_16384Hz  -> Uint8.of_int 0b11
+  in
   match addr with
   | _ when addr = t.div_addr ->
-    (* DIV is incremented every 2^8 = 256 tcycles *)
-    t. internal_tcycle_count lsr 8 |> Uint16.to_uint8
+    t.div_counter
   | _ when addr = t.tima_addr ->
-    t.tima
+    t.tima_counter
   | _ when addr = t.tma_addr ->
-    t.tma
+    t.tima_tma
   | _ when addr = t.tac_addr ->
-    t.tac
+    let enable_bit = (if t.tima_enabled then 0b100 else 0b000) |> Uint8.of_int in
+    Uint8.(enable_bit land byte_of_frequency t.tima_frequency)
   | _ -> assert false
 
 let write_byte t ~addr ~data =
-  let open Uint16 in
+  let frequency_of_byte byte =
+    let byte = Uint8.to_int byte in
+    match byte land 0b11 with
+    | 0b00 -> F_4096Hz
+    | 0b01 -> F_262144Hz
+    | 0b10 -> F_65536Hz
+    | 0b11 -> F_16384Hz
+    | _ -> assert false
+  in
   match addr with
   | _ when addr = t.div_addr ->
-    if has_falling_edge t t.internal_tcycle_count Uint16.zero then
-      t.tima <- Uint8.succ t.tima;
-    t.internal_tcycle_count <- Uint16.zero;
+    t.div_counter <- Uint8.zero;
+    t.internal_mcycle_count <- Uint16.zero;
   | _ when addr = t.tima_addr ->
-    t.tima <- data
+    t.tima_counter <- data
   | _ when addr = t.tma_addr ->
-    t.tma <- data
+    t.tima_tma <- data
   | _ when addr = t.tac_addr ->
-    t.tac <- data
+    if Uint8.(data land of_int 0b100 <> Uint8.zero) then
+      t.tima_enabled <- true;
+    t.tima_frequency <- frequency_of_byte data
   | _ -> assert false
 
 module For_tests = struct
-  let get_tima_count t = t.tima
+  let get_tima_count t = t.tima_counter
 end
