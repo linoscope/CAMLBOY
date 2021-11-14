@@ -81,27 +81,11 @@ let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (cam
     | _     -> ()
   end
 
-let () =
-  (* let rom_bytes = Read_rom_file.f "./resource/private/zelda.gb" in *)
-  let rom_bytes = Read_rom_file.f "./resource/private/kirby.gb" in
-  (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/instr_timing/instr_timing.gb" in *)
-  (* let rom_bytes = Read_rom_file.f "./resource/test_roms/mooneye/bits_bank2.gb" in *)
-  (* let rom_bytes = Read_rom_file.f "./resource/test_roms/blargg/cpu_instrs/individual/02-interrupts.gb" in *)
-  let cartridge = Detect_cartridge.f ~rom_bytes in
-  let module Camlboy = Camlboy.Make (val cartridge) in
-  let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
-  let renderer = create_renderer () in
-  let texture = create_texture renderer in
+let main_with_fps
+    (type a) (module Camlboy : Camlboy_intf.S with type t = a) (camlboy : a) texture renderer =
   let cnt = ref 0 in
   let start_time = ref (Unix.gettimeofday ()) in
-  (* let buf = Buffer.create 1500 in *)
   while true do
-    (* Buffer.add_string buf (Camlboy.show camlboy); *)
-    (* Printf.bprintf buf " tima:%s" (Camlboy.For_tests.get_tima_count camlboy |> Uints.Uint8.show); *)
-    (* Printf.sprintf " LY:$%02x" (Camlboy.For_tests.get_ly camlboy) |> Buffer.add_string buf;
-     * Printf.sprintf " LCD_STAT:%s" (Camlboy.For_tests.get_lcd_stat camlboy |> Uints.Uint8.show)
-     * |> Buffer.add_string buf;
-     * Printf.sprintf " MC:%3d" (Camlboy.For_tests.get_mcycles_in_mode camlboy) |> Buffer.add_string buf; *)
     begin match Camlboy.run_instruction camlboy with
       | In_frame ->
         ()
@@ -119,7 +103,39 @@ let () =
         render_framebuffer ~texture ~renderer ~fb:framebuffer;
 
     end;
-    (* Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
-     * print_string (Buffer.contents buf);
-     * Buffer.clear buf; *)
   done
+
+let main_with_trace
+    (type a) (module Camlboy : Camlboy_intf.S with type t = a) (camlboy : a) texture renderer =
+  let buf = Buffer.create 1500 in
+  while true do
+    Buffer.add_string buf (Camlboy.show camlboy);
+    begin match Camlboy.run_instruction camlboy with
+      | In_frame ->
+        ()
+      | Frame_ended framebuffer ->
+        handle_event (module Camlboy) camlboy;
+        render_framebuffer ~texture ~renderer ~fb:framebuffer;
+
+    end;
+    Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
+    print_string (Buffer.contents buf);
+    Buffer.clear buf;
+  done
+
+let () =
+  let usage_msg = "main.exe [--trace] <rom-path>" in
+  let show_trace = ref false in
+  let rom_path = ref "./resource/games/tobu.gb" in
+  let spec = [("--trace", Arg.Set show_trace,  "Print trace")] in
+  Arg.parse spec (fun path -> rom_path := path) usage_msg;
+  let rom_bytes = Read_rom_file.f !rom_path in
+  let cartridge = Detect_cartridge.f ~rom_bytes in
+  let module Camlboy = Camlboy.Make (val cartridge) in
+  let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
+  let renderer = create_renderer () in
+  let texture = create_texture renderer in
+  if !show_trace then
+    main_with_trace (module Camlboy) camlboy texture renderer
+  else
+    main_with_fps (module Camlboy) camlboy texture renderer
