@@ -20,8 +20,7 @@ jobs:
 
     steps:
       - run: |
-          sudo sed -i 's/azure\.//' /etc/apt/sources.list
-          sudo apt-get upgrade
+          sudo apt-get update
 
       - name: Checkout code
         uses: actions/checkout@v2
