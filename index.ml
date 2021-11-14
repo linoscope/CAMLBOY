@@ -14,7 +14,7 @@ let rom_options = [
   {name = "Retroid"           ; path = "./retroid.gb"};
   {name = "Into The Blue"     ; path = "./into-the-blue.gb"};
   {name = "Tobu Tobu Girl"    ; path = "./tobu.gb"};
-  {name = "Dreaming Sarah"    ; path = "./dreaming-sarah.gb"};
+  {name = "Wishing Sarah"    ; path = "./dreaming-sarah.gb"};
   {name = "Rocket Man Demo"   ; path = "./rocket-man-demo.gb"};
   {name = "SHEEP IT UP"       ; path = "./sheep-it-up.gb"};
 ]
