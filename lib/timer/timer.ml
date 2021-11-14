@@ -13,12 +13,12 @@ type t = {
   tma_addr  : uint16;
   tac_addr  : uint16;
   ic        : Interrupt_controller.t;
-  mutable internal_mcycle_count : uint16;
-  mutable div_counter           : uint8;
+  mutable internal_mcycle_count : int;
+  mutable div_counter           : int;
   mutable tima_enabled          : bool;
   mutable tima_frequency        : frequency;
-  mutable tima_tma              : uint8;
-  mutable tima_counter          : uint8;
+  mutable tima_tma              : int;
+  mutable tima_counter          : int;
 }
 
 let create ~div_addr ~tima_addr ~tma_addr ~tac_addr ~ic = {
@@ -27,37 +27,30 @@ let create ~div_addr ~tima_addr ~tma_addr ~tac_addr ~ic = {
   tma_addr;
   tac_addr;
   ic;
-  internal_mcycle_count = Uint16.zero;
-  div_counter           = Uint8.zero;
+  internal_mcycle_count = 0;
+  div_counter           = 0;
   tima_enabled          = false;
   tima_frequency        = F_4096Hz;
-  tima_counter          = Uint8.zero;
-  tima_tma              = Uint8.zero;
+  tima_counter          = 0;
+  tima_tma              = 0;
 }
-
-let quotient_diff modulo before after =
-  let open Uint16 in
-  let divider = of_int modulo in
-  (after / divider - before / divider) |> to_uint8
-let quotient_diff256 = quotient_diff 256
-let quotient_diff64  = quotient_diff 64
-let quotient_diff16  = quotient_diff 16
-let quotient_diff4   = quotient_diff 4
-let quotient_diff_of_frequency = function
-  | F_4096Hz   -> quotient_diff256
-  | F_262144Hz -> quotient_diff4
-  | F_65536Hz  -> quotient_diff16
-  | F_16384Hz  -> quotient_diff64
 
 let run t ~mcycles =
   let before_mcycle_count = t.internal_mcycle_count in
-  t.internal_mcycle_count <- Uint16.(t.internal_mcycle_count + of_int mcycles);
-  let after_mcycle_count = t.internal_mcycle_count in
-  t.div_counter <- Uint8.(t.div_counter + quotient_diff64 before_mcycle_count after_mcycle_count);
+  let after_mcycle_count = before_mcycle_count + mcycles in
+  t.internal_mcycle_count <- after_mcycle_count mod 0x10000;
+  let quotient_diff = (after_mcycle_count / 64 - before_mcycle_count / 64) in
+  t.div_counter <- (t.div_counter + quotient_diff) mod 0x100;
   if t.tima_enabled then begin
-    let quotient_diff = quotient_diff_of_frequency t.tima_frequency in
+    let divider = match t.tima_frequency with
+      | F_4096Hz   -> 256
+      | F_262144Hz -> 4
+      | F_65536Hz  -> 16
+      | F_16384Hz  -> 64
+    in
+    let quotient_diff = (after_mcycle_count / divider - before_mcycle_count / divider) in
     let before_tima_counter = t.tima_counter in
-    t.tima_counter <- Uint8.(t.tima_counter + quotient_diff before_mcycle_count after_mcycle_count);
+    t.tima_counter <- (t.tima_counter + quotient_diff) mod 0x100;
     let after_tima_counter = t.tima_counter in
     if (after_tima_counter < before_tima_counter) then begin
       Interrupt_controller.request t.ic Timer;
@@ -78,11 +71,11 @@ let read_byte t addr =
   in
   match addr with
   | _ when addr = t.div_addr ->
-    t.div_counter
+    t.div_counter |> Uint8.of_int
   | _ when addr = t.tima_addr ->
-    t.tima_counter
+    t.tima_counter |> Uint8.of_int
   | _ when addr = t.tma_addr ->
-    t.tima_tma
+    t.tima_tma |> Uint8.of_int
   | _ when addr = t.tac_addr ->
     let enable_bit = (if t.tima_enabled then 0b100 else 0b000) |> Uint8.of_int in
     Uint8.(enable_bit land byte_of_frequency t.tima_frequency)
@@ -100,12 +93,12 @@ let write_byte t ~addr ~data =
   in
   match addr with
   | _ when addr = t.div_addr ->
-    t.div_counter <- Uint8.zero;
-    t.internal_mcycle_count <- Uint16.zero;
+    t.div_counter <- 0;
+    t.internal_mcycle_count <- 0;
   | _ when addr = t.tima_addr ->
-    t.tima_counter <- data
+    t.tima_counter <- (Uint8.to_int data)
   | _ when addr = t.tma_addr ->
-    t.tima_tma <- data
+    t.tima_tma <- (Uint8.to_int data)
   | _ when addr = t.tac_addr ->
     if Uint8.(data land of_int 0b100 <> Uint8.zero) then
       t.tima_enabled <- true;
@@ -113,5 +106,5 @@ let write_byte t ~addr ~data =
   | _ -> assert false
 
 module For_tests = struct
-  let get_tima_count t = t.tima_counter
+  let get_tima_count t = t.tima_counter |> Uint8.of_int
 end
