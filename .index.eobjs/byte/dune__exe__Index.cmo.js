@@ -164,14 +164,14 @@
                         ?caml_string_notequal(key_name,cst_j)
                           ?caml_string_notequal(key_name,cst_k)
                             ?caml_string_notequal(key_name,cst_s)
-                              ?caml_string_notequal(key_name,cst_w)?0:caml_call2(C[5],t,1)
-                              :caml_call2(C[5],t,0)
-                            :caml_call2(C[5],t,7)
-                          :caml_call2(C[5],t,6)
-                        :caml_call2(C[5],t,3)
-                      :caml_call2(C[5],t,2)
-                    :caml_call2(C[5],t,5)
-                  :caml_call2(C[5],t,4)}
+                              ?caml_string_notequal(key_name,cst_w)?0:caml_call2(C[4],t,1)
+                              :caml_call2(C[4],t,0)
+                            :caml_call2(C[4],t,7)
+                          :caml_call2(C[4],t,6)
+                        :caml_call2(C[4],t,3)
+                      :caml_call2(C[4],t,2)
+                    :caml_call2(C[4],t,5)
+                  :caml_call2(C[4],t,4)}
         function key_up_listener(ev)
          {var key_name=caml_string_of_jsstring(caml_call1(Brr[7][31][2],ev));
           return caml_string_notequal(key_name,cst_Enter$0)
@@ -183,14 +183,14 @@
                             ?caml_string_notequal(key_name,cst_s$0)
                               ?caml_string_notequal(key_name,cst_w$0)
                                 ?0
-                                :caml_call2(C[6],t,1)
-                              :caml_call2(C[6],t,0)
-                            :caml_call2(C[6],t,7)
-                          :caml_call2(C[6],t,6)
-                        :caml_call2(C[6],t,3)
-                      :caml_call2(C[6],t,2)
-                    :caml_call2(C[6],t,5)
-                  :caml_call2(C[6],t,4)}
+                                :caml_call2(C[5],t,1)
+                              :caml_call2(C[5],t,0)
+                            :caml_call2(C[5],t,7)
+                          :caml_call2(C[5],t,6)
+                        :caml_call2(C[5],t,3)
+                      :caml_call2(C[5],t,2)
+                    :caml_call2(C[5],t,5)
+                  :caml_call2(C[5],t,4)}
         caml_call4(Brr[7][20],0,Brr[7][76],key_down_listener,Brr[16][6]);
         caml_call4(Brr[7][20],0,Brr[7][77],key_up_listener,Brr[16][6]);
         return caml_call2(State[4],key_down_listener,key_up_listener)}}
@@ -206,9 +206,9 @@
          select_el=find_el_by_id(cst_select),
          start_el=find_el_by_id(cst_start);
         function press(ev,t,key)
-         {caml_call1(Brr[7][13],ev);return caml_call2(C[5],t,key)}
+         {caml_call1(Brr[7][13],ev);return caml_call2(C[4],t,key)}
         function release(ev,t,key)
-         {caml_call1(Brr[7][13],ev);return caml_call2(C[6],t,key)}
+         {caml_call1(Brr[7][13],ev);return caml_call2(C[5],t,key)}
         var listen_ops=caml_call4(Brr[7][19],_a_,0,0,0);
         function _G_(ev){return press(ev,t,1)}
         caml_call4(Brr[7][20],[0,listen_ops],Brr[7][97],_G_,up_el);
@@ -248,13 +248,13 @@
       var
        cartridge=caml_call1(Camlboy_lib_Detect_cartridge[1],rom_bytes),
        C=caml_call1(Camlboy_lib_Camlboy[1],cartridge),
-       t=caml_call2(C[3],1,rom_bytes);
+       t=caml_call2(C[2],1,rom_bytes);
       caml_call1(set_up_keyboard(C),t);
       caml_call1(set_up_joypad(C),t);
       var cnt=[0,0],start_time=[0,caml_call1(Brr[15][9],Brr[16][4])];
       function main_loop(param)
        {for(;;)
-         {var match=caml_call1(C[4],t);
+         {var match=caml_call1(C[3],t);
           if(match)
            {var fb=match[1];
             cnt[1]++;
