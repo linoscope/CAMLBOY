@@ -16,8 +16,8 @@ A Game Boy emulator written in OCaml 🐫🎮
 ## Screenshots
 
 <div style="display:flex">
-  <img src="/screenshot/phone-ui.jpg" height="350"/>
-  <img src="/screenshot/desktop-ui.png" height="350" />
+  <img src="/screenshot/phone-ui.jpg" height="500"/>
+  <img src="/screenshot/desktop-ui.png" height="500" />
 </div>
 
 ![Pokemon](./screenshot/pokemon.png)
