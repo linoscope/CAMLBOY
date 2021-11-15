@@ -12,7 +12,9 @@ type sprite = {
   pallete : [`OBP0 | `OBP1];
   tile_vram_bank : [`Bank0 | `Bank1];
   pallete_num : int;
-} [@@deriving show]
+}
+
+val show_sprite : sprite -> string
 
 val create : start_addr:uint16 -> end_addr:uint16 -> t
 

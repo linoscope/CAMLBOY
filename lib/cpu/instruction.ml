@@ -103,7 +103,7 @@ let show = function
   | LD16 (x, y)  -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
   | ADD8 (x, y)  -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
   | ADD16 (x, y) -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
-  | ADDSP y      -> Printf.sprintf "ADD SP, %s" (show_int8 y)
+  | ADDSP y      -> Printf.sprintf "ADD SP, %s" (Int8.show y)
   | ADC (x, y)   -> Printf.sprintf "ADC %s, %s" (show_arg x) (show_arg y)
   | SUB (x, y)   -> Printf.sprintf "SUB %s, %s" (show_arg x) (show_arg y)
   | SBC (x, y)   -> Printf.sprintf "SBC %s, %s" (show_arg x) (show_arg y)
@@ -147,14 +147,12 @@ let show = function
       | NZ | Z | NC | C -> Printf.sprintf "JP %s, %s" (show_condition c) (show_arg x))
   | JR (c, x) -> (
       match c with
-      | None -> Printf.sprintf "JR %s" (show_int8 x)
-      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (show_int8 x))
+      | None -> Printf.sprintf "JR %s" (Int8.show x)
+      | NZ | Z | NC | C -> Printf.sprintf "JR %s, %s" (show_condition c) (Int8.show x))
   | CALL (c, x) -> (
       match c with
-      | None -> Printf.sprintf "CALL %s" (show_uint16 x)
-      | NZ | Z | NC | C -> Printf.sprintf "CALL %s, %s" (show_condition c) (show_uint16 x))
-  | RST x -> Printf.sprintf "RST %s" (show_uint16 x)
+      | None -> Printf.sprintf "CALL %s" (Uint16.show x)
+      | NZ | Z | NC | C -> Printf.sprintf "CALL %s, %s" (show_condition c) (Uint16.show x))
+  | RST x -> Printf.sprintf "RST %s" (Uint16.show x)
   | RET c -> Printf.sprintf "RET %s" (show_condition c)
   | RETI  -> Printf.sprintf "RETI"
-
-let pp fmt x = Format.fprintf fmt "%s" (show x)

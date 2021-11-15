@@ -10,7 +10,7 @@ let%expect_test "test write and read single register" =
   let v = Registers.read_r t A in
 
   v
-  |> show_uint8
+  |> Uint8.show
   |> Stdio.print_endline;
   [%expect {| $AB |}]
 
@@ -21,7 +21,7 @@ let%expect_test "test write and read register pair" =
   let v = Registers.read_rr t BC in
 
   v
-  |> show_uint16
+  |> Uint16.show
   |> Stdio.print_endline;
   [%expect {| $ABCD |}]
 
@@ -33,7 +33,7 @@ let%expect_test "test write single and read register pair" =
   let v = Registers.read_rr t BC in
 
   v
-  |> show_uint16
+  |> Uint16.show
   |> Stdio.print_endline;
   [%expect {| $ABCD |}]
 

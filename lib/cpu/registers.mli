@@ -1,7 +1,6 @@
 open Uints
 
 type t
-[@@deriving show]
 
 type r =
   | A
@@ -12,20 +11,24 @@ type r =
   | F
   | H
   | L
-[@@deriving show]
 
 type rr =
   | AF
   | BC
   | DE
   | HL
-[@@deriving show]
 
 type flag =
   | Carry
   | Half_carry
   | Subtraction
   | Zero
+
+val show : t -> string
+
+val show_r : r -> string
+
+val show_rr : rr -> string
 
 val create : unit -> t
 

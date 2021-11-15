@@ -1,5 +1,7 @@
 module type Basics = sig
-  type t [@@deriving show]
+  type t
+
+  val show : t -> string
 
   val max_int : t
   val zero : t

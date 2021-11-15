@@ -47,7 +47,7 @@ let print_execute_result t inst =
 
 let print_addr_content mmu addr =
   Mmu.read_byte mmu (Uint16.of_int addr)
-  |> show_uint8
+  |> Uint8.show
   |> print_endline
 
 

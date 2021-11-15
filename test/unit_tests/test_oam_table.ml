@@ -43,6 +43,4 @@ let%expect_test "test get_all_sprites" =
   |> print_endline;
 
   [%expect {|
-    { Oam_table.y_pos = 104; x_pos = 69; tile_index = $90;
-      priority = `Sprite_top; y_flip = false; x_flip = true; pallete = `OBP1;
-      tile_vram_bank = `Bank0; pallete_num = 0 } |}]
+    y_pos:104, x_pos:69, tile_index:$90, priority:`Sprite_top, y_flip:false, x_flip:true, pallete:`OBP1, tile_vram_bank:`Bank0, pallete_num:0 |}]

@@ -1,6 +1,6 @@
 open Uints
 
-type t [@@deriving show]
+type t
 
 type type_ =
   | VBlank
@@ -8,7 +8,10 @@ type type_ =
   | Timer
   | Serial_port
   | Joypad
-[@@deriving show]
+
+val show : t -> string
+
+val show_type_ : type_ -> string
 
 val create : ie_addr:Uint16.t -> if_addr:Uint16.t -> t
 

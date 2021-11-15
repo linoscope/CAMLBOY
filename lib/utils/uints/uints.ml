@@ -45,7 +45,6 @@ module Uint8 = struct
     external to_int : t -> int = "%identity"
 
     let show = Printf.sprintf "$%02X"
-    let pp fmt = Format.fprintf fmt "$%02X"
   end
   include B
 
@@ -80,7 +79,6 @@ module Uint16 = struct
     external to_int : t -> int = "%identity"
 
     let show = Printf.sprintf "$%04X"
-    let pp fmt t = Format.fprintf fmt "%s" (show t)
   end
   include B
 
@@ -115,17 +113,10 @@ module Int8 = struct
       Printf.sprintf "-%d" (Int.abs @@ t - 0x100)
     else
       Printf.sprintf "%d" t
-  let pp fmt t = Format.fprintf fmt "%s" (show t)
 end
 
 type uint8 = Uint8.t
-let show_uint8 = Uint8.show
-let pp_uint8 = Uint8.pp
 
 type uint16 = Uint16.t
-let show_uint16 = Uint16.show
-let pp_uint16 = Uint16.pp
 
 type int8 = Int8.t
-let show_int8 = Int8.show
-let pp_int8 = Int8.pp

@@ -12,22 +12,20 @@ type t = {
 }
 
 type r =
-  | A [@printer fun fmt _ -> fprintf fmt "A"]
-  | B [@printer fun fmt _ -> fprintf fmt "B"]
-  | C [@printer fun fmt _ -> fprintf fmt "C"]
-  | D [@printer fun fmt _ -> fprintf fmt "D"]
-  | E [@printer fun fmt _ -> fprintf fmt "E"]
-  | F [@printer fun fmt _ -> fprintf fmt "F"]
-  | H [@printer fun fmt _ -> fprintf fmt "H"]
-  | L [@printer fun fmt _ -> fprintf fmt "L"]
-[@@deriving show]
+  | A
+  | B
+  | C
+  | D
+  | E
+  | F
+  | H
+  | L
 
 type rr =
-  | AF [@printer fun fmt _ -> fprintf fmt "AF"]
-  | BC [@printer fun fmt _ -> fprintf fmt "BC"]
-  | DE [@printer fun fmt _ -> fprintf fmt "DE"]
-  | HL [@printer fun fmt _ -> fprintf fmt "HL"]
-[@@deriving show]
+  | AF
+  | BC
+  | DE
+  | HL
 
 type flag =
   | Carry                       (* c *)
@@ -142,6 +140,22 @@ let unset_flag t flag =
 
 let clear_flags t = t.f <- Uint8.zero
 
+let show_r = function
+  | A -> "A"
+  | B -> "B"
+  | C -> "C"
+  | D -> "D"
+  | E -> "E"
+  | F -> "F"
+  | H -> "H"
+  | L -> "L"
+
+let show_rr = function
+  | AF -> "AF"
+  | BC -> "BC"
+  | DE -> "DE"
+  | HL -> "HL"
+
 let show_f f =
   let f = Uint8.to_int f in
   let z = if f land 0b10000000 <> 0 then 'Z' else '-' in
@@ -158,6 +172,3 @@ let show t =
     (read_rr t BC |> Uint16.show)
     (read_rr t DE |> Uint16.show)
     (read_rr t HL |> Uint16.show)
-
-let pp fmt t = Format.fprintf fmt "%s" (show t)
-

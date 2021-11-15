@@ -18,8 +18,6 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     Printf.sprintf "%s SP:%s PC:%s"
       (Registers.show t.registers) (t.sp |> Uint16.show) (t.pc |> Uint16.show)
 
-  let pp fmt t = Format.fprintf fmt "%s" (show t)
-
   let create ~mmu ~ic ~registers ~sp ~pc ~halted ~ime =
     {
       registers;

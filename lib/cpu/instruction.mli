@@ -71,4 +71,5 @@ type t =
   | RST   of uint16
   | RET   of condition
   | RETI
-[@@deriving show]
+
+val show : t -> string

@@ -10,7 +10,19 @@ type sprite = {
   pallete : [`OBP0 | `OBP1];
   tile_vram_bank : [`Bank0 | `Bank1];
   pallete_num : int;
-} [@@deriving show]
+}
+
+let show_sprite s =
+  Printf.sprintf "y_pos:%d, x_pos:%d, tile_index:%s, priority:%s, y_flip:%b, x_flip:%b, pallete:%s, tile_vram_bank:%s, pallete_num:%d\n"
+    s.y_pos
+    s.x_pos
+    (Uint8.show s.tile_index)
+    (match s.priority with `Sprite_top -> "`Sprite_top" | `Sprite_bottom -> "`Sprite_bottom")
+    s.y_flip
+    s.x_flip
+    (match s.pallete with `OBP0 -> "`OBP0" | `OBP1 -> "`OBP1")
+    (match s.tile_vram_bank with `Bank0 -> "`Bank0" | `Bank1 -> "`Bank1")
+    s.pallete_num
 
 type t = {
   sprites : sprite array;

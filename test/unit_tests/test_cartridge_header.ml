@@ -27,7 +27,7 @@ let%expect_test "test rom only" =
   |> Printf.printf "%d\n";
 
   [%expect {|
-    Cartridge_type.ROM_ONLY
+    ROM_ONLY
     2
     0 |}]
 
@@ -48,6 +48,6 @@ let%expect_test "test mbc1" =
   |> Printf.printf "%d\n";
 
   [%expect {|
-    Cartridge_type.MBC1
+    MBC1
     4
     0 |}]

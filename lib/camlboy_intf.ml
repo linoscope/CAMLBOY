@@ -1,7 +1,9 @@
 open Uints
 
 module type S = sig
-  type t [@@deriving show]
+  type t
+
+  val show : t -> string
 
   val create_with_rom : print_serial_port:bool -> rom_bytes:Bigstringaf.t -> t
 

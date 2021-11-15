@@ -1,7 +1,9 @@
 open Uints
 
 module Make (Mmu : Word_addressable_intf.S) : sig
-  type t [@@deriving show]
+  type t
+
+  val show : t -> string
 
   val create :
     mmu:Mmu.t ->

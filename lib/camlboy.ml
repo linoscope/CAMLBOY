@@ -8,10 +8,10 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
   type t = {
     cpu    : Cpu.t;
-    timer  : Timer.t;  [@opaque]
-    gpu    : Gpu.t;    [@opaque]
-    joypad : Joypad.t; [@opaque]
-  } [@@deriving show]
+    timer  : Timer.t;
+    gpu    : Gpu.t;
+    joypad : Joypad.t;
+  }
 
   let show t = Cpu.show t.cpu
 
