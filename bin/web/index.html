@@ -149,9 +149,14 @@
                 margin-top: 2px;
                 font-size: 0.8em;
             }
+            #fps-box {
+                display: flex;
+                justify-content: center;
+            }
             #throttle-box {
                 display: flex;
                 align-items: center;
+                margin-bottom: 2px;
             }
             input[type='checkbox'] {
                 filter: grayscale(1);
@@ -269,11 +274,11 @@
             </div>
             <div class="bar">
                 <div id="fps-and-throttle">
-                    <span id="fps">0.00</span> FPS
                     <div id="throttle-box">
                         <label for="throttle">Throttle</label>
                         <input type="checkbox" id="throttle" checked></input>
                     </div>
+                    <div id="fps-box"><span id="fps">00.0</span> FPS</div>
                 </div>
                 <select id="rom-selector"></select>
                 <button class="load-rom-btn">
