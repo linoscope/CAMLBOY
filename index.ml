@@ -125,7 +125,7 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   let a_el, b_el = find_el_by_id "a", find_el_by_id "b" in
   let start_el, select_el = find_el_by_id "start", find_el_by_id "select" in
   (* TODO: unlisten these listener on rom change *)
-  let press ev t key = Ev.prevent_default ev; viberate 30; C.press t key in
+  let press ev t key = Ev.prevent_default ev; viberate 10; C.press t key in
   let release ev t key = Ev.prevent_default ev; C.release t key in
   let listen_ops = Ev.listen_opts ~capture:true () in
   Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el);
