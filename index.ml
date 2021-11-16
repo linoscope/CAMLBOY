@@ -23,11 +23,11 @@ let alert v =
   let alert = Jv.get Jv.global "alert" in
   ignore @@ Jv.apply alert Jv.[| of_string v |]
 
+let console_log s = Console.log Jstr.[of_string s]
+
 let viberate ms =
-  let navigator = Jv.get Jv.global "navigator" in
-  match Jv.find navigator "viberate" with
-  | None -> ()
-  | Some viberate -> ignore @@ Jv.apply viberate Jv.[| of_int ms |]
+  let navigator = G.navigator |> Navigator.to_jv in
+  ignore @@ Jv.call navigator "vibrate" Jv.[| of_int ms |]
 
 let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
 
@@ -124,8 +124,8 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
     find_el_by_id "up", find_el_by_id "down", find_el_by_id "left", find_el_by_id "right" in
   let a_el, b_el = find_el_by_id "a", find_el_by_id "b" in
   let start_el, select_el = find_el_by_id "start", find_el_by_id "select" in
-  (* TODO: unlisten these listener when rom change *)
-  let press ev t key = Ev.prevent_default ev; viberate 10; C.press t key in
+  (* TODO: unlisten these listener on rom change *)
+  let press ev t key = Ev.prevent_default ev; viberate 30; C.press t key in
   let release ev t key = Ev.prevent_default ev; C.release t key in
   let listen_ops = Ev.listen_opts ~capture:true () in
   Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el);
