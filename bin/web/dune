@@ -44,6 +44,11 @@
  (deps ../../resource/games/into-the-blue.gb)
  (action (run cp %{deps} %{targets})))
 
+(rule
+ (targets cavern.gb)
+ (deps ../../resource/games/cavern.gb)
+ (action (run cp %{deps} %{targets})))
+
 (alias
  (name app)
  (deps index.js index.html))
