@@ -158,7 +158,7 @@ let run_rom_bytes ctx image_data rom_bytes =
   let cnt = ref 0 in
   let start_time = ref (Performance.now_ms G.performance) in
   let set_fps fps =
-    let fps_str = Printf.sprintf "%.2f" fps in
+    let fps_str = Printf.sprintf "%.1f" fps in
     let fps_el = find_el_by_id "fps" in
     El.set_children fps_el [El.txt (Jstr.v fps_str)]
   in
