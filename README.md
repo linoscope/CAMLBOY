@@ -97,8 +97,10 @@ dune runtest test/rom_tests/
 ## TODO
 
 - [ ] MBC5
+- [ ] Cartridge based save
 - [ ] Game Boy Color mode
 - [ ] Audio Processing Unit (APU)
+- [ ] rescript backend
 - [ ] Bench marks (compare default, flambda, js_of_ocaml, ...)
 
 ## Resources
