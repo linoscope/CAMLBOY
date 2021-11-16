@@ -23,6 +23,12 @@ let alert v =
   let alert = Jv.get Jv.global "alert" in
   ignore @@ Jv.apply alert Jv.[| of_string v |]
 
+let viberate ms =
+  let navigator = Jv.get Jv.global "navigator" in
+  match Jv.find navigator "viberate" with
+  | None -> ()
+  | Some viberate -> ignore @@ Jv.apply viberate Jv.[| of_int ms |]
+
 let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
 
 let draw_framebuffer ctx image_data fb =
@@ -119,7 +125,7 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   let a_el, b_el = find_el_by_id "a", find_el_by_id "b" in
   let start_el, select_el = find_el_by_id "start", find_el_by_id "select" in
   (* TODO: unlisten these listener when rom change *)
-  let press ev t key = Ev.prevent_default ev; C.press t key in
+  let press ev t key = Ev.prevent_default ev; viberate 10; C.press t key in
   let release ev t key = Ev.prevent_default ev; C.release t key in
   let listen_ops = Ev.listen_opts ~capture:true () in
   Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el);
