@@ -129,22 +129,22 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   let press ev t key = Ev.prevent_default ev; viberate 10; C.press t key in
   let release ev t key = Ev.prevent_default ev; C.release t key in
   let listen_ops = Ev.listen_opts ~capture:true () in
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el);
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Down)   (El.as_target down_el);
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Left)   (El.as_target left_el);
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Right)  (El.as_target right_el);
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t A)      (El.as_target a_el);
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t B)      (El.as_target b_el);
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Start)  (El.as_target start_el);
-  Ev.listen Ev.pointerdown ~opts:listen_ops (fun ev -> press ev t Select) (El.as_target select_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t Up)     (El.as_target up_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t Down)   (El.as_target down_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t Left)   (El.as_target left_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t Right)  (El.as_target right_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el);
-  Ev.listen Ev.pointerleave ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el)
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el);
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Down)   (El.as_target down_el);
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Left)   (El.as_target left_el);
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Right)  (El.as_target right_el);
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t A)      (El.as_target a_el);
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t B)      (El.as_target b_el);
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Start)  (El.as_target start_el);
+  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Select) (El.as_target select_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Up)     (El.as_target up_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Down)   (El.as_target down_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Left)   (El.as_target left_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Right)  (El.as_target right_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el);
+  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el)
 
 let throttled = ref true
 
