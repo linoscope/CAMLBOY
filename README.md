@@ -3,15 +3,9 @@
 
 # CAMLBOY
 
-A Game Boy emulator written in OCaml 🐫🎮
+A Game Boy emulator that runs in the browser, written in OCaml and compiled to JS using js_of_ocaml.
 
-**[Demo Page](https://linoscope.github.io/CAMLBOY/)**
-
-## Features
-
-- Can run both in the web browser and in the desktop natively
-  - The web build uses [`js_of_ocaml`](https://ocsigen.org/js_of_ocaml/) (via the [`Brr`](https://github.com/dbuenzli/brr) library) + HTML canvas
-  - The native desktop build uses [`SDL2`](https://www.libsdl.org/download-2.0.php) (via the [`Tsdl`](https://github.com/dbuenzli/tsdl) library)
+Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 ## Screenshots
 
@@ -25,22 +19,55 @@ A Game Boy emulator written in OCaml 🐫🎮
 ![Kirby](./screenshot/kirby.png)
 ![Tetris](./screenshot/tetris.png)
 
-## How to build
+## Project goals and non-goals
 
-### Common
+### Goals
 
-- Install dependencies
+- Playable in the browser of your phone
+- Readable/maintainable code that follow OCaml's best practices
+
+### Non-goals
+
+- Run all games with high accuracy
+- Optimize performance to the limit
+
+## Current state
+
+- Runs with "playable" FPS in middle-tier mobile devices
+  - Around 40~60FPS in my Galaxy S9, a smartphone released in 2018
+- Supports MBC1 and MCB3 cartridges
+- Some visual glitches exist here and there
+- Passes various test roms such as Blargg's `cpu_instrs.gb`and `instr_timing.gb`
+  - [tests for Blargg's test roms](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml)
+  - [tests for Mooneye's test roms](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)
+
+## TODO
+
+- [ ] Cartridge based save
+- [ ] Audio Processing Unit (APU)
+- [ ] rescript backend
+- [ ] Bench marks (compare default, flambda, js_of_ocaml, rescript, ...)
+- [ ] MBC5
+- [ ] Game Boy Color mode
+
+## How to run
+
+We support both js_of_ocaml frontend for the web browser and SDL2 frontend for native desktop.
+
+### Common steps for js_of_ocaml and SDL2
+
+Install dependencies
 
 ```sh
 opam install . --deps-only --with-test
 ```
 
-### Web
+### How to run js_of_ocaml frontend
 
 - Build
 
 ```sh
-dune build
+  dune build
 
 ```
 
@@ -53,9 +80,14 @@ python -m http.server 8000 --directory _build/default/bin/web
 
 - Open `localhost:8000` in the browser
 
-### SDL2
+### How to run SDL2 frontend
 
-- Run `dune exec bin/sdl2/main.exe -- <path_to_rom>`. For example:
+```sh
+dune exec bin/sdl2/main.exe -- <path_to_rom>
+
+```
+
+For example:
 
 ```sh
 dune exec bin/sdl2/main.exe -- resource/games/the-bouncing-ball.gb
@@ -63,19 +95,19 @@ dune exec bin/sdl2/main.exe -- resource/games/the-bouncing-ball.gb
 
 ## How to run tests
 
-- To run all tests:
+### Run all tests:
 
 ```sh
 dune runtest
 ```
 
-- To run unit tests only:
+### Run unit tests only:
 
 ```sh
 dune runtest test/unit_tests/
 ```
 
-- To run integration tests that use test roms:
+### Run integration tests (i.e. tests that use test roms):
 
 ```sh
 dune runtest test/rom_tests/
@@ -93,15 +125,6 @@ dune runtest test/rom_tests/
 - `resource`
   - `games` - Game roms
   - `test_roms` - Test roms used in `rom_tests`
-
-## TODO
-
-- [ ] MBC5
-- [ ] Cartridge based save
-- [ ] Game Boy Color mode
-- [ ] Audio Processing Unit (APU)
-- [ ] rescript backend
-- [ ] Bench marks (compare default, flambda, js_of_ocaml, ...)
 
 ## Resources
 
