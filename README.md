@@ -1,23 +1,24 @@
 [![Build](https://github.com/linoscope/CAMLBOY/actions/workflows/workflow.yml/badge.svg)](https://github.com/linoscope/CAMLBOY/actions/workflows/workflow.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# CAMLBOY
+# **_CAMLBOY_**
 
-A Game Boy emulator that runs in the browser, written in OCaml and compiled to JS using js_of_ocaml.
+**_CAMLBOY_** is a Game Boy emulator that runs in the browser, written in OCaml and compiled to JS using js_of_ocaml.
 
 Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 ## Screenshots
 
-<div style="display:flex">
-  <img src="/screenshot/phone-ui.jpg" height="500"/>
-  <img src="/screenshot/desktop-ui.png" height="500" />
+<div align="center">
+  <img src="/screenshot/pokemon-aka.gif" height="500"/>
 </div>
 
-![Pokemon](./screenshot/pokemon.png)
-![Zelda](./screenshot/zelda.png)
-![Kirby](./screenshot/kirby.png)
-![Tetris](./screenshot/tetris.png)
+<div align="center">
+  <img src="/screenshot/pokemon.png"/>
+  <img src="/screenshot/zelda.png"/>
+  <img src="/screenshot/kirby.png"/>
+  <img src="/screenshot/tetris.png"/>
+</div>
 
 ## Project goals and non-goals
 
