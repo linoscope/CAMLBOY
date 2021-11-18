@@ -3,7 +3,7 @@
 
 # **_CAMLBOY_**
 
-**_CAMLBOY_** is a Game Boy emulator that runs in the browser, written in OCaml and compiled to JS using js_of_ocaml.
+**_CAMLBOY_** is a Game Boy emulator that runs in the browser, written in OCaml and compiled to JS via js_of_ocaml.
 
 Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
@@ -46,8 +46,8 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 - [ ] Cartridge based save
 - [ ] Audio Processing Unit (APU)
-- [ ] rescript backend
-- [ ] Bench marks (compare default, flambda, js_of_ocaml, rescript, ...)
+- [ ] Rescript backend
+- [ ] Bench marks (compare default, flambda, js_of_ocaml, Rescript, ...)
 - [ ] MBC5
 - [ ] Game Boy Color mode
 
