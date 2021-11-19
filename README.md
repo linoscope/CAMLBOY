@@ -3,7 +3,7 @@
 
 # **_CAMLBOY_**
 
-**_CAMLBOY_** is a Game Boy emulator that runs in the browser, written in OCaml and compiled to JS via js_of_ocaml.
+**_CAMLBOY_** is a Game Boy emulator that runs in the browser. It is written in [OCaml](https://ocaml.org/) and compiled to JavaScript using [js_of_ocaml](http://ocsigen.org/js_of_ocaml/latest/manual/overview).
 
 Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
@@ -13,19 +13,16 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
   <img src="/screenshot/pokemon-aka.gif" height="500"/>
 </div>
 
-<div align="center">
-  <img src="/screenshot/pokemon-opening.gif"/>
-  <img src="/screenshot/zelda-opening.gif"/>
-  <img src="/screenshot/kirby-opening.gif"/>
-  <img src="/screenshot/tetris-opening.gif"/>
-</div>
-
 ## Project goals and non-goals
 
 ### Goals
 
 - Playable in the browser of your phone
 - Readable/maintainable code that follow OCaml's best practices
+
+### Stretch goals
+
+- Serve as a benchmark target for various compile backends, similar to [optcarrot](https://github.com/mame/optcarrot) in the Ruby world
 
 ### Non-goals
 
@@ -37,7 +34,6 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 - Runs with "playable" FPS in middle-tier mobile devices
   - Around 40~60FPS in my Galaxy S9, a smartphone released in 2018
 - Supports MBC1 and MCB3 cartridges
-- Some visual glitches exist here and there
 - Passes various test roms such as Blargg's `cpu_instrs.gb`and `instr_timing.gb`
   - [tests for Blargg's test roms](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml)
   - [tests for Mooneye's test roms](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)
@@ -136,7 +132,7 @@ dune runtest test/rom_tests/
 - [Imran Nazar's blog](https://imrannazar.com/GameBoy-Emulation-in-JavaScript)
 - [codeslinger.co.uk](http://www.codeslinger.co.uk/pages/projects/gameboy.html)
 
-## Source of game ROMs:
+## Source of built-in game ROMs:
 
 - [The Bouncing Ball](https://gamejolt.com/games/the-bouncing-ball-gb/86699)
 - [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/)
@@ -146,3 +142,12 @@ dune runtest test/rom_tests/
 - [Rocket Man Demo](https://lightgamesgb.com/portfolio/rocket-man/)
 - [SHEET IT UP](https://drludos.itch.io/sheep-it-up)
 - [Cavern](https://thegreatgallus.itch.io/cavern-mvm-9)
+
+## More screenshots
+
+<div align="center">
+  <img src="/screenshot/pokemon-opening.gif"/>
+  <img src="/screenshot/zelda-opening.gif"/>
+  <img src="/screenshot/kirby-opening.gif"/>
+  <img src="/screenshot/tetris-opening.gif"/>
+</div>
