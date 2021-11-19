@@ -8,7 +8,8 @@ open Fut.Syntax
 let gb_w = 160
 let gb_h = 144
 
-type rom_option = {name : string; path : string}
+type rom_option = { name : string; path : string }
+
 let rom_options = [
   {name = "The Bouncing Ball" ; path = "./the-bouncing-ball.gb"};
   {name = "Tobu Tobu Girl"    ; path = "./tobu.gb"};
@@ -25,10 +26,6 @@ let alert v =
   ignore @@ Jv.apply alert Jv.[| of_string v |]
 
 let console_log s = Console.log Jstr.[of_string s]
-
-let viberate ms =
-  let navigator = G.navigator |> Navigator.to_jv in
-  ignore @@ Jv.call navigator "vibrate" Jv.[| of_int ms |]
 
 let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
 
@@ -125,6 +122,10 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
     find_el_by_id "up", find_el_by_id "down", find_el_by_id "left", find_el_by_id "right" in
   let a_el, b_el = find_el_by_id "a", find_el_by_id "b" in
   let start_el, select_el = find_el_by_id "start", find_el_by_id "select" in
+  let viberate ms =
+    let navigator = G.navigator |> Navigator.to_jv in
+    ignore @@ Jv.call navigator "vibrate" Jv.[| of_int ms |]
+  in
   (* TODO: unlisten these listener on rom change *)
   let press ev t key = Ev.prevent_default ev; viberate 10; C.press t key in
   let release ev t key = Ev.prevent_default ev; C.release t key in
@@ -229,6 +230,26 @@ let set_up_rom_selector ctx image_data selector_el =
   in
   Ev.listen Ev.change on_change (El.as_target selector_el)
 
+let set_default_throttle_val checkbox_el =
+  let uri = Window.location G.window in
+  let param =
+    uri
+    |> Uri.query
+    |> Uri.Params.of_jstr
+    |> Uri.Params.find Jstr.(v "throttled")
+  in
+  let set_throttled_val b =
+    El.set_prop (El.Prop.checked) b checkbox_el;
+    throttled := b
+  in
+  match param with
+  | Some jstr ->
+    begin match Jstr.to_string jstr with
+      | "false" -> set_throttled_val false
+      | _      -> set_throttled_val true
+    end
+  | None -> set_throttled_val true
+
 let on_checkbox_change checkbox_el =
   let checked = El.prop (El.Prop.checked) checkbox_el in
   throttled := checked
@@ -243,6 +264,7 @@ let () =
   draw_framebuffer ctx image_data fb;
   (* Set up throttle checkbox *)
   let checkbox_el = find_el_by_id "throttle" in
+  set_default_throttle_val checkbox_el;
   Ev.listen Ev.change (fun _ -> on_checkbox_change checkbox_el) (El.as_target checkbox_el);
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
