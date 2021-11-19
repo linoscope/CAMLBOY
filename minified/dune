@@ -1,0 +1,54 @@
+(executables
+ (names index)
+ (libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib)
+ (link_flags (:standard -no-check-prims))
+ (modes js))
+
+(rule
+ (targets index.js)
+ (deps index.bc.js)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets tobu.gb)
+ (deps ../../resource/games/tobu.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets the-bouncing-ball.gb)
+ (deps ../../resource/games/the-bouncing-ball.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets dreaming-sarah.gb)
+ (deps ../../resource/games/dreaming-sarah.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets sheep-it-up.gb)
+ (deps ../../resource/games/sheep-it-up.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets rocket-man-demo.gb)
+ (deps ../../resource/games/rocket-man-demo.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets retroid.gb)
+ (deps ../../resource/games/retroid.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets into-the-blue.gb)
+ (deps ../../resource/games/into-the-blue.gb)
+ (action (run cp %{deps} %{targets})))
+
+(rule
+ (targets cavern.gb)
+ (deps ../../resource/games/cavern.gb)
+ (action (run cp %{deps} %{targets})))
+
+(alias
+ (name app)
+ (deps index.js index.html))
