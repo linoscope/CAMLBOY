@@ -5,6 +5,7 @@ open Tsdl
 let gb_w = 160
 let gb_h = 144
 let scale = 2
+let sec_per_frame = 1. /. 60.
 
 let or_exit = function
   | Error (`Msg e) -> Sdl.log "%s" e; exit 1
@@ -81,7 +82,7 @@ let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (cam
     | _     -> ()
   end
 
-let main_with_fps
+let main_fullspeed
     (type a) (module Camlboy : Camlboy_intf.S with type t = a) (camlboy : a) texture renderer =
   let cnt = ref 0 in
   let start_time = ref (Unix.gettimeofday ()) in
@@ -116,18 +117,34 @@ let main_with_trace
       | Frame_ended framebuffer ->
         handle_event (module Camlboy) camlboy;
         render_framebuffer ~texture ~renderer ~fb:framebuffer;
-
     end;
     Printf.bprintf buf " | %s\n" (Camlboy.For_tests.prev_inst camlboy |> Instruction.show);
     print_string (Buffer.contents buf);
     Buffer.clear buf;
   done
 
+let main_in_60fps
+    (type a) (module Camlboy : Camlboy_intf.S with type t = a) (camlboy : a) texture renderer =
+  let start_time = ref (Unix.gettimeofday ()) in
+  while true do
+    begin match Camlboy.run_instruction camlboy with
+      | In_frame ->
+        ()
+      | Frame_ended framebuffer ->
+        handle_event (module Camlboy) camlboy;
+        render_framebuffer ~texture ~renderer ~fb:framebuffer;
+        let duration = Unix.gettimeofday () -. !start_time in
+        if duration < sec_per_frame then
+          Unix.sleepf (sec_per_frame -. duration);
+        start_time := Unix.gettimeofday ()
+    end;
+  done
+
 let () =
-  let usage_msg = "main.exe [--trace] <rom-path>" in
-  let show_trace = ref false in
+  let usage_msg = "main.exe [-mode {default|withtrace|fullspeed}] <rom_path>" in
+  let mode = ref "default" in
   let rom_path = ref "./resource/games/tobu.gb" in
-  let spec = [("--trace", Arg.Set show_trace,  "Print trace")] in
+  let spec = [("-mode", Arg.Set_string mode,  "Mode of run")] in
   Arg.parse spec (fun path -> rom_path := path) usage_msg;
   let rom_bytes = Read_rom_file.f !rom_path in
   let cartridge = Detect_cartridge.f ~rom_bytes in
@@ -135,7 +152,9 @@ let () =
   let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
   let renderer = create_renderer () in
   let texture = create_texture renderer in
-  if !show_trace then
-    main_with_trace (module Camlboy) camlboy texture renderer
-  else
-    main_with_fps (module Camlboy) camlboy texture renderer
+  let main = match !mode with
+    | "withtrace" -> main_with_trace
+    | "fullspeed" -> main_fullspeed
+    | _           -> main_in_60fps
+  in
+  main (module Camlboy) camlboy texture renderer
