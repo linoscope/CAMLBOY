@@ -14,10 +14,10 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 </div>
 
 <div align="center">
-  <img src="/screenshot/pokemon.png"/>
-  <img src="/screenshot/zelda.png"/>
-  <img src="/screenshot/kirby.png"/>
-  <img src="/screenshot/tetris.png"/>
+  <img src="/screenshot/pokemon-opening.gif"/>
+  <img src="/screenshot/zelda-opening.gif"/>
+  <img src="/screenshot/kirby-opening.gif"/>
+  <img src="/screenshot/tetris-opening.gif"/>
 </div>
 
 ## Project goals and non-goals
