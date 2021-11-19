@@ -4,7 +4,9 @@ open Tsdl
 
 let gb_w = 160
 let gb_h = 144
-let scale = 2
+let scale = 2.
+let scaled_gb_w = Float.(of_int gb_w *. scale |> to_int)
+let scaled_gb_h = Float.(of_int gb_h *. scale |> to_int)
 let sec_per_frame = 1. /. 60.
 
 let or_exit = function
@@ -14,7 +16,7 @@ let or_exit = function
 let create_renderer () =
   Sdl.init Sdl.Init.(video + events) |> or_exit;
   let window =
-    Sdl.create_window ~w:(gb_w * scale) ~h:(gb_h * scale) "CAMLBOY" Sdl.Window.windowed
+    Sdl.create_window ~w:scaled_gb_w ~h:scaled_gb_h "CAMLBOY" Sdl.Window.windowed
     |> or_exit
   in
   Sdl.create_renderer window ~index:(-1) |> or_exit
