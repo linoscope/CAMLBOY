@@ -23,11 +23,12 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 ### Stretch goals
 
 - Serve as a benchmark target for various compile backends, similar to [optcarrot](https://github.com/mame/optcarrot) in the Ruby world
+- Achive stable 60fps in low-tier mobile devices
 
 ### Non-goals
 
 - Run all games with high accuracy
-- Optimize performance to the limit
+- Optimize performance to the limit at the expese of code readability
 
 ## Current state
 
