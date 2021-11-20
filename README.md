@@ -1,13 +1,17 @@
 [![Build](https://github.com/linoscope/CAMLBOY/actions/workflows/workflow.yml/badge.svg)](https://github.com/linoscope/CAMLBOY/actions/workflows/workflow.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# **_CAMLBOY_**
+<p align="center">
+  <img src="/resource/logo.png" width="420px">
+</p>
+
+## About
 
 **_CAMLBOY_** is a Game Boy emulator that runs in the browser. It is written in [OCaml](https://ocaml.org/) and compiled to JavaScript using [js_of_ocaml](http://ocsigen.org/js_of_ocaml/latest/manual/overview).
 
 Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
-## Screenshots
+## Screenshot
 
 <div align="center">
   <img src="/resource/screenshot/pokemon-ingame2.gif" height="500"/>
