@@ -2,7 +2,17 @@ open Uints
 
 module Make (Mmu : Word_addressable_intf.S) : sig
 
-  (** Returns (instruction length, (mcycle when not branched, mcycle when branched), instruction) *)
-  val f : Mmu.t -> pc:uint16 -> uint16 * (int * int) * Instruction.t
+  type mcycles = {
+    not_branched : int;
+    branched : int;
+  }
+
+  type inst_info = {
+    len : uint16;
+    mcycles : mcycles;
+    inst : Instruction.t;
+  }
+
+  val f : Mmu.t -> pc:uint16 -> inst_info
 
 end

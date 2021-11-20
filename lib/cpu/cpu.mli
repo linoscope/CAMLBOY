@@ -20,7 +20,12 @@ module Make (Mmu : Word_addressable_intf.S) : sig
 
   module For_tests : sig
 
-    val execute : t -> int * int -> Instruction.t -> int
+    val execute :
+      t ->
+      branched_mcycles:int ->
+      not_branched_mcycles:int ->
+      inst:Instruction.t ->
+      int
 
     val prev_inst : t -> Instruction.t
 

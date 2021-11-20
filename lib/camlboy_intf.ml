@@ -14,7 +14,6 @@ module type S = sig
   val release : t -> Joypad.key -> unit
 
   module For_tests : sig
-
     val prev_inst : t -> Instruction.t
 
     val get_ly : t -> int

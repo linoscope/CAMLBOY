@@ -3,15 +3,15 @@ open Uints
 module Make (Mmu : Word_addressable_intf.S) = struct
 
   type t = {
-    registers : Registers.t;
-    mutable pc : uint16;
-    mutable sp : uint16;
-    mmu : Mmu.t;
-    mutable halted : bool;
-    mutable ime : bool; (* interrupt master enable *)
+    registers                            : Registers.t;
+    mutable pc                           : uint16;
+    mutable sp                           : uint16;
+    mmu                                  : Mmu.t;
+    mutable halted                       : bool;
+    mutable ime                          : bool; (* interrupt master enable *)
     mutable enable_ime_before_next_instr : bool;
-    mutable prev_inst : Instruction.t; (* for debugging purpose *)
-    ic : Interrupt_controller.t;
+    mutable prev_inst                    : Instruction.t; (* for debugging purpose *)
+    ic                                   : Interrupt_controller.t;
   }
 
   let show t =
@@ -34,7 +34,11 @@ module Make (Mmu : Word_addressable_intf.S) = struct
 
   type next_pc = Next | Jump of uint16
 
-  let execute (t : t) (mcycles : int * int)  (inst : Instruction.t) : int =
+  let execute
+      (t : t)
+      ~(branched_mcycles : int)
+      ~(not_branched_mcycles : int)
+      ~(inst : Instruction.t) : int =
     let set_flags = Registers.set_flags t.registers in
     let read : type a. a Instruction.arg -> a = fun arg ->
       match arg with
@@ -417,12 +421,12 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         Jump addr
     in
     t.prev_inst <- inst;
-    match next_pc, mcycles with
-    | Next, (not_branched_mcycle, _) ->
-      not_branched_mcycle
-    | Jump addr, (_, branched_mcycle) ->
+    match next_pc with
+    | Next ->
+      not_branched_mcycles
+    | Jump addr ->
       t.pc <- addr;
-      branched_mcycle
+      branched_mcycles
 
   module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
 
@@ -431,9 +435,9 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       if t.halted then
         4
       else
-        let (len, mcycles, inst) = Fetch_and_decode.f t.mmu ~pc:t.pc in
-        t.pc <- Uint16.(t.pc + len);
-        execute t mcycles inst
+        let Fetch_and_decode.{len; mcycles; inst} = Fetch_and_decode.f t.mmu ~pc:t.pc in
+        t.pc <- Uint16.(t.pc +len);
+        execute t ~branched_mcycles:mcycles.branched ~not_branched_mcycles:mcycles.not_branched ~inst
     in
     let handle_interrupt t : int =
       match Interrupt_controller.next t.ic with
