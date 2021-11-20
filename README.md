@@ -10,7 +10,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 ## Screenshots
 
 <div align="center">
-  <img src="/screenshot/pokemon-ingame.gif" height="500"/>
+  <img src="/resource/screenshot/pokemon-ingame.gif" height="500"/>
 </div>
 
 ## Project goals and non-goals
@@ -146,8 +146,8 @@ dune runtest test/rom_tests/
 ## More screenshots
 
 <div align="center">
-  <img src="/screenshot/zelda-opening.gif"/>
-  <img src="/screenshot/kirby-opening.gif"/>
-  <img src="/screenshot/tetris-opening.gif"/>
-  <img src="/screenshot/donkykong-opening.gif"/>
+  <img src="/resource/screenshot/zelda-opening.gif"/>
+  <img src="/resource/screenshot/kirby-opening.gif"/>
+  <img src="/resource/screenshot/tetris-opening.gif"/>
+  <img src="/resource/screenshot/donkykong-opening.gif"/>
 </div>
