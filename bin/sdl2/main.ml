@@ -84,7 +84,7 @@ let handle_event (type a) (module Camlboy : Camlboy_intf.S with type t = a) (cam
     | _     -> ()
   end
 
-let main_fullspeed
+let main_no_throttle
     (type a) (module Camlboy : Camlboy_intf.S with type t = a) (camlboy : a) texture renderer =
   let cnt = ref 0 in
   let start_time = ref (Unix.gettimeofday ()) in
@@ -143,10 +143,10 @@ let main_in_60fps
   done
 
 let () =
-  let usage_msg = "main.exe [-mode {default|withtrace|fullspeed}] <rom_path>" in
+  let usage_msg = "main.exe [--mode {default|withtrace|no-throttle}] <rom_path>" in
   let mode = ref "default" in
   let rom_path = ref "./resource/games/tobu.gb" in
-  let spec = [("-mode", Arg.Set_string mode,  "Mode of run")] in
+  let spec = [("--mode", Arg.Set_string mode,  "Mode of run")] in
   Arg.parse spec (fun path -> rom_path := path) usage_msg;
   let rom_bytes = Read_rom_file.f !rom_path in
   let cartridge = Detect_cartridge.f ~rom_bytes in
@@ -156,7 +156,7 @@ let () =
   let texture = create_texture renderer in
   let main = match !mode with
     | "withtrace" -> main_with_trace
-    | "fullspeed" -> main_fullspeed
+    | "no-throttle" -> main_no_throttle
     | _           -> main_in_60fps
   in
   main (module Camlboy) camlboy texture renderer
