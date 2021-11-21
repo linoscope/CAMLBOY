@@ -1,5 +1,5 @@
 (executables
- (names index)
+ (names index bench)
  (libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib)
  (link_flags (:standard -no-check-prims))
  (modes js))
@@ -8,6 +8,19 @@
  (targets index.js)
  (deps index.bc.js)
  (action (run cp %{deps} %{targets})))
+
+(alias
+ (name app)
+ (deps index.js index.html))
+
+(rule
+ (targets bench.js)
+ (deps bench.bc.js)
+ (action (run cp %{deps} %{targets})))
+
+(alias
+ (name bench_app)
+ (deps bench.js bench.html))
 
 (rule
  (targets tobu.gb)
@@ -48,7 +61,3 @@
  (targets cavern.gb)
  (deps ../../resource/games/cavern.gb)
  (action (run cp %{deps} %{targets})))
-
-(alias
- (name app)
- (deps index.js index.html))
