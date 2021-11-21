@@ -1,3 +1,7 @@
+(** @canonical Dune__exe.Bench *)
+module Bench = Dune__exe__Bench
+
+
 (** @canonical Dune__exe.Index *)
 module Index = Dune__exe__Index
 
