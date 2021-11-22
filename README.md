@@ -50,10 +50,23 @@ We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutob
 
 ### Prerequisite
 
-Install required dependencies:
+Install [opam](https://opam.ocaml.org/doc/Install.html), OCaml's package manager, if you haven't yet.
+
+### Basic setup
 
 ```sh
-$ opam install . --deps-only --with-test
+# Clone repository
+git clone https://github.com/linoscope/CAMLBOY.git
+# cd into repository
+cd CAMLBOY
+# Craete local switch for the repository
+opam switch create . 4.13.1
+eval $(opam env)
+# Install system packages required by opam packages (SDL, etc)
+opam pin add camlboy.dev . --no-action
+opam depext camlboy
+# Install opam dependencies
+opam install . --deps-only --with-test
 ```
 
 ### How to run with UI
@@ -83,13 +96,7 @@ $ dune exec bin/sdl2/main.exe -- resource/games/tobu.gb
 
 #### Benchmark for js_of_ocaml build
 
-First, follow the steps in "How to run with UI - js_of_ocaml frontend" above. Now open
-
-```sh
-http://localhost:8000/bench.html?frames=<frames>&rom_path=<rom_path>
-```
-
-For example, if you open [http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb](http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb) you should see something like this:
+First, follow the steps in "How to run with UI - js_of_ocaml frontend" above. Now open `http://localhost:8000/bench.html?frames=<frames>&rom_path=<rom_path>`. For example, if you open [http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb](http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb) you should see something like this:
 
 ![web-bench-example](resource/screenshot/web-bench-example.png)
 
