@@ -38,8 +38,8 @@ jobs:
 
       # Build (and deploy) minified version to /minified
       - run: |
-          opam exec -- dune build --profile release --build-dir _build-minified
-          cp -r _build-minified/default/bin/web _build/default/bin/web/minified
+          opam exec -- dune build --profile release --build-dir _build-release
+          cp -r _build-release/default/bin/web _build/default/bin/web/release
 
       - name: Deploy website
         uses: peaceiris/actions-gh-pages@v3
