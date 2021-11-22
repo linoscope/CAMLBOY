@@ -23,13 +23,11 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 - Playable in the browser of your phone
 - Readable/maintainable code that follow OCaml's best practices
-- Minimal external dependecies in the core emulator code (`/lib`) in order to support various compiler backends
 
 ### Stretch goals
 
 - Achive stable 60fps in low-tier mobile devices
-- Serve as a benchmark target for various compile backends, similar to [optcarrot](https://github.com/mame/optcarrot) in the Ruby world
-  - Would be especially interesting if we can compare the performance of various JS/wasm backends, such as [js_of_ocaml](http://ocsigen.org/js_of_ocaml/latest/manual/overview), [Rescript](https://rescript-lang.org/), [Melange](https://github.com/melange-re/melange), and [ocaml-wasm](https://github.com/corwin-of-amber/ocaml-wasm/tree/wasm-4.11)
+- Serve as a benchmark target for various compile backends, similar to [optcarrot](https://github.com/mame/optcarrot) in the Ruby world. Would be especially interesting if we can compare the performance of various JS/wasm backends, such as [js_of_ocaml](http://ocsigen.org/js_of_ocaml/latest/manual/overview), [Rescript](https://rescript-lang.org/), [Melange](https://github.com/melange-re/melange), and [ocaml-wasm](https://github.com/corwin-of-amber/ocaml-wasm/tree/wasm-4.11).
 
 ### Non-goals
 
@@ -39,14 +37,15 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 ## Current state
 
 - Runs with "playable" FPS in middle-tier mobile devices. (It runs at around 40~60FPS in my Galaxy S9, a smartphone released in 2018)
-- Supports "headless" benchmarking mode (for both native and web) that runs without rendering the screen
-- Passes various test roms: [tests for Blargg's test roms](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), [tests for Mooneye's test roms](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)
+- Supports "headless" benchmarking mode, for both native and web, that runs without UI
+- Passes various test roms such as Blargg's `cpu_insrts.gb` and `instr_timing.gb` (tests agains Blargg's test roms can be found [here](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), and tests agains Mooneye's test roms can be found [here](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)).
 
 ## Benchmark results
 
 We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in "headless" mode (i.e. without UI) for 10 times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment / commands used for the benchmark.
 
 ![bench-result](resource/benchmark-result.png)
+p
 
 ## How to run
 
@@ -73,7 +72,17 @@ opam install . --deps-only --with-test
 
 ### How to run with UI
 
-#### js_of_ocaml frontend
+#### Run with SDL2 UI
+
+```sh
+# Build
+$ dune build
+# Usage: main.exe [--mode {default|withtrace|no-throttle}] <rom_path>
+# For example:
+$ dune exec bin/sdl2/main.exe -- resource/games/tobu.gb
+```
+
+#### Run with js_of_ocaml UI
 
 ```sh
 # Build
@@ -84,25 +93,9 @@ $ python -m http.server 8000 --directory _build/default/bin/web
 
 ```
 
-#### SDL2 frontend
-
-```sh
-# Build
-$ dune build
-# Usage: main.exe [--mode {default|withtrace|no-throttle}] <rom_path>
-# For example:
-$ dune exec bin/sdl2/main.exe -- resource/games/tobu.gb
-```
-
 ### How to run bench marks in headless mode
 
-#### Benchmark for js_of_ocaml build
-
-First, follow the steps in "How to run with UI - js_of_ocaml frontend" above. Now open `http://localhost:8000/bench.html?frames=<frames>&rom_path=<rom_path>`. For example, if you open [http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb](http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb) you should see something like this:
-
-![web-bench-example](resource/screenshot/web-bench-example.png)
-
-#### Benchmark for native
+#### Benchmark for native build
 
 ```sh
 # Usage: bench.exe [--frames <frames>] <rom_path>
@@ -113,6 +106,12 @@ ROM path: resource/games/tobu.gb
 Duration: 1.453315
      FPS: 1032.123098
 ```
+
+#### Benchmark for js_of_ocaml build
+
+First, follow the steps in "How to run with UI - js_of_ocaml frontend" above. Now open `http://localhost:8000/bench.html?frames=<frames>&rom_path=<rom_path>`. For example, if you open [http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb](http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb) you should see something like this:
+
+![web-bench-example](resource/screenshot/web-bench-example.png)
 
 ### How to run tests
 
@@ -146,6 +145,15 @@ $ dune runtest test/rom_tests/
 - [ ] MBC5
 - [ ] Game Boy Color mode
 
+## More screenshots
+
+<div align="center">
+    <img src="/resource/screenshot/pokemon-opening.gif"/>
+    <img src="/resource/screenshot/zelda-opening.gif"/>
+    <img src="/resource/screenshot/kirby-opening.gif"/>
+    <img src="/resource/screenshot/donkykong-opening.gif"/>
+</div>
+
 ## Resources
 
 - [Pandocs](https://gbdev.io/pandocs/)
@@ -165,12 +173,3 @@ $ dune runtest test/rom_tests/
 - [Rocket Man Demo](https://lightgamesgb.com/portfolio/rocket-man/)
 - [SHEET IT UP](https://drludos.itch.io/sheep-it-up)
 - [Cavern](https://thegreatgallus.itch.io/cavern-mvm-9)
-
-## More screenshots
-
-<div align="center">
-    <img src="/resource/screenshot/pokemon-opening.gif"/>
-    <img src="/resource/screenshot/zelda-opening.gif"/>
-    <img src="/resource/screenshot/kirby-opening.gif"/>
-    <img src="/resource/screenshot/donkykong-opening.gif"/>
-</div>
