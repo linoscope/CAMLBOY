@@ -23,11 +23,11 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 - Playable in the browser of your phone
 - Readable/maintainable code that follow OCaml's best practices
-- Serve as a benchmark target for various compile backends, similar to [optcarrot](https://github.com/mame/optcarrot) in the Ruby world
 
 ### Stretch goals
 
 - Achive stable 60fps in low-tier mobile devices
+- Serve as a benchmark target for various compile backends, similar to [optcarrot](https://github.com/mame/optcarrot) in the Ruby world
 
 ### Non-goals
 
@@ -41,6 +41,8 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 - Passes various test roms: [tests for Blargg's test roms](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), [tests for Mooneye's test roms](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)
 
 ## Benchmark results
+
+We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in "headless" mode (i.e. without UI) and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment / commands used for the benchmark.
 
 ![bench-result](resource/benchmark-result.png)
 

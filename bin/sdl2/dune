@@ -1,3 +1,4 @@
 (executables
  (names main bench)
+ (ocamlopt_flags -O3)
  (libraries camlboy_lib tsdl))
