@@ -23,6 +23,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 - Playable in the browser of your phone
 - Readable/maintainable code that follow OCaml's best practices
+- Minimal external dependecies in the core emulator code (`/lib`) in order to support various compiler backends
 
 ### Stretch goals
 
@@ -43,7 +44,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 ## Benchmark results
 
-We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in "headless" mode (i.e. without UI) and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment / commands used for the benchmark.
+We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in "headless" mode (i.e. without UI) for 10 times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment / commands used for the benchmark.
 
 ![bench-result](resource/benchmark-result.png)
 

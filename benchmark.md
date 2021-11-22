@@ -32,7 +32,8 @@ dune exec bin/sdl2/bench.exe -- resource/games/tobu.gb --frames 1500
 
 ```sh
 opam switch 4.13.1
-eval $(opam env) && dune build
+eval $(opam env)
+dune build
 python -m http.server 8000 --directory _build/default/bin/web
 xdg-open http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb
 
