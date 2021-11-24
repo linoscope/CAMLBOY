@@ -1,6 +1,7 @@
 (executables
  (names index bench)
  (libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib)
+ (js_of_ocaml (flags (:standard --no-inline)))
  (link_flags (:standard -no-check-prims))
  (modes js))
 
