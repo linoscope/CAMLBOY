@@ -30,6 +30,9 @@ dune exec bin/sdl2/bench.exe -- resource/games/tobu.gb --frames 1500
 
 ### js_of_ocaml 3.11.0
 
+Note that for we pass `--no-inline` flag to js_of_ocaml ([source](bin/web/dune)) because disabling inlining improves the FPS significantly (more than 3 times).
+See [this thread in discuss.ocaml.org](https://discuss.ocaml.org/t/js-of-ocaml-output-performs-considerably-worse-when-built-with-profile-release-flag/8862/15?u=linoscope) for more details.
+
 ```sh
 opam switch 4.13.1
 eval $(opam env)
