@@ -36,7 +36,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 ## Current state
 
-- Runs with "playable" FPS in middle-tier mobile devices. (It runs at around 40~60FPS in my Galaxy S9, a smartphone released in 2018)
+- Runs with "playable" FPS in middle-tier mobile devices. (It runs at 60FPS for most games in my Galaxy S9, a smartphone released in 2018)
 - Supports "headless" benchmarking mode, for both native and web, that runs without UI
 - Passes various test roms such as Blargg's `cpu_insrts.gb` and `instr_timing.gb` (tests agains Blargg's test roms can be found [here](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), and tests agains Mooneye's test roms can be found [here](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)).
 
@@ -45,7 +45,6 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in "headless" mode (i.e. without UI) for 10 times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment / commands used for the benchmark.
 
 ![bench-result](resource/benchmark-result.png)
-p
 
 ## How to run
 
@@ -60,7 +59,7 @@ Install [opam](https://opam.ocaml.org/doc/Install.html), OCaml's package manager
 git clone https://github.com/linoscope/CAMLBOY.git
 # cd into repository
 cd CAMLBOY
-# Craete local switch for the repository
+# Create local switch for the repository
 opam switch create . 4.13.1
 eval $(opam env)
 # Install system packages required by opam packages (SDL, etc)
