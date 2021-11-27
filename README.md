@@ -21,7 +21,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 ### Goals
 
-- Playable in the browser of your phone
+- Playable in the browser of middle-tier/high-tier mobile devices
 - Readable/maintainable code that follow OCaml's best practices
 
 ### Stretch goals
