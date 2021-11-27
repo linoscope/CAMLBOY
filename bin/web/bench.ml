@@ -49,26 +49,21 @@ let run_rom_path rom_path frames =
     end
   | Error e  -> Console.(log [Jv.Error.message e]); Fut.return 0.
 
-let read_param param_key =
+let read_param param_key ~default =
   let uri = Window.location G.window in
   let param =
     uri
     |> Uri.query
     |> Uri.Params.of_jstr
-    |> Uri.Params.find Jstr.(v param_key)
   in
-  match param with
+  match Uri.Params.find Jstr.(v param_key) param with
   | Some jstr -> Jstr.to_string jstr
-  | None ->
-    let msg = Printf.sprintf "Parameter %s missing in URL" param_key in
-    alert msg;
-    failwith msg
-
+  | None -> default
 
 let () =
   (* Read URL parameters *)
-  let rom_path = read_param "rom_path" in
-  let frames = read_param "frames" |> int_of_string in
+  let rom_path = read_param "rom_path" ~default:"tobu.gb" in
+  let frames = read_param "frames" ~default:"1500" |> int_of_string in
   (* Load initial rom *)
   let fut = run_rom_path rom_path frames in
   Fut.await fut (fun duration_ms ->
