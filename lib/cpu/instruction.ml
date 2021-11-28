@@ -15,38 +15,12 @@ type 'a arg =
   | SP          : uint16 arg
   | SP_offset   : int8         -> uint16 arg
 
-let show_arg : type a. a arg -> string = function
-  | Immediate8 n   -> Uint8.show n
-  | Immediate16 n  -> Uint16.show n
-  | Direct8 n
-  | Direct16 n     -> Printf.sprintf "(%s)" (Uint16.show n)
-  | R r            -> Registers.show_r r
-  | RR rr          -> Registers.show_rr rr
-  | RR_indirect rr -> Printf.sprintf "(%s)" (Registers.show_rr rr)
-  | FF00_offset n  -> Printf.sprintf "($FF00+%s)" (Uint8.show n)
-  | FF00_C         -> "($FF00+C)"
-  | HL_inc         -> "(HL+)"
-  | HL_dec         -> "(HL-)"
-  | SP             -> "SP"
-  | SP_offset n    ->
-    if Int8.is_neg n then
-      Printf.sprintf "SP-%s" Int8.(show @@ abs n)
-    else
-      Printf.sprintf "SP+%s" Int8.(show n)
-
 type condition =
   | None
   | NZ
   | Z
   | NC
   | C
-
-let show_condition = function
-  | None -> ""
-  | NZ   -> "NZ"
-  | Z    -> "Z"
-  | NC   -> "NC"
-  | C    -> "C"
 
 type t =
   | LD8   of uint8 arg * uint8 arg
@@ -98,7 +72,34 @@ type t =
   | RET   of condition
   | RETI
 
-let show = function
+let show t =
+  let show_arg : type a. a arg -> string = function
+    | Immediate8 n   -> Uint8.show n
+    | Immediate16 n  -> Uint16.show n
+    | Direct8 n
+    | Direct16 n     -> Printf.sprintf "(%s)" (Uint16.show n)
+    | R r            -> Registers.show_r r
+    | RR rr          -> Registers.show_rr rr
+    | RR_indirect rr -> Printf.sprintf "(%s)" (Registers.show_rr rr)
+    | FF00_offset n  -> Printf.sprintf "($FF00+%s)" (Uint8.show n)
+    | FF00_C         -> "($FF00+C)"
+    | HL_inc         -> "(HL+)"
+    | HL_dec         -> "(HL-)"
+    | SP             -> "SP"
+    | SP_offset n    ->
+      if Int8.is_neg n then
+        Printf.sprintf "SP-%s" Int8.(show @@ abs n)
+      else
+        Printf.sprintf "SP+%s" Int8.(show n)
+  in
+  let show_condition = function
+    | None -> ""
+    | NZ   -> "NZ"
+    | Z    -> "Z"
+    | NC   -> "NC"
+    | C    -> "C"
+  in
+  match t with
   | LD8 (x, y)   -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
   | LD16 (x, y)  -> Printf.sprintf "LD %s, %s" (show_arg x) (show_arg y)
   | ADD8 (x, y)  -> Printf.sprintf "ADD %s, %s" (show_arg x) (show_arg y)
