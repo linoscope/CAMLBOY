@@ -1,3 +1,6 @@
+(** A 16 bit memory bus, which is used by the CPU to address ROM, RAM, and I/O.
+ ** It is often refered to as the "MMU" in documentation/emulator code,
+ ** but that is a little inacurate since the Game Boy does not have a dedicated memory management unit. *)
 
 module Make (Cartridge : Addressable_intf.S) : sig
 

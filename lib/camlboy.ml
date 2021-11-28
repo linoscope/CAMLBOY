@@ -2,9 +2,9 @@ open Uints
 
 module Make (Cartridge : Cartridge_intf.S) = struct
 
-  module Mmu = Mmu.Make(Cartridge)
+  module Bus = Bus.Make(Cartridge)
 
-  module Cpu = Cpu.Make(Mmu)
+  module Cpu = Cpu.Make(Bus)
 
   type t = {
     cpu    : Cpu.t;
@@ -15,7 +15,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
   let show t = Cpu.show t.cpu
 
-  let initialize_state ~registers ~mmu ~lcd_stat ~gpu =
+  let initialize_state ~registers ~bus ~lcd_stat ~gpu =
     (* initialize registers *)
     Registers.set_flags registers ~z:true ~n:false ~h:true ~c:true ();
     Registers.[
@@ -27,7 +27,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     |> List.iter (fun (reg, data) ->
         Registers.write_rr registers reg (Uint16.of_int data));
 
-    (* initialize mmu *)
+    (* initialize bus *)
     [
       (0xFF00, 0xCF);
       (0xFF01, 0x00);
@@ -52,7 +52,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
       (0xFFFF, 0x00);
     ]
     |> List.iter (fun (addr, data) ->
-        Mmu.write_byte mmu ~addr:(Uint16.of_int addr) ~data:(Uint8.of_int data));
+        Bus.write_byte bus ~addr:(Uint16.of_int addr) ~data:(Uint8.of_int data));
 
     (* initialize GPU *)
     Lcd_stat.set_gpu_mode lcd_stat Gpu_mode.VBlank;
@@ -141,7 +141,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~type_:`RW
         ()
     in
-    let mmu = Mmu.create
+    let bus = Bus.create
         ~cartridge
         ~wram
         ~shadow_ram
@@ -155,7 +155,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     in
     let registers = Registers.create () in
     let cpu = Cpu.create
-        ~mmu
+        ~bus
         ~ic
         ~registers
         ~sp:(of_int 0xFFFE)
@@ -163,7 +163,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~halted:false
         ~ime:false
     in
-    initialize_state ~mmu ~registers ~lcd_stat ~gpu;
+    initialize_state ~bus ~registers ~lcd_stat ~gpu;
     { cpu; timer; gpu; joypad }
 
   let run_instruction t =

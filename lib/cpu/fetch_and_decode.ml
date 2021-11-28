@@ -1,7 +1,7 @@
 open Uints
 open Instruction
 
-module Make (Mmu : Word_addressable_intf.S) = struct
+module Make (Bus : Word_addressable_intf.S) = struct
 
   type mcycles = {
     not_branched : int;
@@ -31,12 +31,12 @@ module Make (Mmu : Word_addressable_intf.S) = struct
     let l3 = 3 |> Uint16.of_int
   end
 
-  let f mmu ~pc : inst_info =
+  let f bus ~pc : inst_info =
     let open Instruction_length in
     let addr_after_pc = Uint16.(succ pc) in
-    let next_byte () = Mmu.read_byte mmu addr_after_pc in
-    let next_word () = Mmu.read_word mmu addr_after_pc in
-    let op = Mmu.read_byte mmu pc |> Uint8.to_int in
+    let next_byte () = Bus.read_byte bus addr_after_pc in
+    let next_word () = Bus.read_word bus addr_after_pc in
+    let op = Bus.read_byte bus pc |> Uint8.to_int in
     match op with
     | 0x00 -> { len = l1; mcycles = { not_branched = 1; branched = 1}; inst = NOP }
     | 0x01 -> { len = l3; mcycles = { not_branched = 3; branched = 3}; inst = LD16 (RR BC, Immediate16 (next_word ())) }

@@ -1,22 +1,22 @@
 include Camlboy_lib
 open Uints
 
-module Mmu = Mock_mmu
-module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
+module Bus = Mock_bus
+module Fetch_and_decode = Fetch_and_decode.Make(Bus)
 
 let disassemble instr_bin_file out  =
   let rom_bytes = Read_rom_file.f instr_bin_file in
   let rom_len = Bigstringaf.length rom_bytes in
 
-  let mmu = Mmu.create ~size:0x3FF in
-  Mmu.load mmu ~src:rom_bytes ~dst_pos:Uint16.zero;
+  let bus = Bus.create ~size:0x3FF in
+  Bus.load bus ~src:rom_bytes ~dst_pos:Uint16.zero;
 
   let rom_len = rom_len |> Uint16.of_int in
   let rec loop pc =
     if pc == rom_len then
       ()
     else
-      let Fetch_and_decode.{len; mcycles; inst} = Fetch_and_decode.f mmu ~pc:pc in
+      let Fetch_and_decode.{len; mcycles; inst} = Fetch_and_decode.f bus ~pc:pc in
       Printf.fprintf out "{\n\tinst = %s;\n\tinst_len = %d;\n\tmcycles = (%d, %d)\n}\n"
         (Instruction.show inst) (Uint16.to_int len) mcycles.not_branched mcycles.branched;
       loop Uint16.(pc + len)

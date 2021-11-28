@@ -1,34 +1,34 @@
 open Uints
 
-module Make (Mmu : Word_addressable_intf.S) = struct
+module Make (Bus : Word_addressable_intf.S) = struct
 
   type t = {
     registers                            : Registers.t;
+    bus                                  : Bus.t;
+    ic                                   : Interrupt_controller.t;
     mutable pc                           : uint16;
     mutable sp                           : uint16;
-    mmu                                  : Mmu.t;
     mutable halted                       : bool;
     mutable ime                          : bool; (* interrupt master enable *)
     mutable enable_ime_before_next_instr : bool;
     mutable prev_inst                    : Instruction.t; (* for debugging purpose *)
-    ic                                   : Interrupt_controller.t;
   }
 
   let show t =
     Printf.sprintf "%s SP:%s PC:%s"
       (Registers.show t.registers) (t.sp |> Uint16.show) (t.pc |> Uint16.show)
 
-  let create ~mmu ~ic ~registers ~sp ~pc ~halted ~ime =
+  let create ~bus ~ic ~registers ~sp ~pc ~halted ~ime =
     {
       registers;
-      mmu;
+      bus;
+      ic;
       sp;
       pc;
       halted;
       ime;
       enable_ime_before_next_instr = false;
       prev_inst = NOP;
-      ic
     }
 
 
@@ -44,27 +44,27 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       match arg with
       | Immediate8 n -> n
       | Immediate16 n -> n
-      | Direct8 addr -> Mmu.read_byte t.mmu addr
+      | Direct8 addr -> Bus.read_byte t.bus addr
       | R r -> Registers.read_r t.registers r
       | RR_indirect rr ->
         let addr = Registers.read_rr t.registers rr in
-        Mmu.read_byte t.mmu addr
+        Bus.read_byte t.bus addr
       | FF00_offset n ->
         let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
-        Mmu.read_byte t.mmu addr
+        Bus.read_byte t.bus addr
       | FF00_C ->
         let c = Registers.read_r t.registers C in
         let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
-        Mmu.read_byte t.mmu addr
+        Bus.read_byte t.bus addr
       | HL_inc ->
         let addr = Registers.read_rr t.registers HL in
         Registers.write_rr t.registers HL Uint16.(succ addr);
-        Mmu.read_byte t.mmu addr
+        Bus.read_byte t.bus addr
       | HL_dec ->
         let addr = Registers.read_rr t.registers HL in
         Registers.write_rr t.registers HL Uint16.(pred addr);
-        Mmu.read_byte t.mmu addr
-      | Direct16 addr -> Mmu.read_word t.mmu addr
+        Bus.read_byte t.bus addr
+      | Direct16 addr -> Bus.read_word t.bus addr
       | RR rr -> Registers.read_rr t.registers rr
       | SP -> t.sp
       | SP_offset n ->
@@ -83,24 +83,24 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       | RR rr -> Registers.write_rr t.registers rr y
       | FF00_offset n ->
         let addr = Uint16.(of_int 0xFF00 + of_uint8 n) in
-        Mmu.write_byte t.mmu ~addr ~data:y
+        Bus.write_byte t.bus ~addr ~data:y
       | RR_indirect rr ->
         let addr = Registers.read_rr t.registers rr in
-        Mmu.write_byte t.mmu ~addr ~data:y
+        Bus.write_byte t.bus ~addr ~data:y
       | FF00_C ->
         let c = Registers.read_r t.registers C in
         let addr = Uint16.(of_int 0xFF00 + of_uint8 c) in
-        Mmu.write_byte t.mmu ~addr ~data:y
+        Bus.write_byte t.bus ~addr ~data:y
       | HL_inc ->
         let addr = Registers.read_rr t.registers HL in
-        Mmu.write_byte t.mmu ~addr ~data:y;
+        Bus.write_byte t.bus ~addr ~data:y;
         Registers.write_rr t.registers HL Uint16.(succ addr)
       | HL_dec ->
         let addr = Registers.read_rr t.registers HL in
-        Mmu.write_byte t.mmu ~addr ~data:y;
+        Bus.write_byte t.bus ~addr ~data:y;
         Registers.write_rr t.registers HL Uint16.(pred addr)
-      | Direct8 addr -> Mmu.write_byte t.mmu ~addr ~data:y
-      | Direct16 addr -> Mmu.write_word t.mmu ~addr ~data:y
+      | Direct8 addr -> Bus.write_byte t.bus ~addr ~data:y
+      | Direct16 addr -> Bus.write_word t.bus ~addr ~data:y
       | SP -> t.sp <- y
       | SP_offset _
       | Immediate16 _
@@ -379,10 +379,10 @@ module Make (Mmu : Word_addressable_intf.S) = struct
         Next
       | PUSH rr ->
         t.sp <- Uint16.(t.sp - of_int 2);
-        Mmu.write_word t.mmu ~addr:t.sp ~data:(Registers.read_rr t.registers rr);
+        Bus.write_word t.bus ~addr:t.sp ~data:(Registers.read_rr t.registers rr);
         Next
       | POP rr ->
-        Registers.write_rr t.registers rr (Mmu.read_word t.mmu t.sp);
+        Registers.write_rr t.registers rr (Bus.read_word t.bus t.sp);
         t.sp <- Uint16.(t.sp + of_int 2);
         Next
       | JP (c, x) ->
@@ -399,23 +399,23 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       | CALL (c, x) ->
         if check_condition t c then begin
           t.sp <- Uint16.(t.sp - of_int 2);
-          Mmu.write_word t.mmu ~addr:t.sp ~data:t.pc;
+          Bus.write_word t.bus ~addr:t.sp ~data:t.pc;
           Jump x
         end else
           Next
       | RST x ->
         t.sp <- Uint16.(t.sp - of_int 2);
-        Mmu.write_word t.mmu ~addr:t.sp ~data:t.pc;
+        Bus.write_word t.bus ~addr:t.sp ~data:t.pc;
         Jump x
       | RET c ->
         if check_condition t c then begin
-          let addr = Mmu.read_word t.mmu t.sp in
+          let addr = Bus.read_word t.bus t.sp in
           t.sp <- Uint16.(t.sp + of_int 2);
           Jump addr
         end else
           Next
       | RETI  ->
-        let addr = Mmu.read_word t.mmu t.sp in
+        let addr = Bus.read_word t.bus t.sp in
         t.sp <- Uint16.(t.sp + of_int 2);
         t.ime <- true;
         Jump addr
@@ -428,14 +428,14 @@ module Make (Mmu : Word_addressable_intf.S) = struct
       t.pc <- addr;
       branched_mcycles
 
-  module Fetch_and_decode = Fetch_and_decode.Make(Mmu)
+  module Fetch_and_decode = Fetch_and_decode.Make(Bus)
 
   let run_instruction t  =
     let fetch_decode_execute t =
       if t.halted then
         4
       else
-        let Fetch_and_decode.{len; mcycles; inst} = Fetch_and_decode.f t.mmu ~pc:t.pc in
+        let Fetch_and_decode.{len; mcycles; inst} = Fetch_and_decode.f t.bus ~pc:t.pc in
         t.pc <- Uint16.(t.pc +len);
         execute t ~branched_mcycles:mcycles.branched ~not_branched_mcycles:mcycles.not_branched ~inst
     in
@@ -458,7 +458,7 @@ module Make (Mmu : Word_addressable_intf.S) = struct
             | Joypad      -> Uint16.(of_int 0x60)
           in
           t.sp <- Uint16.(t.sp - of_int 2);
-          Mmu.write_word t.mmu ~addr:t.sp ~data:t.pc;
+          Bus.write_word t.bus ~addr:t.sp ~data:t.pc;
           t.pc <- addr;
           5
         end

@@ -1,8 +1,8 @@
 open Camlboy_lib
 open Uints
 
-module Mmu = Mock_mmu
-module Cpu = Cpu.Make(Mock_mmu)
+module Bus = Mock_bus
+module Cpu = Cpu.Make(Mock_bus)
 
 let create_cpu
     ?(a = 0x00) ?(b = 0x00) ?(c = 0x00)
@@ -10,7 +10,7 @@ let create_cpu
     ?(carry=false) ?(half_carry=false) ?(sub=false) ?(zero=false)
     ?(pc = 0x00) ?(sp = 0x00)
     ?(halted = false)
-    ?(mmu = Mmu.create ~size:0x10)
+    ?(bus = Bus.create ~size:0x10)
     ?(ime = true) () =
   let registers = Registers.create () in
   Registers.write_r registers A (Uint8.of_int a);
@@ -24,7 +24,7 @@ let create_cpu
   let zeros = Bytes.create 0x10 in
   Bytes.fill zeros 0 0x10 (Char.chr 0);
   Cpu.create
-    ~mmu
+    ~bus
     ~ic:(Interrupt_controller.create ~ie_addr:Uint16.(of_int 0xF) ~if_addr:Uint16.(of_int 0xE))
     ~registers
     ~pc:(Uint16.of_int pc)
@@ -43,8 +43,8 @@ let print_execute_result t inst =
   Cpu.show t
   |> print_endline
 
-let print_addr_content mmu addr =
-  Mmu.read_byte mmu (Uint16.of_int addr)
+let print_addr_content bus addr =
+  Bus.read_byte bus (Uint16.of_int addr)
   |> Uint8.show
   |> print_endline
 
@@ -86,9 +86,9 @@ let%expect_test "LD16 BC, 0xAABB" =
     A:$00 F:---- BC:$9988 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
 let%expect_test "LD8 A, (HL)" =
-  let mmu = Mmu.create ~size:0x10 in
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xAB);
-  let t = create_cpu ~l:0x2 ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xAB);
+  let t = create_cpu ~l:0x2 ~bus () in
 
   LD8 (R A, RR_indirect HL)
   |> print_execute_result t;
@@ -97,8 +97,8 @@ let%expect_test "LD8 A, (HL)" =
     A:$AB F:---- BC:$0000 DE:$0000 HL:$0002 SP:$0000 PC:$0000 |}]
 
 let%expect_test "LD8 (HL), B" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~l:0x2 ~b:0xAB ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~l:0x2 ~b:0xAB ~bus () in
 
   LD8 (RR_indirect HL, R B)
   |> print_execute_result t;
@@ -106,12 +106,12 @@ let%expect_test "LD8 (HL), B" =
   [%expect {|
     A:$00 F:---- BC:$AB00 DE:$0000 HL:$0002 SP:$0000 PC:$0000 |}];
 
-  print_addr_content mmu 0x2;
+  print_addr_content bus 0x2;
   [%expect {|$AB|}]
 
 let%expect_test "LD8 (HL+), B" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~l:0x2 ~b:0xAB ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~l:0x2 ~b:0xAB ~bus () in
 
   LD8 (HL_inc, R B)
   |> print_execute_result t;
@@ -119,12 +119,12 @@ let%expect_test "LD8 (HL+), B" =
   [%expect{|
     A:$00 F:---- BC:$AB00 DE:$0000 HL:$0003 SP:$0000 PC:$0000 |}];
 
-  print_addr_content mmu 0x2;
+  print_addr_content bus 0x2;
   [%expect {|$AB|}]
 
 let%expect_test "LD8 (HL-), B" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~l:0x2 ~b:0xAB ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~l:0x2 ~b:0xAB ~bus () in
 
   LD8 (HL_dec, R B)
   |> print_execute_result t;
@@ -132,15 +132,15 @@ let%expect_test "LD8 (HL-), B" =
   [%expect{|
     A:$00 F:---- BC:$AB00 DE:$0000 HL:$0001 SP:$0000 PC:$0000 |}];
 
-  print_addr_content mmu 0x2;
+  print_addr_content bus 0x2;
   [%expect {|$AB|}]
 
 let%expect_test "LD8 A, (HL+)" =
-  let mmu = Mmu.create ~size:0x10 in
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xBB);
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x3) ~data:Uint8.(of_int 0xCC);
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x1) ~data:Uint8.(of_int 0xDD);
-  let t = create_cpu ~l:0x2 ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xBB);
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x3) ~data:Uint8.(of_int 0xCC);
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x1) ~data:Uint8.(of_int 0xDD);
+  let t = create_cpu ~l:0x2 ~bus () in
 
   LD8 (R A, HL_inc)
   |> print_execute_result t;
@@ -149,11 +149,11 @@ let%expect_test "LD8 A, (HL+)" =
     A:$BB F:---- BC:$0000 DE:$0000 HL:$0003 SP:$0000 PC:$0000 |}]
 
 let%expect_test "LD8 A, (HL-)" =
-  let mmu = Mmu.create ~size:0x10 in
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xBB);
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x3) ~data:Uint8.(of_int 0xCC);
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x1) ~data:Uint8.(of_int 0xDD);
-  let t = create_cpu ~l:0x2 ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x2) ~data:Uint8.(of_int 0xBB);
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x3) ~data:Uint8.(of_int 0xCC);
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x1) ~data:Uint8.(of_int 0xDD);
+  let t = create_cpu ~l:0x2 ~bus () in
 
   LD8 (R A, HL_dec)
   |> print_execute_result t;
@@ -162,9 +162,9 @@ let%expect_test "LD8 A, (HL-)" =
     A:$BB F:---- BC:$0000 DE:$0000 HL:$0001 SP:$0000 PC:$0000 |}]
 
 let%expect_test "LD8 A, ($FF00+$44)" =
-  let mmu = Mmu.create ~size:0xFFFF in
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0xFF44) ~data:Uint8.(of_int 0xAA);
-  let t = create_cpu ~mmu () in
+  let bus = Bus.create ~size:0xFFFF in
+  Bus.write_byte bus ~addr:Uint16.(of_int 0xFF44) ~data:Uint8.(of_int 0xAA);
+  let t = create_cpu ~bus () in
 
   LD8 (R A, FF00_offset (Uint8.of_int 0x44))
   |> print_execute_result t;
@@ -602,8 +602,8 @@ let%expect_test "RES (4, A) when A = 0b00000011" =
     A:$03 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$0000 |}]
 
 let%expect_test "PUSH BC" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~b:0xBB ~c:0xCC ~sp:8 ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~b:0xBB ~c:0xCC ~sp:8 ~bus () in
 
   PUSH BC
   |> print_execute_result t;
@@ -611,17 +611,17 @@ let%expect_test "PUSH BC" =
   [%expect {|
     A:$00 F:---- BC:$BBCC DE:$0000 HL:$0000 SP:$0006 PC:$0000 |}];
 
-  print_addr_content mmu 0x7;
-  print_addr_content mmu 0x6;
+  print_addr_content bus 0x7;
+  print_addr_content bus 0x6;
   [%expect {|
      $BB
      $CC|}]
 
 let%expect_test "POP BC" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~b:0xBB ~c:0xCC ~sp:6 ~mmu () in
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x7) ~data:Uint8.(of_int 0xBB);
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x6) ~data:Uint8.(of_int 0xCC);
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~b:0xBB ~c:0xCC ~sp:6 ~bus () in
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x7) ~data:Uint8.(of_int 0xBB);
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x6) ~data:Uint8.(of_int 0xCC);
 
   POP BC
   |> print_execute_result t;
@@ -711,8 +711,8 @@ let%expect_test "JR NZ, -14 when z=0" =
     A:$00 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0000 PC:$00FE |}]
 
 let%expect_test "CALL 0x0010" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~mmu ~pc:0xBBCC ~sp:0x8 () in
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~bus ~pc:0xBBCC ~sp:0x8 () in
 
   CALL (None, Uint16.(of_int 0x0010))
   |> print_execute_result t;
@@ -720,17 +720,17 @@ let%expect_test "CALL 0x0010" =
   [%expect {|
     A:$00 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0006 PC:$0010 |}];
 
-  print_addr_content mmu 0x7;
-  print_addr_content mmu 0x6;
+  print_addr_content bus 0x7;
+  print_addr_content bus 0x6;
   [%expect {|
      $BB
      $CC|}]
 
 let%expect_test "RET" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~sp:6 ~mmu () in
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x7) ~data:Uint8.(of_int 0xBB);
-  Mmu.write_byte mmu ~addr:Uint16.(of_int 0x6) ~data:Uint8.(of_int 0xCC);
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~sp:6 ~bus () in
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x7) ~data:Uint8.(of_int 0xBB);
+  Bus.write_byte bus ~addr:Uint16.(of_int 0x6) ~data:Uint8.(of_int 0xCC);
 
   RET None
   |> print_execute_result t;
@@ -739,8 +739,8 @@ let%expect_test "RET" =
     A:$00 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0008 PC:$BBCC |}]
 
 let%expect_test "RST 0x08" =
-  let mmu = Mmu.create ~size:0x10 in
-  let t = create_cpu ~pc:0xBBCC ~sp:8 ~mmu () in
+  let bus = Bus.create ~size:0x10 in
+  let t = create_cpu ~pc:0xBBCC ~sp:8 ~bus () in
 
   RST (Uint16.of_int 0x08)
   |> print_execute_result t;
@@ -748,8 +748,8 @@ let%expect_test "RST 0x08" =
   [%expect {|
     A:$00 F:---- BC:$0000 DE:$0000 HL:$0000 SP:$0006 PC:$0008 |}];
 
-  print_addr_content mmu 0x7;
-  print_addr_content mmu 0x6;
+  print_addr_content bus 0x7;
+  print_addr_content bus 0x6;
   [%expect {|
      $BB
      $CC|}]

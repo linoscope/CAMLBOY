@@ -1,10 +1,10 @@
 open Uints
 
-module Make (Mmu : Word_addressable_intf.S) : sig
+module Make (Bus : Word_addressable_intf.S) : sig
   type t
 
   val create :
-    mmu:Mmu.t ->
+    bus:Bus.t ->
     ic:Interrupt_controller.t ->
     registers:Registers.t ->
     sp:uint16 ->
