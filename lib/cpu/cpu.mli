@@ -3,8 +3,6 @@ open Uints
 module Make (Mmu : Word_addressable_intf.S) : sig
   type t
 
-  val show : t -> string
-
   val create :
     mmu:Mmu.t ->
     ic:Interrupt_controller.t ->
@@ -15,8 +13,10 @@ module Make (Mmu : Word_addressable_intf.S) : sig
     ime:bool ->
     t
 
-  (** Returns machine cycle (mcycle) count  *)
+  (** Executes a single instruction. Returns machine cycle (mcycle) count consumed during the execution. *)
   val run_instruction : t -> int
+
+  val show : t -> string
 
   module For_tests : sig
 

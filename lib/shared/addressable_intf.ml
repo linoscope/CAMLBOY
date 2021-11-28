@@ -1,4 +1,4 @@
-(** Interface for components in which we can read/write bytes  *)
+(** Interface for components in which we can read/write bytes from/to  *)
 
 open Uints
 

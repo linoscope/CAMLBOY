@@ -9,10 +9,6 @@ type type_ =
   | Serial_port
   | Joypad
 
-val show : t -> string
-
-val show_type_ : type_ -> string
-
 val create : ie_addr:Uint16.t -> if_addr:Uint16.t -> t
 
 val request : t -> type_ -> unit
@@ -25,3 +21,7 @@ val clear_all : t -> unit
 val next : t -> type_ option
 
 include Addressable_intf.S with type t := t
+
+val show : t -> string
+
+val show_type_ : type_ -> string

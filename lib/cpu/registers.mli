@@ -24,12 +24,6 @@ type flag =
   | Subtraction
   | Zero
 
-val show : t -> string
-
-val show_r : r -> string
-
-val show_rr : rr -> string
-
 val create : unit -> t
 
 val read_r : t -> r -> uint8
@@ -49,3 +43,9 @@ val set_flags : t -> ?c:bool -> ?h:bool -> ?n:bool -> ?z:bool -> unit -> unit
 val unset_flag : t -> flag -> unit
 
 val clear_flags : t -> unit
+
+val show : t -> string
+
+val show_r : r -> string
+
+val show_rr : rr -> string
