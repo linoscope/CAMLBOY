@@ -7,8 +7,7 @@ type t = {
 }
 
 let create ~start_addr ~end_addr =
-  let string = String.init Uint16.(to_int @@ end_addr - start_addr + one) (fun _ -> Char.chr 0) in
-  let bytes = Bigstringaf.of_string ~off:0 ~len:(String.length string) string in
+  let bytes = Bigstringaf.create Uint16.(to_int @@ end_addr - start_addr + one) in
   {
     bytes;
     start_addr;
