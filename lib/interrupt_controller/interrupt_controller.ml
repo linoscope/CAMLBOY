@@ -21,23 +21,6 @@ type type_ =
   | Serial_port
   | Joypad
 
-let show_type_ = function
-  | VBlank      -> "VBlank"
-  | LCD_stat    -> "LCD_stat"
-  | Timer       -> "Timer"
-  | Serial_port -> "Serial_port"
-  | Joypad      -> "Joypad"
-
-let show t =
-  let open Bool in
-  Printf.sprintf
-    "ie:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d, joypad:%d), \
-     if:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d, joypad:%d)"
-    (to_int t.ie.vblank) (to_int t.ie.lcd_stat)
-    (to_int t.ie.timer) (to_int t.ie.serial_port) (to_int t.ie.joypad)
-    (to_int t.if_.vblank) (to_int t.if_.lcd_stat)
-    (to_int t.if_.timer) (to_int t.if_.serial_port) (to_int t.if_.joypad)
-
 let create ~ie_addr ~if_addr = {
   ie  = {addr = ie_addr; vblank = false; lcd_stat = false; timer = false; serial_port = false; joypad = false};
   if_ = {addr = if_addr; vblank = false; lcd_stat = false; timer = false; serial_port = false; joypad = false};
@@ -122,3 +105,20 @@ let write_byte t ~addr ~data =
     t.if_ <- state_of_byte data t.if_.addr
   end else
     assert false
+
+let show_type_ = function
+  | VBlank      -> "VBlank"
+  | LCD_stat    -> "LCD_stat"
+  | Timer       -> "Timer"
+  | Serial_port -> "Serial_port"
+  | Joypad      -> "Joypad"
+
+let show t =
+  let open Bool in
+  Printf.sprintf
+    "ie:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d, joypad:%d), \
+     if:(vblank:%d, lcd_stat:%d, timer:%d, serial_port:%d, joypad:%d)"
+    (to_int t.ie.vblank) (to_int t.ie.lcd_stat)
+    (to_int t.ie.timer) (to_int t.ie.serial_port) (to_int t.ie.joypad)
+    (to_int t.if_.vblank) (to_int t.if_.lcd_stat)
+    (to_int t.if_.timer) (to_int t.if_.serial_port) (to_int t.if_.joypad)

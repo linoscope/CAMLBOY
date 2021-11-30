@@ -2,6 +2,8 @@ open Uints
 
 module Make (Bus : Word_addressable_intf.S) = struct
 
+  module Fetch_and_decode = Fetch_and_decode.Make(Bus)
+
   type t = {
     registers                            : Registers.t;
     bus                                  : Bus.t;
@@ -13,10 +15,6 @@ module Make (Bus : Word_addressable_intf.S) = struct
     mutable enable_ime_before_next_instr : bool;
     mutable prev_inst                    : Instruction.t; (* for debugging purpose *)
   }
-
-  let show t =
-    Printf.sprintf "%s SP:%s PC:%s"
-      (Registers.show t.registers) (t.sp |> Uint16.show) (t.pc |> Uint16.show)
 
   let create ~bus ~ic ~registers ~sp ~pc ~halted ~ime =
     {
@@ -30,7 +28,6 @@ module Make (Bus : Word_addressable_intf.S) = struct
       enable_ime_before_next_instr = false;
       prev_inst = NOP;
     }
-
 
   type next_pc = Next | Jump of uint16
 
@@ -428,8 +425,6 @@ module Make (Bus : Word_addressable_intf.S) = struct
       t.pc <- addr;
       branched_mcycles
 
-  module Fetch_and_decode = Fetch_and_decode.Make(Bus)
-
   let run_instruction t  =
     let fetch_decode_execute t =
       if t.halted then
@@ -441,8 +436,7 @@ module Make (Bus : Word_addressable_intf.S) = struct
     in
     let handle_interrupt t : int =
       match Interrupt_controller.next t.ic with
-      | None ->
-        0
+      | None -> 0
       | Some type_ ->
         t.halted <- false;
         if not t.ime then
@@ -470,6 +464,10 @@ module Make (Bus : Word_addressable_intf.S) = struct
     let inst_mcycles = fetch_decode_execute t in
     let interrupt_mcycles = handle_interrupt t in
     inst_mcycles + interrupt_mcycles
+
+  let show t =
+    Printf.sprintf "%s SP:%s PC:%s"
+      (Registers.show t.registers) (t.sp |> Uint16.show) (t.pc |> Uint16.show)
 
   module For_tests = struct
 

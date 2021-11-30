@@ -1,6 +1,6 @@
 open Uints
 
-module Make (Mmu : Word_addressable_intf.S) : sig
+module Make (Bus : Word_addressable_intf.S) : sig
 
   type mcycles = {
     not_branched : int;
@@ -13,6 +13,6 @@ module Make (Mmu : Word_addressable_intf.S) : sig
     inst : Instruction.t;
   }
 
-  val f : Mmu.t -> pc:uint16 -> inst_info
+  val f : Bus.t -> pc:uint16 -> inst_info
 
 end
