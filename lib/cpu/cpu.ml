@@ -38,7 +38,6 @@ module Make (Bus : Word_addressable_intf.S) = struct
       ~(inst : Instruction.t) : int =
     let set_flags = Registers.set_flags t.registers in
     let read : type a. a Instruction.arg -> a = fun arg ->
-      let open Instruction in
       match arg with
       | Immediate8 n -> n
       | Immediate16 n -> n
@@ -76,7 +75,6 @@ module Make (Bus : Word_addressable_intf.S) = struct
         sp + n |> Uint16.of_int
     in
     let write : type a. a Instruction.arg -> a -> unit = fun x y ->
-      let open Instruction in
       match x with
       | R r -> Registers.write_r t.registers r y
       | RR rr -> Registers.write_rr t.registers rr y
@@ -101,9 +99,9 @@ module Make (Bus : Word_addressable_intf.S) = struct
       | Direct8 addr -> Bus.write_byte t.bus ~addr ~data:y
       | Direct16 addr -> Bus.write_word t.bus ~addr ~data:y
       | SP -> t.sp <- y
-      | SP_offset _   -> failwith @@ Printf.sprintf "Invalid arugment"
-      | Immediate16 _ -> failwith @@ Printf.sprintf "Invalid arugment"
-      | Immediate8 _  -> failwith @@ Printf.sprintf "Invalid arugment"
+      | SP_offset _
+      | Immediate16 _
+      | Immediate8 _ -> failwith @@ Printf.sprintf "Invalid arugment"
     in
     let (<--) x y = write x y in
     let check_condition t : Instruction.condition -> bool = function
