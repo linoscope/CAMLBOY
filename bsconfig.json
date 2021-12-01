@@ -1,0 +1,31 @@
+{
+    "name": "reboy",
+    "version": "0.0.1",
+    "sources": [
+        {
+            "dir" : "lib",
+            "subdirs" : true
+        },
+        {
+            "dir" : "bin/rescript",
+            "subdirs" : true
+        },
+        {
+            "dir" : "stub/rescript",
+            "subdirs" : true
+        },
+    ],
+    "package-specs": {
+        "module": "commonjs",
+        "in-source": true
+    },
+    "suffix": ".bs.js",
+    "warnings": {
+        "number" : "-3-44",
+        "error" : "+101"
+    },
+    "refmt": 3,
+    "generate-merlin": true,
+    "reason": { "react-jsx": 3 },
+    "bs-dependencies": ["@rescript/react"]
+}
