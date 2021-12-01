@@ -76,7 +76,7 @@ let show t =
   let show_arg : type a. a arg -> string = function
     | Immediate8 n   -> Uint8.show n
     | Immediate16 n  -> Uint16.show n
-    | Direct8 n
+    | Direct8 n      -> Printf.sprintf "(%s)" (Uint16.show n)
     | Direct16 n     -> Printf.sprintf "(%s)" (Uint16.show n)
     | R r            -> Registers.show_r r
     | RR rr          -> Registers.show_rr rr
