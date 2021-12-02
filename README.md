@@ -42,13 +42,19 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 ## Benchmark results
 
-| ![benchmark-60fps.gif](/resource/screenshot/benchmark-60fps.gif) | ![benchmark-nothrottle-withui.gif](/resource/screenshot/benchmark-nothrottle-withui.gif) |
-| :--------------------------------------------------------------: | :--------------------------------------------------------------------------------------: |
-|          First 1500 frames of Tobu Tobu girl (in 60FPS)          |                   First 1500 frames of Tobu Tobu girl (no throttling)                    |
-
 We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in "headless" mode (i.e. without UI) for 10 times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment / commands used for the benchmark.
 
-![bench-result](resource/benchmark-result.png)
+<div align="center">
+  <figure>
+    <img src="resource/benchmark-result.png" />
+  </figure>
+  <div>
+    <figure>
+      <img src="/resource/screenshot/benchmark-60fps.gif" />
+    </figure>
+    <div><i>First 1500 frames of Tobu Tobu Girl (in 60FPS)</i></div>
+  </div>
+</div>
 
 ## How to run
 
