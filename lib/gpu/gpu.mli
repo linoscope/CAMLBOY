@@ -15,8 +15,6 @@ val create :
   ic:Interrupt_controller.t ->
   t
 
-val set_mcycles_in_mode : t -> int -> unit
-
 val get_frame_buffer : t -> [`White | `Light_gray | `Dark_gray | `Black ] array array
 
 (** Used for DMA transfer.  *)

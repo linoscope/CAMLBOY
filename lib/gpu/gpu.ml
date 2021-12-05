@@ -66,8 +66,6 @@ let create
   handle_ly_eq_lyc t;
   t
 
-let set_mcycles_in_mode t mcycles_in_mode = t.mcycles_in_mode <- mcycles_in_mode
-
 let get_frame_buffer t = t.frame_buffer
 
 let render_bg_window_line t ly =

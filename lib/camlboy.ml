@@ -15,7 +15,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
   let show t = Cpu.show t.cpu
 
-  let initialize_state ~registers ~bus ~lcd_stat ~gpu =
+  let initialize_state ~registers ~bus ~lcd_stat =
     (* initialize registers *)
     Registers.set_flags registers ~z:true ~n:false ~h:true ~c:true ();
     Registers.[
@@ -55,8 +55,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         Bus.write_byte bus ~addr:(Uint16.of_int addr) ~data:(Uint8.of_int data));
 
     (* initialize GPU *)
-    Lcd_stat.set_gpu_mode lcd_stat Gpu_mode.VBlank;
-    Gpu.set_mcycles_in_mode gpu 0
+    Lcd_stat.set_gpu_mode lcd_stat Gpu_mode.VBlank
 
 
   let ly_addr = Uint16.of_int 0xFF44
@@ -163,7 +162,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~halted:false
         ~ime:false
     in
-    initialize_state ~bus ~registers ~lcd_stat ~gpu;
+    initialize_state ~bus ~registers ~lcd_stat;
     { cpu; timer; gpu; joypad }
 
   let run_instruction t =
