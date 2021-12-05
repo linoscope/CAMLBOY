@@ -30,7 +30,7 @@ include Addressable_intf.S with type t := t
 
 module For_tests : sig
 
-  (** Same as Runnable_intf.S.run but returns information about mode change  *)
+  (** Same as [run] but returns information about mode change. *)
   val run : t -> mcycles:int -> [`Mode_changed | `Mode_not_changed]
 
   val show : t -> string

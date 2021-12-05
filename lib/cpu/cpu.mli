@@ -13,7 +13,8 @@ module Make (Bus : Word_addressable_intf.S) : sig
     ime:bool ->
     t
 
-  (** Executes a single instruction. Returns machine cycle (mcycle) count consumed during the execution. *)
+  (** Executes a single instruction.
+   ** Returns machine cycle (mcycle) count consumed during the execution. *)
   val run_instruction : t -> int
 
   val show : t -> string
