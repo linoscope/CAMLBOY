@@ -37,8 +37,8 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 ## Current state
 
 - Runs with "playable" FPS in middle-tier mobile devices. (It runs at 60FPS for most games in my Galaxy S9, a smartphone released in 2018)
-- Supports "headless" benchmarking mode, for both native and web, that runs without UI
-- Passes various test roms such as Blargg's `cpu_insrts.gb` and `instr_timing.gb` (tests agains Blargg's test roms can be found [here](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), and tests agains Mooneye's test roms can be found [here](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)).
+- Supports "headless" benchmarking mode, both for native and web, that runs without UI
+- Passes various test roms such as Blargg's `cpu_insrts.gb` and `instr_timing.gb` (tests using Blargg's test roms can be found [here](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), and tests using Mooneye's test roms can be found [here](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)).
 
 ## Benchmark results
 
