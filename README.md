@@ -54,6 +54,12 @@ We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutob
     </figure>
     <div><i>First 1500 frames of Tobu Tobu Girl (in 60FPS)</i></div>
   </div>
+  <div>
+    <figure>
+      <img src="/resource/screenshot/benchmark-nothrottle.gif" />
+    </figure>
+    <div><i>First 1500 frames of Tobu Tobu Girl (in 1000FPS)</i></div>
+  </div>
 </div>
 
 ## How to run
