@@ -31,11 +31,10 @@ module Make (Bus : Word_addressable_intf.S) = struct
 
   type next_pc = Next | Jump of uint16
 
-  let execute
-      (t : t)
-      ~(branched_mcycles : int)
-      ~(not_branched_mcycles : int)
-      ~(inst : Instruction.t) : int =
+  let execute (t : t) (inst_info : Inst_info.t) : int =
+    let open Inst_info in
+    let {len=_; mcycles; inst} = inst_info in
+    let {not_branched=not_branched_mcycles; branched=branched_mcycles} = mcycles in
     let set_flags = Registers.set_flags t.registers in
     let read : type a. a Instruction.arg -> a = fun arg ->
       match arg with
@@ -430,9 +429,9 @@ module Make (Bus : Word_addressable_intf.S) = struct
       if t.halted then
         4
       else
-        let Fetch_and_decode.{len; mcycles; inst} = Fetch_and_decode.f t.bus ~pc:t.pc in
-        t.pc <- Uint16.(t.pc +len);
-        execute t ~branched_mcycles:mcycles.branched ~not_branched_mcycles:mcycles.not_branched ~inst
+        let inst_info = Fetch_and_decode.f t.bus ~pc:t.pc in
+        t.pc <- Uint16.(t.pc + inst_info.len);
+        execute t inst_info
     in
     let handle_interrupt t : int =
       match Interrupt_controller.next t.ic with

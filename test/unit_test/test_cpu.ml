@@ -33,7 +33,8 @@ let create_cpu
     ~ime
 
 let execute_result t inst =
-  Cpu.For_tests.execute t ~branched_mcycles:1 ~not_branched_mcycles:2 ~inst
+  let inst_info = Inst_info.{len=(Uint16.of_int 2); mcycles={branched=1; not_branched=2; }; inst} in
+  Cpu.For_tests.execute t inst_info
   |> (fun x -> ignore (x : int))
 
 

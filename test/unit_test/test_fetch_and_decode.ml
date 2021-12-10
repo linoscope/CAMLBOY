@@ -16,7 +16,7 @@ let disassemble instr_bin_file out  =
     if pc == rom_len then
       ()
     else
-      let Fetch_and_decode.{len; mcycles; inst} = Fetch_and_decode.f bus ~pc:pc in
+      let Inst_info.{len; mcycles; inst} = Fetch_and_decode.f bus ~pc:pc in
       Printf.fprintf out "{\n\tinst = %s;\n\tinst_len = %d;\n\tmcycles = (%d, %d)\n}\n"
         (Instruction.show inst) (Uint16.to_int len) mcycles.not_branched mcycles.branched;
       loop Uint16.(pc + len)

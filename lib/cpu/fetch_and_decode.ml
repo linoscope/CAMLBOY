@@ -3,17 +3,6 @@ open Instruction
 
 module Make (Bus : Word_addressable_intf.S) = struct
 
-  type mcycles = {
-    not_branched : int;
-    branched : int;
-  }
-
-  type inst_info = {
-    len : uint16;
-    mcycles : mcycles;
-    inst : Instruction.t;
-  }
-
   module RST_offset = struct
     let x00 = 0x00 |> Uint16.of_int
     let x08 = 0x08 |> Uint16.of_int
@@ -31,7 +20,7 @@ module Make (Bus : Word_addressable_intf.S) = struct
     let l3 = 3 |> Uint16.of_int
   end
 
-  let f bus ~pc : inst_info =
+  let f bus ~pc : Inst_info.t =
     let open Instruction_length in
     let addr_after_pc = Uint16.(succ pc) in
     let next_byte () = Bus.read_byte bus addr_after_pc in
