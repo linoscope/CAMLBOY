@@ -1,7 +1,7 @@
 open Camlboy_lib
 open Uints
 
-module Camlboy = Camlboy.Make (Cartridge_mbc1)
+module Camlboy = Camlboy.Make (Mbc1)
 
 (** Blargg tests end with "JR -2" infinite loop *)
 let is_infinite_loop instr =

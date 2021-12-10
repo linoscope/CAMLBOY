@@ -1,5 +1,5 @@
 open Camlboy_lib
-module M = Mooneye_utils.Make(Cartridge_mbc1)
+module M = Mooneye_utils.Make(Mbc1)
 
 let%expect_test "basic.gb" =
   M.run_test_rom_and_print_framebuffer "oam_dma/basic.gb";
