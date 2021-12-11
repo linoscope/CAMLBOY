@@ -3,14 +3,21 @@ opam-version: "2.0"
 synopsis: "A Gambeboy emulator written in OCaml"
 description: "A Gambeboy emulator written in OCaml"
 maintainer: ["linoshitani@gmail.com"]
+authors: ["Lin Oshitani"]
+license: "MIT"
+homepage: "https://github.com/linoscope/CAMLBOY"
+doc: "https://github.com/linoscope/CAMLBOY"
+bug-reports: "https://github.com/linoscope/CAMLBOY/issues"
 depends: [
-  "bigstringaf" {>= "0.8.0"}
-  "ppx_deriving" {>= "4.5"}
-  "ppx_jane" {>= "v0.14.0" & with-test}
+  "dune" {>= "2.9"}
   "brr" {>= "0.0.2"}
+  "js_of_ocaml-compiler" {>= "3.11.0"}
   "js_of_ocaml-lwt" {>= "3.11.0"}
+  "ppx_deriving" {>= "4.5"}
   "tsdl" {>= "0.9.8"}
-  "dune" {>= "2.7"}
+  "base" {>= "v0.14.0" & with-test}
+  "bigstringaf" {>= "0.8.0" & with-test}
+  "ppx_jane" {>= "v0.14.0" & with-test}
   "odoc" {with-doc}
 ]
 build: [
@@ -22,8 +29,11 @@ build: [
     name
     "-j"
     jobs
+    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+  ["dune" "install" "-p" name "--create-install-files" name]
 ]
+dev-repo: "git+https://github.com/linoscope/CAMLBOY.git"
