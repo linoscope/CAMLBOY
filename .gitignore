@@ -1,4 +1,5 @@
-_build*
+_build/*
+_opam/*
 .merlin
 resource/private
 *.bs.js
