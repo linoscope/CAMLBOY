@@ -1,6 +1,6 @@
 open Uints
 
-type 'a arg =
+type _ arg =
   | Immediate8  : uint8        -> uint8  arg
   | Immediate16 : uint16       -> uint16 arg
   | Direct8     : uint16       -> uint8  arg
