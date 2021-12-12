@@ -62,6 +62,35 @@ We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutob
   </div>
 </div>
 
+## Architecture diagram
+
+Here is a rough sketch of the various modules and their relation between them.
+
+<div align="center">
+  <img src="/resource/diagram/camlboy_architecture.png" height="500"/>
+</div>
+
+## Directory Structure
+
+- `lib` - Main emulator code
+- `bin` - UI code
+  - `web` - Web
+  - `sdl2` - SDL2
+- `test`
+  - `unit_tests` - Unit tests
+  - `rom_tests` - Integration tests that use test roms
+- `resource`
+  - `games` - Game roms
+  - `test_roms` - Test roms used in `rom_tests`
+
+## TODO
+
+- [ ] Cartridge based save
+- [ ] Audio Processing Unit (APU)
+- [ ] Rescript backend
+- [ ] MBC5
+- [ ] Game Boy Color mode
+
 ## How to run
 
 ### Prerequisite
@@ -138,35 +167,6 @@ $ dune runtest test/unit_tests/
 # Run integration tests (tests that use test roms):
 $ dune runtest test/rom_tests/
 ```
-
-## Architecture diagram
-
-Here is a rough sketch of the various modules and their relation between them.
-
-<div align="center">
-  <img src="/resource/diagram/camlboy_architecture.png" height="500"/>
-</div>
-
-## Directory Structure
-
-- `lib` - Main emulator code
-- `bin` - UI code
-  - `web` - Web
-  - `sdl2` - SDL2
-- `test`
-  - `unit_tests` - Unit tests
-  - `rom_tests` - Integration tests that use test roms
-- `resource`
-  - `games` - Game roms
-  - `test_roms` - Test roms used in `rom_tests`
-
-## TODO
-
-- [ ] Cartridge based save
-- [ ] Audio Processing Unit (APU)
-- [ ] Rescript backend
-- [ ] MBC5
-- [ ] Game Boy Color mode
 
 ## More screenshots
 
