@@ -144,7 +144,7 @@ $ dune runtest test/rom_tests/
 Here is a rough sketch of the various modules and their relation between them.
 
 <div align="center">
-  <img src="/resource/screenshot/diagram/camlboy_architecture.png" height="500"/>
+  <img src="/resource/diagram/camlboy_architecture.png" height="500"/>
 </div>
 
 ## Directory Structure
