@@ -139,7 +139,15 @@ $ dune runtest test/unit_tests/
 $ dune runtest test/rom_tests/
 ```
 
-## Project Structure
+## Architecture diagram
+
+Here is a rough sketch of the various modules and their relation between them.
+
+<div align="center">
+  <img src="/resource/screenshot/diagram/camlboy_architecture.png" height="500"/>
+</div>
+
+## Directory Structure
 
 - `lib` - Main emulator code
 - `bin` - UI code
