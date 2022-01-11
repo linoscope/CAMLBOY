@@ -11,6 +11,11 @@
 
 Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
+## Accompanied blog posts
+
+- English: https://linoscope.github.io/writing-a-game-boy-emulator-in-ocaml/
+- 日本語: https://qiita.com/linoscope/items/244d931aaae07df2c27e
+
 ## Screenshot
 
 <div align="center">
@@ -22,7 +27,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 ### Goals
 
 - Playable in the browser of middle-tier/high-tier mobile devices
-- Readable/maintainable code that follow OCaml's best practices
+- Readable/maintainable code that follows OCaml's best practices
 
 ### Stretch goals
 
@@ -32,17 +37,20 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 ### Non-goals
 
 - Run all games with high accuracy
-- Optimize performance to the limit at the expese of code readability
+- Optimize performance to the limit at the expense of code readability
 
 ## Current state
 
 - Runs with "playable" FPS in middle-tier mobile devices. (It runs at 60FPS for most games in my Galaxy S9, a smartphone released in 2018)
-- Supports "headless" benchmarking mode, both for native and web, that runs without UI
-- Passes various test roms such as Blargg's `cpu_insrts.gb` and `instr_timing.gb` (tests using Blargg's test roms can be found [here](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), and tests using Mooneye's test roms can be found [here](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)).
+- Runs with ~1000FPS, with UI, in native
+- Supports headless benchmarking mode, both for native and web, that runs without UI
+- Passes various test ROMs such as Blargg's `cpu_insrts.gb` and `instr_timing.gb` (tests using Blargg's test ROMs can be found [here](https://github.com/linoscope/CAMLBOY/blob/main/test/rom_tests/test_blargg_test_roms.ml), and tests using Mooneye's test ROMs can be found [here](https://github.com/linoscope/CAMLBOY/tree/main/test/rom_tests/mooneye)).
 
 ## Benchmark results
 
-We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in "headless" mode (i.e. without UI) for 10 times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment / commands used for the benchmark.
+We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in headless mode (i.e., without UI) for ten times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment/commands used for the benchmark.[^1]
+
+[^1]: Note that we can not use this benchmark to compare the FPS with other Game Boy emulators. This is because the performance of an emulator depends significantly on how accurate it is and how much functionality it has. For example, CALMBOY does not implement the APU (Audio Processing Unit), so there is no point in comparing its FPS with emulators with APU support.
 
 <div align="center">
   <figure>
@@ -64,7 +72,7 @@ We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutob
 
 ## Architecture diagram
 
-Here is a rough sketch of the various modules and their relation between them.
+Here is a rough sketch of the various modules and their relationship. You can find details in the [accompanied blog post](https://linoscope.github.io/writing-a-game-boy-emulator-in-ocaml/).
 
 <div align="center">
   <img src="/resource/diagram/camlboy_architecture.png" height="500"/>
@@ -137,7 +145,7 @@ $ python -m http.server 8000 --directory _build/default/bin/web
 
 ```
 
-### How to run bench marks in headless mode
+### How to run benchmarks in headless mode
 
 #### Benchmark for native build
 
@@ -164,7 +172,7 @@ First, follow the steps in "How to run with UI - js_of_ocaml frontend" above. No
 $ dune runtest
 # Run unit tests only:
 $ dune runtest test/unit_tests/
-# Run integration tests (tests that use test roms):
+# Run integration tests (tests that use test ROMs):
 $ dune runtest test/rom_tests/
 ```
 
