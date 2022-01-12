@@ -31,7 +31,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 ### Stretch goals
 
-- Achive stable 60fps in low-tier mobile devices
+- Achieve stable 60fps in low-tier mobile devices
 - Serve as a benchmark target for various compile backends, similar to [optcarrot](https://github.com/mame/optcarrot) in the Ruby world. Would be especially interesting if we can compare the performance of various JS/wasm backends, such as [js_of_ocaml](http://ocsigen.org/js_of_ocaml/latest/manual/overview), [Rescript](https://rescript-lang.org/), [Melange](https://github.com/melange-re/melange), and [ocaml-wasm](https://github.com/corwin-of-amber/ocaml-wasm/tree/wasm-4.11).
 
 ### Non-goals
