@@ -1,5 +1,6 @@
 (library
  (name camlboy_lib)
+ (public_name camlboy)
  (libraries bigstringaf))
 
 (include_subdirs unqualified)
