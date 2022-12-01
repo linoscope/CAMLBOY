@@ -1,4 +1,4 @@
-(lang dune 2.9)
+(lang dune 3.6)
 
 (generate_opam_files true)
 
@@ -15,6 +15,7 @@
 
 (package
  (name camlboy)
+ (allow_empty)
  (synopsis "A Gambeboy emulator written in OCaml")
  (description "A Gambeboy emulator written in OCaml")
  (depends

@@ -1,1 +1,1 @@
-module Make (Cartridge : Cartridge_intf.S) : Camlboy_intf.S
+module Make (_ : Cartridge_intf.S) : Camlboy_intf.S
