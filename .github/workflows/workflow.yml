@@ -36,25 +36,6 @@ jobs:
 
       - run: opam exec -- dune runtest
 
-      # Build and deploy non-release build (i.e. dev build) to /dev
-      - run: |
-          opam exec -- dune build --build-dir _build-dev
-          cp -r _build-dev/default/bin/web _build/default/bin/web/dev
-
-      # Build and deploy release build with --no-inline to /release-no-inline
-      - run: |
-          # Add --pretty flag to dune file
-          sed -i 's/--no-inline/--no-inline --pretty/' bin/web/dune
-          opam exec -- dune build --profile release --build-dir _build-release-no-inline
-          cp -r _build-release-no-inline/default/bin/web _build/default/bin/web/release-no-inline
-
-      # Build and deploy release build without --no-inline to /release
-      - run: |
-          # Remove --no-inline flag from dune file
-          sed -i 's/--no-inline//' bin/web/dune
-          opam exec -- dune build --profile release --build-dir _build-release
-          cp -r _build-release/default/bin/web _build/default/bin/web/release
-
       - name: Deploy website
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}

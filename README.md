@@ -113,7 +113,7 @@ git clone https://github.com/linoscope/CAMLBOY.git
 # cd into repository
 cd CAMLBOY
 # Create local switch for the repository
-opam switch create . 4.13.1
+opam switch create . ocaml-base-compiler.4.13.1
 eval $(opam env)
 # Install system packages required by opam packages (SDL, etc)
 opam pin add camlboy.dev . --no-action

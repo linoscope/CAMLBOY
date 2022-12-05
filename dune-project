@@ -1,5 +1,7 @@
 (lang dune 3.6)
 
+(name camlboy)
+
 (generate_opam_files true)
 
 (license MIT)
@@ -19,12 +21,13 @@
  (synopsis "A Gambeboy emulator written in OCaml")
  (description "A Gambeboy emulator written in OCaml")
  (depends
+  (ocaml (>= 4.13.1))
   (brr
-   (>= 0.0.2))
+   (>= 0.0.4))
   (js_of_ocaml-compiler
-   (>= 3.11.0))
+   (>= 4.1.0))
   (js_of_ocaml-lwt
-   (>= 3.11.0))
+   (>= 4.1.0))
   (ppx_deriving
    (>= 4.5))
   (tsdl
