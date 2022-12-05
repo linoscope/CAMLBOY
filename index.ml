@@ -70,16 +70,16 @@ module State = struct
     end;
     begin match !key_down_listener with
       | None -> ()
-      | Some lister -> Ev.unlisten Ev.keydown lister G.target
+      | Some lister -> Ev.unlisten lister
     end;
     begin match !key_up_listener with
       | None -> ()
-      | Some lister -> Ev.unlisten Ev.keyup lister G.target
+      | Some lister -> Ev.unlisten lister
     end
 end
 
 let set_up_keyboard (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
-  let key_down_listener ev =
+  let key_down_fun ev =
     let key_ev = Ev.as_type ev in
     let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
     match key_name with
@@ -93,7 +93,7 @@ let set_up_keyboard (type a) (module C : Camlboy_intf.S with type t = a) (t : a)
     | "d"     -> C.press t Right
     | _       -> ()
   in
-  let key_up_listener ev =
+  let key_up_fun ev =
     let key_ev = Ev.as_type ev in
     let key_name = key_ev |> Ev.Keyboard.key |> Jstr.to_string in
     match key_name with
@@ -107,8 +107,8 @@ let set_up_keyboard (type a) (module C : Camlboy_intf.S with type t = a) (t : a)
     | "d"     -> C.release t Right
     | _       -> ()
   in
-  Ev.listen Ev.keydown (key_down_listener) G.target;
-  Ev.listen Ev.keyup (key_up_listener) G.target;
+  let key_down_listener = Ev.listen Ev.keydown (key_down_fun) G.target in
+  let key_up_listener = Ev.listen Ev.keyup (key_up_fun) G.target in
   State.set_listener key_down_listener key_up_listener
 
 let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
@@ -124,22 +124,23 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   let press ev t key = Ev.prevent_default ev; viberate 10; C.press t key in
   let release ev t key = Ev.prevent_default ev; C.release t key in
   let listen_ops = Ev.listen_opts ~capture:true () in
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el);
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Down)   (El.as_target down_el);
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Left)   (El.as_target left_el);
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Right)  (El.as_target right_el);
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t A)      (El.as_target a_el);
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t B)      (El.as_target b_el);
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Start)  (El.as_target start_el);
-  Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Select) (El.as_target select_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Up)     (El.as_target up_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Down)   (El.as_target down_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Left)   (El.as_target left_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Right)  (El.as_target right_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el);
-  Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el)
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Up)     (El.as_target up_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Down)   (El.as_target down_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Left)   (El.as_target left_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Right)  (El.as_target right_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t A)      (El.as_target a_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t B)      (El.as_target b_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Start)  (El.as_target start_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchstart ~opts:listen_ops (fun ev -> press ev t Select) (El.as_target select_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Up)     (El.as_target up_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Down)   (El.as_target down_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Left)   (El.as_target left_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Right)  (El.as_target right_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t A)      (El.as_target a_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t B)      (El.as_target b_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Start)  (El.as_target start_el) in
+  let (_ : Ev.listener) = Ev.listen My_ev.touchend ~opts:listen_ops (fun ev -> release ev t Select) (El.as_target select_el) in
+  ()
 
 let throttled = ref true
 
@@ -222,7 +223,8 @@ let set_up_rom_selector ctx image_data selector_el =
     let rom_path = El.prop (El.Prop.value) selector_el |> Jstr.to_string in
     Fut.await (run_selected_rom ctx image_data rom_path) (fun () -> ())
   in
-  Ev.listen Ev.change on_change (El.as_target selector_el)
+  let (_ : Ev.listener) = Ev.listen Ev.change on_change (El.as_target selector_el) in
+  ()
 
 let set_default_throttle_val checkbox_el =
   let uri = Window.location G.window in
@@ -251,7 +253,7 @@ let on_checkbox_change checkbox_el =
 let () =
   (* Set up canvas *)
   let canvas = find_el_by_id "canvas" |> Canvas.of_el in
-  let ctx = C2d.create canvas in
+  let ctx = C2d.get_context canvas in
   C2d.scale ctx ~sx:1.5 ~sy:1.5;
   let image_data = C2d.create_image_data ctx ~w:gb_w ~h:gb_h in
   let fb = Array.make_matrix gb_h gb_w `Light_gray in
@@ -259,10 +261,10 @@ let () =
   (* Set up throttle checkbox *)
   let checkbox_el = find_el_by_id "throttle" in
   set_default_throttle_val checkbox_el;
-  Ev.listen Ev.change (fun _ -> on_checkbox_change checkbox_el) (El.as_target checkbox_el);
+  let (_ : Ev.listener) = Ev.listen Ev.change (fun _ -> on_checkbox_change checkbox_el) (El.as_target checkbox_el) in
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
-  Ev.listen Ev.change (fun _ -> on_load_rom ctx image_data input_el) (El.as_target input_el);
+  let (_ : Ev.listener) = Ev.listen Ev.change (fun _ -> on_load_rom ctx image_data input_el) (El.as_target input_el) in
   (* Set up rom selector *)
   let selector_el = find_el_by_id "rom-selector" in
   set_up_rom_selector ctx image_data selector_el;
