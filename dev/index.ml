@@ -21,12 +21,6 @@ let rom_options = [
   {name = "SHEEP IT UP"       ; path = "./sheep-it-up.gb"};
 ]
 
-let alert v =
-  let alert = Jv.get Jv.global "alert" in
-  ignore @@ Jv.apply alert Jv.[| of_string v |]
-
-let console_log s = Console.log Jstr.[of_string s]
-
 let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
 
 let draw_framebuffer ctx image_data fb =

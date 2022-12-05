@@ -3,10 +3,6 @@ open Brr
 open Brr_io
 open Fut.Syntax
 
-let alert v =
-  let alert = Jv.get Jv.global "alert" in
-  ignore @@ Jv.apply alert Jv.[| of_string v |]
-
 let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
 
 let run_rom_bytes rom_bytes frames =
