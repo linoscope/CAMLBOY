@@ -16,10 +16,17 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 - English: https://linoscope.github.io/writing-a-game-boy-emulator-in-ocaml/
 - 日本語: https://qiita.com/linoscope/items/244d931aaae07df2c27e
 
-## Screenshot
+## Screenshots
 
 <div align="center">
   <img src="/resource/screenshot/pokemon-aka.gif" height="500"/>
+</div>
+
+<div align="center">
+    <img src="/resource/screenshot/tetris-opening.gif"/>
+    <img src="/resource/screenshot/zelda-opening.gif"/>
+    <img src="/resource/screenshot/kirby-opening.gif"/>
+    <img src="/resource/screenshot/donkykong-opening.gif"/>
 </div>
 
 ## Project goals and non-goals
@@ -175,15 +182,6 @@ $ dune runtest test/unit_tests/
 # Run integration tests (tests that use test ROMs):
 $ dune runtest test/rom_tests/
 ```
-
-## More screenshots
-
-<div align="center">
-    <img src="/resource/screenshot/tetris-opening.gif"/>
-    <img src="/resource/screenshot/zelda-opening.gif"/>
-    <img src="/resource/screenshot/kirby-opening.gif"/>
-    <img src="/resource/screenshot/donkykong-opening.gif"/>
-</div>
 
 ## Resources
 
