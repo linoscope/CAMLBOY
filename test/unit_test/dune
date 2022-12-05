@@ -1,7 +1,7 @@
 (library
  (name camlboy_unit_test)
  (libraries camlboy_lib base bigstringaf)
- (inline_tests)
+ (inline_tests (deps (source_tree  ../../resource/test_roms)))
  (preprocess (pps ppx_jane)))
 
 (include_subdirs unqualified)
