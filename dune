@@ -1,3 +1,0 @@
-(alias
- (name all)
- (deps (glob_files bin/web/*.html)))

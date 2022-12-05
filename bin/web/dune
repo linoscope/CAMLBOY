@@ -7,6 +7,10 @@
  (link_flags (:standard -no-check-prims))
  (modes js))
 
+(alias
+ (name all)
+ (deps (glob_files *.html)))
+
 (rule
  (targets index.js)
  (deps index.bc.js)
