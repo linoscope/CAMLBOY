@@ -11,10 +11,15 @@
 
 Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
-## Accompanied blog posts
+## Accompanied Posts and Videos
 
+### Posts
 - English: https://linoscope.github.io/writing-a-game-boy-emulator-in-ocaml/
 - 日本語: https://qiita.com/linoscope/items/244d931aaae07df2c27e
+
+### Videos
+
+- Talk at Functional Conf 2025: https://www.youtube.com/watch?v=hFzHqxMar3g
 
 ## Screenshots
 
