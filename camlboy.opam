@@ -11,9 +11,9 @@ bug-reports: "https://github.com/linoscope/CAMLBOY/issues"
 depends: [
   "dune" {>= "3.17"}
   "ocaml" {>= "4.13.1"}
-  "brr" {>= "0.0.4"}
-  "js_of_ocaml-compiler" {>= "4.1.0"}
-  "js_of_ocaml-lwt" {>= "4.1.0"}
+  "brr" {>= "0.0.7"}
+  "js_of_ocaml-compiler" {>= "6.0.1"}
+  "js_of_ocaml-lwt" {>= "6.0.1"}
   "ppx_deriving" {>= "4.5"}
   "tsdl" {>= "0.9.8"}
   "base" {>= "v0.14.0" & with-test}

@@ -23,11 +23,11 @@
  (depends
   (ocaml (>= 4.13.1))
   (brr
-   (>= 0.0.4))
+   (>= 0.0.7))
   (js_of_ocaml-compiler
-   (>= 4.1.0))
+   (>= 6.0.1))
   (js_of_ocaml-lwt
-   (>= 4.1.0))
+   (>= 6.0.1))
   (ppx_deriving
    (>= 4.5))
   (tsdl
