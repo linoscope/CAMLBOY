@@ -22,6 +22,7 @@
  (description "A Gambeboy emulator written in OCaml")
  (depends
   (ocaml (>= 4.14.2))
+  (wasm_of_ocaml-compiler (>= 6.0.1))
   (brr
    (>= 0.0.7))
   (js_of_ocaml-compiler

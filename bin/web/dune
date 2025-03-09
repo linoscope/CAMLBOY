@@ -2,7 +2,7 @@
  (names index bench)
  (libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib)
  (link_flags (:standard -no-check-prims))
- (modes js))
+ (modes wasm))
 
 (alias
  (name all)
@@ -10,12 +10,12 @@
 
 (rule
  (targets index.js)
- (deps index.bc.js)
+ (deps index.bc.wasm.js)
  (action (run cp %{deps} %{targets})))
 
 (rule
  (targets bench.js)
- (deps bench.bc.js)
+ (deps bench.bc.wasm.js)
  (action (run cp %{deps} %{targets})))
 
 (rule
