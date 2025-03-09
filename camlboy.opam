@@ -9,7 +9,7 @@ homepage: "https://github.com/linoscope/CAMLBOY"
 doc: "https://github.com/linoscope/CAMLBOY"
 bug-reports: "https://github.com/linoscope/CAMLBOY/issues"
 depends: [
-  "dune" {>= "3.6"}
+  "dune" {>= "3.17"}
   "ocaml" {>= "4.13.1"}
   "brr" {>= "0.0.4"}
   "js_of_ocaml-compiler" {>= "4.1.0"}

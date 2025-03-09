@@ -1,4 +1,4 @@
-(lang dune 3.6)
+(lang dune 3.17)
 
 (name camlboy)
 
