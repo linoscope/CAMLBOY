@@ -1,8 +1,10 @@
+; Replace ./dune with this file to run js_of_ocaml version.
+
 (executables
  (names index bench)
  (libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib)
  (link_flags (:standard -no-check-prims))
- (modes wasm))
+ (modes js))
 
 (alias
  (name all)
@@ -10,12 +12,12 @@
 
 (rule
  (targets index.js)
- (deps index.bc.wasm.js)
+ (deps index.bc.js)
  (action (run cp %{deps} %{targets})))
 
 (rule
  (targets bench.js)
- (deps bench.bc.wasm.js)
+ (deps bench.bc.js)
  (action (run cp %{deps} %{targets})))
 
 (rule

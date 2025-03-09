@@ -36,12 +36,11 @@ jobs:
 
       - run: opam exec -- dune runtest
 
-      # Build and deploy release build with --no-inline to /no-inline
+      # Build and deploy release build that uses js-of-ocaml instead of wasm-of-ocaml
       - run: |
-          # Add --no-inline flag from dune file
-          sed -i 's/(libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib)/(libraries brr bigstringaf js_of_ocaml-lwt camlboy_lib) (js_of_ocaml (flags (:standard --no-inline)))/' bin/web/dune
-          opam exec -- dune build --profile release --build-dir _build-no-inline
-          cp -r _build-no-inline/default/bin/web _build/default/bin/web/no-inline
+          cp bin/web/dune-for-js bin/web/dune
+          opam exec -- dune build --profile release --build-dir _build-js
+          cp -r _build-js/default/bin/web _build/default/bin/web/js
 
       - name: Deploy website
         uses: peaceiris/actions-gh-pages@v3
