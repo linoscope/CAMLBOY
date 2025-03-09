@@ -24,31 +24,32 @@ let rom_options = [
 let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.get
 
 let draw_framebuffer ctx image_data fb =
-  let d = C2d.Image_data.data image_data in
+  let d = C2d.Image_data.data image_data |> Tarray.to_bigarray1 in
   for y = 0 to gb_h - 1 do
     for x = 0 to gb_w - 1 do
       let off = 4 * (y * gb_w + x) in
+      let open Bigarray in
       match fb.(y).(x) with
       | `White ->
-        Tarray.set d (off    ) 0xE5;
-        Tarray.set d (off + 1) 0xFB;
-        Tarray.set d (off + 2) 0xF4;
-        Tarray.set d (off + 3) 0xFF;
+        Array1.set d (off    ) 0xE5;
+        Array1.set d (off + 1) 0xFB;
+        Array1.set d (off + 2) 0xF4;
+        Array1.set d (off + 3) 0xFF;
       | `Light_gray ->
-        Tarray.set d (off    ) 0x97;
-        Tarray.set d (off + 1) 0xAE;
-        Tarray.set d (off + 2) 0xB8;
-        Tarray.set d (off + 3) 0xFF;
+        Array1.set d (off    ) 0x97;
+        Array1.set d (off + 1) 0xAE;
+        Array1.set d (off + 2) 0xB8;
+        Array1.set d (off + 3) 0xFF;
       | `Dark_gray ->
-        Tarray.set d (off    ) 0x61;
-        Tarray.set d (off + 1) 0x68;
-        Tarray.set d (off + 2) 0x7D;
-        Tarray.set d (off + 3) 0xFF;
+        Array1.set d (off    ) 0x61;
+        Array1.set d (off + 1) 0x68;
+        Array1.set d (off + 2) 0x7D;
+        Array1.set d (off + 3) 0xFF;
       | `Black ->
-        Tarray.set d (off    ) 0x22;
-        Tarray.set d (off + 1) 0x1E;
-        Tarray.set d (off + 2) 0x31;
-        Tarray.set d (off + 3) 0xFF;
+        Array1.set d (off    ) 0x22;
+        Array1.set d (off + 1) 0x1E;
+        Array1.set d (off + 2) 0x31;
+        Array1.set d (off + 3) 0xFF;
     done
   done;
   C2d.put_image_data ctx image_data ~x:0 ~y:0
