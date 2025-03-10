@@ -7,7 +7,7 @@
 
 ## About
 
-**_CAMLBOY_** is a Game Boy emulator that runs in the browser. It is written in [OCaml](https://ocaml.org/) and compiled to JavaScript using [js_of_ocaml](http://ocsigen.org/js_of_ocaml/latest/manual/overview) (edit: After #15 CAMLBOY is now compiled to WASM!).
+**_CAMLBOY_** is a Game Boy emulator that runs in the browser. It is written in [OCaml](https://ocaml.org/) and compiled to JavaScript using [js_of_ocaml](http://ocsigen.org/js_of_ocaml/latest/manual/overview) (edit: After [#15](https://github.com/linoscope/CAMLBOY/pull/15) CAMLBOY is now compiled to WASM!).
 
 Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
