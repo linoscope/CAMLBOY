@@ -190,3 +190,47 @@ let%expect_test "length counter disables channel" =
   [%expect {|
     $F1
     $F0 |}]
+
+(* Audio buffer integration tests *)
+
+let%expect_test "sample generation rate" =
+  (* Create APU with known sample rate for predictable timing *)
+  (* At 44100 Hz and 1048576 M-cycles/sec, we get ~23.78 M-cycles per sample *)
+  let t = Apu.create ~sample_rate:44100 () in
+  Printf.printf "initial samples: %d\n" (Apu.samples_available t);
+  (* Run for ~100 M-cycles - should generate ~4 samples (100 / 23.78 ≈ 4.2) *)
+  Apu.run t ~mcycles:100;
+  Printf.printf "after 100 mcycles: %d\n" (Apu.samples_available t);
+  (* Run for ~1000 M-cycles - should generate ~42 more samples *)
+  Apu.run t ~mcycles:1000;
+  Printf.printf "after 1100 mcycles: %d\n" (Apu.samples_available t);
+  [%expect {|
+    initial samples: 0
+    after 100 mcycles: 4
+    after 1100 mcycles: 46 |}]
+
+let%expect_test "samples can be popped" =
+  let t = Apu.create ~sample_rate:44100 () in
+  Apu.run t ~mcycles:100;
+  let count = Apu.samples_available t in
+  Printf.printf "available: %d\n" count;
+  (* Pop one sample *)
+  (match Apu.pop_sample t with
+   | Some s -> Printf.printf "got sample: left=%d, right=%d\n" s.left s.right
+   | None -> print_endline "empty");
+  Printf.printf "after pop: %d\n" (Apu.samples_available t);
+  [%expect {|
+    available: 4
+    got sample: left=-32768, right=-32768
+    after pop: 3 |}]
+
+let%expect_test "pop_samples batch read" =
+  let t = Apu.create ~sample_rate:44100 () in
+  Apu.run t ~mcycles:100;
+  let dst = Bigarray.(Array1.create int16_signed c_layout (10 * 2)) in
+  let count = Apu.pop_samples t ~dst ~count:10 in
+  Printf.printf "requested: 10, got: %d\n" count;
+  Printf.printf "remaining: %d\n" (Apu.samples_available t);
+  [%expect {|
+    requested: 10, got: 4
+    remaining: 0 |}]

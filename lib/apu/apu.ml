@@ -3,6 +3,22 @@
 
 open Uints
 
+(* Audio timing constants.
+   CPU runs at 4194304 Hz (T-cycles), 1 M-cycle = 4 T-cycles.
+   We generate audio samples at a configurable rate (default 44100 Hz).
+
+   M-cycles per second = 4194304 / 4 = 1048576
+   M-cycles per sample = 1048576 / sample_rate
+
+   For 44100 Hz: 1048576 / 44100 ≈ 23.78 M-cycles per sample.
+   We use fixed-point math with Int64 to handle the fractional part accurately
+   and avoid integer overflow in js_of_ocaml (which uses 32-bit ints). *)
+let default_sample_rate = 44100
+let mcycles_per_second = Int64.of_int Constants.mcycles_per_second
+
+(* Fixed-point precision for sample timing (16 bits of fraction) *)
+let timing_precision = 65536L
+
 (* APU register addresses *)
 let nr10_addr = 0xFF10  (* Square 1 sweep *)
 let nr11_addr = 0xFF11  (* Square 1 duty/length *)
@@ -40,18 +56,41 @@ type t = {
   mutable nr50 : uint8;  (* Master volume & Vin *)
   mutable nr51 : uint8;  (* Sound panning *)
   mutable power_on : bool;
+
+  (* Audio output *)
+  audio_buffer : Audio_buffer.t;
+  mutable sample_counter : int64;  (* Fixed-point counter for sample timing *)
+  cycles_per_sample : int64;       (* Fixed-point M-cycles per sample *)
+  sample_rate : int;
 }
 
-let create () = {
-  square1 = Square_channel.create ~has_sweep:true;
-  square2 = Square_channel.create ~has_sweep:false;
-  sweep = Sweep.create ();
-  frame_seq = Frame_sequencer.create ();
-  wave_ram = Array.make 16 Uint8.zero;
-  nr50 = Uint8.zero;
-  nr51 = Uint8.zero;
-  power_on = false;
-}
+(* Calculate samples per frame for default buffer sizing.
+   At 60 FPS and 44100 Hz: samples_per_frame = 44100 / 60 = 735. *)
+let samples_per_frame ~sample_rate ~sec_per_frame =
+  int_of_float (float sample_rate *. sec_per_frame)
+
+let create ?(sample_rate = default_sample_rate) ?(sec_per_frame = 1. /. 60.) ?buffer_size () =
+  let buffer_size =
+    Option.value buffer_size
+      ~default:(samples_per_frame ~sample_rate ~sec_per_frame)
+  in
+  (* Calculate fixed-point cycles per sample:
+     cycles_per_sample = (mcycles_per_second * timing_precision) / sample_rate *)
+  let cycles_per_sample = Int64.(div (mul mcycles_per_second timing_precision) (of_int sample_rate)) in
+  {
+    square1 = Square_channel.create ~has_sweep:true;
+    square2 = Square_channel.create ~has_sweep:false;
+    sweep = Sweep.create ();
+    frame_seq = Frame_sequencer.create ();
+    wave_ram = Array.make 16 Uint8.zero;
+    nr50 = Uint8.zero;
+    nr51 = Uint8.zero;
+    power_on = false;
+    audio_buffer = Audio_buffer.create buffer_size;
+    sample_counter = 0L;
+    cycles_per_sample;
+    sample_rate;
+  }
 
 (* Process frame sequencer events *)
 let process_frame_events t events =
@@ -74,17 +113,87 @@ let process_frame_events t events =
         | None -> ()
   ) events
 
-let run t ~mcycles =
-  if not t.power_on then
+(* Mix all channels and return stereo sample.
+   Each channel outputs 0-15, we sum and scale to 16-bit signed audio.
+
+   NR51 controls panning:
+   - Bits 0-3: Channels 1-4 to right output
+   - Bits 4-7: Channels 1-4 to left output
+
+   NR50 controls volume:
+   - Bits 0-2: Right volume (0-7)
+   - Bits 4-6: Left volume (0-7)
+
+   The final sample is scaled to fit int16 range (-32768 to 32767).
+   With 4 channels at 15 max volume each, max sum = 60 per side.
+   After volume (8x max), max = 480.
+   Scale factor to reach ~32767: 32767/480 ≈ 68.
+   We use 64 for efficient multiplication. *)
+let mix_sample t =
+  let s1 = Square_channel.get_sample t.square1 in
+  let s2 = Square_channel.get_sample t.square2 in
+  let s3 = 0 in  (* Wave channel - TODO *)
+  let s4 = 0 in  (* Noise channel - TODO *)
+
+  let nr51 = Uint8.to_int t.nr51 in
+  let nr50 = Uint8.to_int t.nr50 in
+
+  (* Sum channels for each output based on NR51 panning *)
+  let left =
+    (if nr51 land 0x10 <> 0 then s1 else 0) +
+    (if nr51 land 0x20 <> 0 then s2 else 0) +
+    (if nr51 land 0x40 <> 0 then s3 else 0) +
+    (if nr51 land 0x80 <> 0 then s4 else 0)
+  in
+  let right =
+    (if nr51 land 0x01 <> 0 then s1 else 0) +
+    (if nr51 land 0x02 <> 0 then s2 else 0) +
+    (if nr51 land 0x04 <> 0 then s3 else 0) +
+    (if nr51 land 0x08 <> 0 then s4 else 0)
+  in
+
+  (* Apply master volume from NR50 (each side 0-7, we use 1-8) *)
+  let vol_left = ((nr50 lsr 4) land 0x07) + 1 in
+  let vol_right = (nr50 land 0x07) + 1 in
+
+  (* Scale to 16-bit signed range *)
+  let scale = 64 in
+  let left_out = (left * vol_left * scale) - 32768 in
+  let right_out = (right * vol_right * scale) - 32768 in
+
+  (* Clamp to int16 range *)
+  let clamp v = max (-32768) (min 32767 v) in
+  (clamp left_out, clamp right_out)
+
+(* Generate audio samples based on elapsed cycles *)
+let generate_samples t ~mcycles =
+  (* Add cycles to counter (in fixed-point) *)
+  t.sample_counter <- Int64.(add t.sample_counter (mul (of_int mcycles) timing_precision));
+
+  (* Generate samples while we have accumulated enough cycles *)
+  while t.sample_counter >= t.cycles_per_sample do
+    t.sample_counter <- Int64.sub t.sample_counter t.cycles_per_sample;
+    let (left, right) = mix_sample t in
+    (* If buffer is full, samples are dropped (audio underrun protection) *)
+    let _ = Audio_buffer.push t.audio_buffer ~left ~right in
     ()
-  else begin
+  done
+
+let run t ~mcycles =
+  if not t.power_on then begin
+    (* Even when powered off, generate silent samples to keep audio flowing *)
+    generate_samples t ~mcycles
+  end else begin
     (* Run frame sequencer and process events *)
     let events = Frame_sequencer.run t.frame_seq ~mcycles in
     process_frame_events t events;
 
     (* Run channels *)
     Square_channel.run t.square1 ~mcycles;
-    Square_channel.run t.square2 ~mcycles
+    Square_channel.run t.square2 ~mcycles;
+
+    (* Generate audio samples *)
+    generate_samples t ~mcycles
   end
 
 let accepts _t addr =
@@ -259,3 +368,26 @@ let write_byte t ~addr ~data =
       t.nr51 <- data
     | _ -> ()
   end
+
+(* Audio buffer access for SDL2 callback *)
+
+(* Get the audio buffer (for direct access in callback) *)
+let get_audio_buffer t = t.audio_buffer
+
+(* Get number of samples available in buffer *)
+let samples_available t = Audio_buffer.available t.audio_buffer
+
+(* Pop a single sample from the buffer *)
+let pop_sample t = Audio_buffer.pop t.audio_buffer
+
+(* Pop multiple samples into bigarray. Returns number of samples read.
+   This is the main interface for the SDL2 audio callback.
+   Destination should be interleaved stereo (L R L R ...). *)
+let pop_samples t ~dst ~count =
+  Audio_buffer.pop_into t.audio_buffer ~dst ~count
+
+(* Get the audio buffer capacity *)
+let buffer_capacity t = Audio_buffer.capacity t.audio_buffer
+
+(* Get the sample rate *)
+let sample_rate t = t.sample_rate
