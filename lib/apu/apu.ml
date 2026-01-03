@@ -37,7 +37,11 @@ let nr32_addr = 0xFF1C  (* Wave volume *)
 let nr33_addr = 0xFF1D  (* Wave frequency low *)
 let nr34_addr = 0xFF1E  (* Wave frequency high / control *)
 
-let _nr41_addr = 0xFF20  (* Noise length - TODO *)
+let nr41_addr = 0xFF20  (* Noise length *)
+let nr42_addr = 0xFF21  (* Noise envelope *)
+let nr43_addr = 0xFF22  (* Noise polynomial counter *)
+let nr44_addr = 0xFF23  (* Noise control *)
+
 let nr50_addr = 0xFF24  (* Master volume *)
 let nr51_addr = 0xFF25  (* Sound panning *)
 let nr52_addr = 0xFF26  (* Sound on/off *)
@@ -51,6 +55,7 @@ type t = {
   square2 : Square_channel.t;
   sweep : Sweep.t;  (* For Square 1 *)
   wave : Wave_channel.t;
+  noise : Noise_channel.t;
 
   (* Frame sequencer drives length/envelope/sweep clocking *)
   frame_seq : Frame_sequencer.t;
@@ -88,6 +93,7 @@ let create ?(sample_rate = default_sample_rate) ?(sec_per_frame = 1. /. 60.) ?bu
     square2 = Square_channel.create ~has_sweep:false;
     sweep = Sweep.create ();
     wave = Wave_channel.create ();
+    noise = Noise_channel.create ();
     frame_seq = Frame_sequencer.create ();
     wave_ram = Array.make 16 Uint8.zero;
     nr50 = Uint8.zero;
@@ -105,11 +111,13 @@ let process_frame_events t events =
     | Frame_sequencer.Length ->
       Square_channel.clock_length t.square1;
       Square_channel.clock_length t.square2;
-      Wave_channel.clock_length t.wave
+      Wave_channel.clock_length t.wave;
+      Noise_channel.clock_length t.noise
     | Frame_sequencer.Envelope ->
       Square_channel.clock_envelope t.square1;
-      Square_channel.clock_envelope t.square2
+      Square_channel.clock_envelope t.square2;
       (* Wave channel has no envelope *)
+      Noise_channel.clock_envelope t.noise
     | Frame_sequencer.Sweep ->
       let (new_freq_opt, should_disable) = Sweep.clock t.sweep in
       if should_disable then
@@ -142,7 +150,7 @@ let mix_sample t =
   let s1 = Square_channel.get_sample t.square1 in
   let s2 = Square_channel.get_sample t.square2 in
   let s3 = Wave_channel.get_sample t.wave in
-  let s4 = 0 in  (* Noise channel - TODO *)
+  let s4 = Noise_channel.get_sample t.noise in
 
   let nr51 = Uint8.to_int t.nr51 in
   let nr50 = Uint8.to_int t.nr50 in
@@ -201,6 +209,7 @@ let run t ~mcycles =
     Square_channel.run t.square1 ~mcycles;
     Square_channel.run t.square2 ~mcycles;
     Wave_channel.run t.wave ~wave_ram:t.wave_ram ~mcycles;
+    Noise_channel.run t.noise ~mcycles;
 
     (* Generate audio samples *)
     generate_samples t ~mcycles
@@ -215,7 +224,7 @@ let read_nr52 t =
   let ch1 = if Square_channel.is_enabled t.square1 then 0x01 else 0 in
   let ch2 = if Square_channel.is_enabled t.square2 then 0x02 else 0 in
   let ch3 = if Wave_channel.is_enabled t.wave then 0x04 else 0 in
-  let ch4 = 0 in  (* Noise channel - TODO *)
+  let ch4 = if Noise_channel.is_enabled t.noise then 0x08 else 0 in
   let power = if t.power_on then 0x80 else 0 in
   (* Bits 4-6 are unused and read as 1 *)
   Uint8.of_int (0x70 lor power lor ch4 lor ch3 lor ch2 lor ch1)
@@ -284,6 +293,30 @@ let read_byte t addr =
     | _ when a = nr34_addr ->
       (* NR34: bit 6 = length enable, rest unused/write-only (read as 1) *)
       let len = Wave_channel.get_length t.wave in
+      Uint8.of_int (0xBF lor (if Length_counter.is_enabled len then 0x40 else 0))
+
+    (* Noise channel registers *)
+    | _ when a = nr41_addr ->
+      (* NR41: Write-only, reads as 0xFF *)
+      Uint8.of_int 0xFF
+    | _ when a = nr42_addr ->
+      (* NR42: Envelope register, fully readable *)
+      let env = Noise_channel.get_envelope t.noise in
+      Uint8.of_int (
+        ((Envelope.get_volume env) lsl 4) lor
+        (if Envelope.get_direction env = Envelope.Up then 0x08 else 0) lor
+        (Envelope.get_period env)
+      )
+    | _ when a = nr43_addr ->
+      (* NR43: Polynomial counter, fully readable *)
+      Uint8.of_int (
+        ((Noise_channel.get_clock_shift t.noise) lsl 4) lor
+        (if Noise_channel.get_width_mode t.noise then 0x08 else 0) lor
+        (Noise_channel.get_divisor_code t.noise)
+      )
+    | _ when a = nr44_addr ->
+      (* NR44: bit 6 = length enable, rest unused/write-only (read as 1) *)
+      let len = Noise_channel.get_length t.noise in
       Uint8.of_int (0xBF lor (if Length_counter.is_enabled len then 0x40 else 0))
 
     (* Master control *)
@@ -393,12 +426,40 @@ let write_wave t addr data =
 
   | _ -> ()
 
+(* Write to Noise channel registers *)
+let write_noise t addr data =
+  let d = Uint8.to_int data in
+  match addr with
+  | _ when addr = nr41_addr ->
+    let len = Noise_channel.get_length t.noise in
+    Length_counter.load_from_register len ~register_value:(d land 0x3F)
+
+  | _ when addr = nr42_addr ->
+    let env = Noise_channel.get_envelope t.noise in
+    Envelope.load_from_register env ~register_value:d;
+    Noise_channel.update_dac t.noise
+
+  | _ when addr = nr43_addr ->
+    Noise_channel.set_clock_shift t.noise ((d lsr 4) land 0x0F);
+    Noise_channel.set_width_mode t.noise ((d land 0x08) <> 0);
+    Noise_channel.set_divisor_code t.noise (d land 0x07)
+
+  | _ when addr = nr44_addr ->
+    let len = Noise_channel.get_length t.noise in
+    Length_counter.set_enabled len ((d land 0x40) <> 0);
+    (* Trigger *)
+    if (d land 0x80) <> 0 then
+      Noise_channel.trigger t.noise
+
+  | _ -> ()
+
 (* Reset all channels and registers *)
 let power_off t =
   Square_channel.reset t.square1;
   Square_channel.reset t.square2;
   Sweep.reset t.sweep;
   Wave_channel.reset t.wave;
+  Noise_channel.reset t.noise;
   Frame_sequencer.reset t.frame_seq;
   t.nr50 <- Uint8.zero;
   t.nr51 <- Uint8.zero
@@ -422,6 +483,8 @@ let write_byte t ~addr ~data =
       write_square2 t a data
     | _ when a >= nr30_addr && a <= nr34_addr ->
       write_wave t a data
+    | _ when a >= nr41_addr && a <= nr44_addr ->
+      write_noise t a data
     | _ when a = nr50_addr ->
       t.nr50 <- data
     | _ when a = nr51_addr ->
