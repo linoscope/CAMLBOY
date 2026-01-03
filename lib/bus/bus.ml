@@ -12,10 +12,11 @@ module Make (Cartridge : Addressable_intf.S) = struct
     serial_port : Serial_port.t;
     ic          : Interrupt_controller.t;
     timer       : Timer.t;
+    apu         : Apu.t;
     dt          : Mmap_register.t;
   }
 
-  let create ~cartridge ~wram ~gpu ~zero_page ~shadow_ram ~joypad ~serial_port ~ic ~timer ~dma_transfer = {
+  let create ~cartridge ~wram ~gpu ~zero_page ~shadow_ram ~joypad ~serial_port ~ic ~timer ~apu ~dma_transfer = {
     cartridge;
     wram;
     shadow_ram;
@@ -25,6 +26,7 @@ module Make (Cartridge : Addressable_intf.S) = struct
     serial_port;
     ic;
     timer;
+    apu;
     dt = dma_transfer;
   }
 
@@ -40,6 +42,7 @@ module Make (Cartridge : Addressable_intf.S) = struct
     | _ when Serial_port.accepts t.serial_port addr -> Serial_port.read_byte t.serial_port addr
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.read_byte t.ic addr
     | _ when Timer.accepts t.timer addr             -> Timer.read_byte t.timer addr
+    | _ when Apu.accepts t.apu addr                 -> Apu.read_byte t.apu addr
     | _ when Mmap_register.accepts t.dt addr        -> Mmap_register.read_byte t.dt addr
     | _ ->
       (* Undocumented IO registers should always return 0xFF. Blargg's cpu_insrs fail without this.
@@ -68,6 +71,7 @@ module Make (Cartridge : Addressable_intf.S) = struct
     | _ when Serial_port.accepts t.serial_port addr -> Serial_port.write_byte t.serial_port ~addr ~data
     | _ when Interrupt_controller.accepts t.ic addr -> Interrupt_controller.write_byte t.ic ~addr ~data
     | _ when Timer.accepts t.timer  addr            -> Timer.write_byte t.timer ~addr ~data
+    | _ when Apu.accepts t.apu addr                 -> Apu.write_byte t.apu ~addr ~data
     | _ when Mmap_register.accepts t.dt  addr       ->
       Mmap_register.write_byte t.dt ~addr ~data;
       dma_transfer data
@@ -84,6 +88,7 @@ module Make (Cartridge : Addressable_intf.S) = struct
     || Serial_port.accepts t.serial_port addr
     || Interrupt_controller.accepts t.ic addr
     || Timer.accepts t.timer addr
+    || Apu.accepts t.apu addr
     || Mmap_register.accepts t.dt  addr
 
 

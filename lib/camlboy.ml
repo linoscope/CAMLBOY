@@ -11,6 +11,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
     timer  : Timer.t;
     gpu    : Gpu.t;
     joypad : Joypad.t;
+    apu    : Apu.t;
   }
 
   let show t = Cpu.show t.cpu
@@ -135,6 +136,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~tac_addr:(of_int 0xFF07)
         ~ic
     in
+    let apu = Apu.create () in
     let dma_transfer = Mmap_register.create
         ~addr:(of_int 0xFF46)
         ~type_:`RW
@@ -150,6 +152,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~serial_port
         ~ic
         ~timer
+        ~apu
         ~dma_transfer
     in
     let registers = Registers.create () in
@@ -163,11 +166,12 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~ime:false
     in
     initialize_state ~bus ~registers ~lcd_stat;
-    { cpu; timer; gpu; joypad }
+    { cpu; timer; gpu; joypad; apu }
 
   let run_instruction t =
     let mcycles = Cpu.run_instruction t.cpu in
     Timer.run t.timer ~mcycles;
+    Apu.run t.apu ~mcycles;
     Gpu.run t.gpu ~mcycles
 
   let press t key = Joypad.press t.joypad key
