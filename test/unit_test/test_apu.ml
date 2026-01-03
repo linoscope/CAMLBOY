@@ -66,28 +66,35 @@ let%expect_test "NR52 power off clears bit 7" =
 
 let%expect_test "registers cannot be written when powered off" =
   let t = create () in
-  (* Write to NR11 while powered off *)
-  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0x80);
+  (* Write to NR11 while powered off - duty bits (7-6) should not change *)
+  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0xC0);  (* duty = 3 *)
   print t nr11_addr;
-  [%expect {| $00 |}]
+  (* NR11 reads: bits 7-6 (duty) readable, bits 5-0 read as 1 *)
+  (* Default duty is Duty_50 (value 2), so bits 7-6 = 10 = 0x80 *)
+  (* 0x80 | 0x3F = 0xBF *)
+  [%expect {| $BF |}]
 
 let%expect_test "registers can be written when powered on" =
   let t = create () in
   power_on t;
-  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0x80);
+  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0xC0);  (* duty = 3 *)
   print t nr11_addr;
-  [%expect {| $80 |}]
+  (* NR11 reads: bits 7-6 (duty) = 11 = 0xC0, bits 5-0 read as 1 = 0x3F *)
+  (* 0xC0 | 0x3F = 0xFF *)
+  [%expect {| $FF |}]
 
 let%expect_test "power off clears all registers except wave RAM" =
   let t = create () in
   power_on t;
-  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0x80);
+  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0xC0);  (* duty = 3 *)
   Apu.write_byte t ~addr:wave_ram_start ~data:(Uint8.of_int 0xAB);
   power_off t;
   print t nr11_addr;
   print t wave_ram_start;
+  (* After power off, duty resets to Duty_50 (value 2), so bits 7-6 = 10 = 0x80 *)
+  (* 0x80 | 0x3F = 0xBF *)
   [%expect {|
-    $00
+    $BF
     $AB |}]
 
 let%expect_test "wave RAM can be read and written" =
@@ -107,3 +114,79 @@ let%expect_test "run does not crash" =
   Apu.run t ~mcycles:100;
   print t nr52_addr;
   [%expect {| $F0 |}]
+
+(* Integration tests for square channels *)
+
+let nr12_addr = Uint16.of_int 0xFF12  (* Square 1 envelope *)
+let nr13_addr = Uint16.of_int 0xFF13  (* Square 1 frequency low *)
+let nr14_addr = Uint16.of_int 0xFF14  (* Square 1 frequency high / control *)
+
+let%expect_test "trigger Square 1 enables channel" =
+  let t = create () in
+  power_on t;
+  (* Set envelope to enable DAC: volume=15, direction=down *)
+  Apu.write_byte t ~addr:nr12_addr ~data:(Uint8.of_int 0xF0);
+  (* Trigger channel *)
+  Apu.write_byte t ~addr:nr14_addr ~data:(Uint8.of_int 0x80);
+  print t nr52_addr;
+  (* NR52 should show channel 1 enabled (bit 0) *)
+  [%expect {| $F1 |}]
+
+let%expect_test "NR52 shows both channels when enabled" =
+  let t = create () in
+  power_on t;
+  let nr22_addr = Uint16.of_int 0xFF17 in
+  let nr24_addr = Uint16.of_int 0xFF19 in
+  (* Enable Square 1 *)
+  Apu.write_byte t ~addr:nr12_addr ~data:(Uint8.of_int 0xF0);
+  Apu.write_byte t ~addr:nr14_addr ~data:(Uint8.of_int 0x80);
+  (* Enable Square 2 *)
+  Apu.write_byte t ~addr:nr22_addr ~data:(Uint8.of_int 0xF0);
+  Apu.write_byte t ~addr:nr24_addr ~data:(Uint8.of_int 0x80);
+  print t nr52_addr;
+  (* NR52 should show channels 1 and 2 enabled (bits 0 and 1) *)
+  [%expect {| $F3 |}]
+
+let%expect_test "frequency register split across NR13 and NR14" =
+  let t = create () in
+  power_on t;
+  (* Set frequency to 0x456 = 0100_0101_0110
+     NR13 = 0x56 (low 8 bits)
+     NR14 bits 2-0 = 0x4 (high 3 bits) *)
+  Apu.write_byte t ~addr:nr13_addr ~data:(Uint8.of_int 0x56);
+  Apu.write_byte t ~addr:nr14_addr ~data:(Uint8.of_int 0x04);
+  (* NR13 is write-only, reads as 0xFF *)
+  print t nr13_addr;
+  (* NR14 bits 2-0 are write-only, reads as 0xBF (bit 6 = length enable = 0) *)
+  print t nr14_addr;
+  [%expect {|
+    $FF
+    $BF |}]
+
+let%expect_test "sweep register NR10 read/write" =
+  let t = create () in
+  power_on t;
+  (* Set sweep: period=5, negate=true, shift=3 = 0101_1011 = 0x5B *)
+  Apu.write_byte t ~addr:nr10_addr ~data:(Uint8.of_int 0x5B);
+  print t nr10_addr;
+  (* NR10 reads: bit 7 unused (reads as 1), bits 6-4 period, bit 3 negate, bits 2-0 shift *)
+  (* 0x80 | 0x50 | 0x08 | 0x03 = 0xDB *)
+  [%expect {| $DB |}]
+
+let%expect_test "length counter disables channel" =
+  let t = create () in
+  power_on t;
+  (* Set envelope to enable DAC *)
+  Apu.write_byte t ~addr:nr12_addr ~data:(Uint8.of_int 0xF0);
+  (* Set length to 1 (register value 63 means length = 64 - 63 = 1) *)
+  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0x3F);
+  (* Trigger with length enable *)
+  Apu.write_byte t ~addr:nr14_addr ~data:(Uint8.of_int 0xC0);
+  print t nr52_addr;
+  (* Run enough cycles for length to expire (1 tick at 256Hz = 4096 mcycles) *)
+  (* Frame sequencer clocks length at steps 0,2,4,6, so we need to hit one *)
+  Apu.run t ~mcycles:2048;  (* One frame sequencer step *)
+  print t nr52_addr;
+  [%expect {|
+    $F1
+    $F0 |}]

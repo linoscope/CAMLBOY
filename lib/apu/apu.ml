@@ -5,77 +5,257 @@ open Uints
 
 (* APU register addresses *)
 let nr10_addr = 0xFF10  (* Square 1 sweep *)
+let nr11_addr = 0xFF11  (* Square 1 duty/length *)
+let nr12_addr = 0xFF12  (* Square 1 envelope *)
+let nr13_addr = 0xFF13  (* Square 1 frequency low *)
+let nr14_addr = 0xFF14  (* Square 1 frequency high / control *)
+
+let nr21_addr = 0xFF16  (* Square 2 duty/length *)
+let nr22_addr = 0xFF17  (* Square 2 envelope *)
+let nr23_addr = 0xFF18  (* Square 2 frequency low *)
+let nr24_addr = 0xFF19  (* Square 2 frequency high / control *)
+
+let _nr30_addr = 0xFF1A  (* Wave DAC enable - TODO *)
+let _nr41_addr = 0xFF20  (* Noise length - TODO *)
+let nr50_addr = 0xFF24  (* Master volume *)
+let nr51_addr = 0xFF25  (* Sound panning *)
 let nr52_addr = 0xFF26  (* Sound on/off *)
+
 let wave_ram_start = 0xFF30
 let wave_ram_end = 0xFF3F
 
 type t = {
-  (* Channel registers: NR10-NR14, NR21-NR24, NR30-NR34, NR41-NR44 *)
-  (* For now, store raw register values *)
-  regs : uint8 array;  (* 0xFF10-0xFF26, indexed as addr - 0xFF10 *)
+  (* Sound channels *)
+  square1 : Square_channel.t;
+  square2 : Square_channel.t;
+  sweep : Sweep.t;  (* For Square 1 *)
 
-  (* Wave RAM: 16 bytes = 32 4-bit samples *)
+  (* Frame sequencer drives length/envelope/sweep clocking *)
+  frame_seq : Frame_sequencer.t;
+
+  (* Wave RAM: 16 bytes = 32 4-bit samples (for wave channel) *)
   wave_ram : uint8 array;
 
-  (* Master control state extracted from NR52 *)
+  (* Master control registers *)
+  mutable nr50 : uint8;  (* Master volume & Vin *)
+  mutable nr51 : uint8;  (* Sound panning *)
   mutable power_on : bool;
 }
 
 let create () = {
-  regs = Array.make 23 Uint8.zero;  (* 0xFF10 to 0xFF26 inclusive *)
+  square1 = Square_channel.create ~has_sweep:true;
+  square2 = Square_channel.create ~has_sweep:false;
+  sweep = Sweep.create ();
+  frame_seq = Frame_sequencer.create ();
   wave_ram = Array.make 16 Uint8.zero;
+  nr50 = Uint8.zero;
+  nr51 = Uint8.zero;
   power_on = false;
 }
 
-let run _t ~mcycles:_ =
-  (* No-op for now - will be implemented in later patches *)
-  ()
+(* Process frame sequencer events *)
+let process_frame_events t events =
+  List.iter (function
+    | Frame_sequencer.Length ->
+      Square_channel.clock_length t.square1;
+      Square_channel.clock_length t.square2
+    | Frame_sequencer.Envelope ->
+      Square_channel.clock_envelope t.square1;
+      Square_channel.clock_envelope t.square2
+    | Frame_sequencer.Sweep ->
+      let (new_freq_opt, should_disable) = Sweep.clock t.sweep in
+      if should_disable then
+        Square_channel.set_enabled t.square1 false
+      else
+        match new_freq_opt with
+        | Some new_freq ->
+          Square_channel.set_frequency t.square1 new_freq;
+          Sweep.set_shadow_frequency t.sweep new_freq
+        | None -> ()
+  ) events
+
+let run t ~mcycles =
+  if not t.power_on then
+    ()
+  else begin
+    (* Run frame sequencer and process events *)
+    let events = Frame_sequencer.run t.frame_seq ~mcycles in
+    process_frame_events t events;
+
+    (* Run channels *)
+    Square_channel.run t.square1 ~mcycles;
+    Square_channel.run t.square2 ~mcycles
+  end
 
 let accepts _t addr =
   let a = Uint16.to_int addr in
-  (* NR10-NR26: 0xFF10-0xFF26 *)
-  (* Wave RAM: 0xFF30-0xFF3F *)
   (a >= nr10_addr && a <= nr52_addr) || (a >= wave_ram_start && a <= wave_ram_end)
+
+(* Read NR52 - sound on/off and channel status *)
+let read_nr52 t =
+  let ch1 = if Square_channel.is_enabled t.square1 then 0x01 else 0 in
+  let ch2 = if Square_channel.is_enabled t.square2 then 0x02 else 0 in
+  let ch3 = 0 in  (* Wave channel - TODO *)
+  let ch4 = 0 in  (* Noise channel - TODO *)
+  let power = if t.power_on then 0x80 else 0 in
+  (* Bits 4-6 are unused and read as 1 *)
+  Uint8.of_int (0x70 lor power lor ch4 lor ch3 lor ch2 lor ch1)
 
 let read_byte t addr =
   let a = Uint16.to_int addr in
   if a >= wave_ram_start && a <= wave_ram_end then
-    (* Wave RAM *)
     t.wave_ram.(a - wave_ram_start)
-  else if a >= nr10_addr && a <= nr52_addr then begin
-    (* Sound registers *)
-    let reg_idx = a - nr10_addr in
-    if a = nr52_addr then
-      (* NR52: bit 7 is power, bits 0-3 are channel status (read-only) *)
-      (* For now, just return power bit + unused bits set *)
-      let power_bit = if t.power_on then 0x80 else 0x00 in
-      Uint8.of_int (0x70 lor power_bit)
-    else
-      (* Other registers: return stored value OR'd with read mask *)
-      (* Read masks will be implemented in a later patch *)
-      t.regs.(reg_idx)
-  end else
-    Uint8.of_int 0xFF
+  else match a with
+    (* Square 1 registers *)
+    | _ when a = nr10_addr ->
+      let sw = t.sweep in
+      Uint8.of_int (
+        0x80 lor  (* Bit 7 unused, reads as 1 *)
+        ((Sweep.get_period sw) lsl 4) lor
+        (if Sweep.get_negate sw then 0x08 else 0) lor
+        (Sweep.get_shift sw)
+      )
+    | _ when a = nr11_addr ->
+      (* Only bits 7-6 (duty) are readable *)
+      Uint8.of_int (0x3F lor ((Square_channel.int_of_duty (Square_channel.get_duty t.square1)) lsl 6))
+    | _ when a = nr12_addr ->
+      let env = Square_channel.get_envelope t.square1 in
+      Uint8.of_int (
+        ((Envelope.get_volume env) lsl 4) lor
+        (if Envelope.get_direction env = Envelope.Up then 0x08 else 0) lor
+        (Envelope.get_period env)
+      )
+    | _ when a = nr13_addr ->
+      (* Write-only, reads as 0xFF *)
+      Uint8.of_int 0xFF
+    | _ when a = nr14_addr ->
+      (* Only bit 6 (length enable) is readable *)
+      let len = Square_channel.get_length t.square1 in
+      Uint8.of_int (0xBF lor (if Length_counter.is_enabled len then 0x40 else 0))
+
+    (* Square 2 registers *)
+    | _ when a = nr21_addr ->
+      Uint8.of_int (0x3F lor ((Square_channel.int_of_duty (Square_channel.get_duty t.square2)) lsl 6))
+    | _ when a = nr22_addr ->
+      let env = Square_channel.get_envelope t.square2 in
+      Uint8.of_int (
+        ((Envelope.get_volume env) lsl 4) lor
+        (if Envelope.get_direction env = Envelope.Up then 0x08 else 0) lor
+        (Envelope.get_period env)
+      )
+    | _ when a = nr23_addr ->
+      Uint8.of_int 0xFF
+    | _ when a = nr24_addr ->
+      let len = Square_channel.get_length t.square2 in
+      Uint8.of_int (0xBF lor (if Length_counter.is_enabled len then 0x40 else 0))
+
+    (* Master control *)
+    | _ when a = nr50_addr -> t.nr50
+    | _ when a = nr51_addr -> t.nr51
+    | _ when a = nr52_addr -> read_nr52 t
+
+    (* Unimplemented or write-only registers *)
+    | _ -> Uint8.of_int 0xFF
+
+(* Write to Square 1 registers *)
+let write_square1 t addr data =
+  let d = Uint8.to_int data in
+  match addr with
+  | _ when addr = nr10_addr ->
+    let old_negate = Sweep.get_negate t.sweep in
+    Sweep.load_from_register t.sweep ~register_value:d;
+    (* Check for obscure negate->positive disable *)
+    let new_negate = Sweep.get_negate t.sweep in
+    if Sweep.check_negate_to_positive_switch t.sweep ~new_negate && not new_negate && old_negate then
+      Square_channel.set_enabled t.square1 false
+
+  | _ when addr = nr11_addr ->
+    Square_channel.set_duty t.square1 (Square_channel.duty_of_int ((d lsr 6) land 0x03));
+    let len = Square_channel.get_length t.square1 in
+    Length_counter.load_from_register len ~register_value:(d land 0x3F)
+
+  | _ when addr = nr12_addr ->
+    let env = Square_channel.get_envelope t.square1 in
+    Envelope.load_from_register env ~register_value:d;
+    Square_channel.update_dac t.square1
+
+  | _ when addr = nr13_addr ->
+    let freq = Square_channel.get_frequency t.square1 in
+    Square_channel.set_frequency t.square1 ((freq land 0x700) lor d)
+
+  | _ when addr = nr14_addr ->
+    let freq = Square_channel.get_frequency t.square1 in
+    Square_channel.set_frequency t.square1 ((freq land 0xFF) lor ((d land 0x07) lsl 8));
+    let len = Square_channel.get_length t.square1 in
+    Length_counter.set_enabled len ((d land 0x40) <> 0);
+    (* Trigger *)
+    if (d land 0x80) <> 0 then begin
+      Square_channel.trigger t.square1;
+      let overflow = Sweep.trigger t.sweep ~frequency:(Square_channel.get_frequency t.square1) in
+      if overflow then
+        Square_channel.set_enabled t.square1 false
+    end
+
+  | _ -> ()
+
+(* Write to Square 2 registers *)
+let write_square2 t addr data =
+  let d = Uint8.to_int data in
+  match addr with
+  | _ when addr = nr21_addr ->
+    Square_channel.set_duty t.square2 (Square_channel.duty_of_int ((d lsr 6) land 0x03));
+    let len = Square_channel.get_length t.square2 in
+    Length_counter.load_from_register len ~register_value:(d land 0x3F)
+
+  | _ when addr = nr22_addr ->
+    let env = Square_channel.get_envelope t.square2 in
+    Envelope.load_from_register env ~register_value:d;
+    Square_channel.update_dac t.square2
+
+  | _ when addr = nr23_addr ->
+    let freq = Square_channel.get_frequency t.square2 in
+    Square_channel.set_frequency t.square2 ((freq land 0x700) lor d)
+
+  | _ when addr = nr24_addr ->
+    let freq = Square_channel.get_frequency t.square2 in
+    Square_channel.set_frequency t.square2 ((freq land 0xFF) lor ((d land 0x07) lsl 8));
+    let len = Square_channel.get_length t.square2 in
+    Length_counter.set_enabled len ((d land 0x40) <> 0);
+    (* Trigger *)
+    if (d land 0x80) <> 0 then
+      Square_channel.trigger t.square2
+
+  | _ -> ()
+
+(* Reset all channels and registers *)
+let power_off t =
+  Square_channel.reset t.square1;
+  Square_channel.reset t.square2;
+  Sweep.reset t.sweep;
+  Frame_sequencer.reset t.frame_seq;
+  t.nr50 <- Uint8.zero;
+  t.nr51 <- Uint8.zero
 
 let write_byte t ~addr ~data =
   let a = Uint16.to_int addr in
   if a >= wave_ram_start && a <= wave_ram_end then
-    (* Wave RAM write *)
     t.wave_ram.(a - wave_ram_start) <- data
-  else if a >= nr10_addr && a <= nr52_addr then begin
-    let reg_idx = a - nr10_addr in
-    if a = nr52_addr then begin
-      (* NR52: only bit 7 (power) is writable *)
-      let new_power = Uint8.to_int data land 0x80 <> 0 in
-      if t.power_on && not new_power then begin
-        (* Power off: clear all registers except NR52 and wave RAM *)
-        for i = 0 to 21 do
-          t.regs.(i) <- Uint8.zero
-        done
-      end;
-      t.power_on <- new_power
-    end else if t.power_on then
-      (* Only allow writes when powered on *)
-      t.regs.(reg_idx) <- data
-    (* When powered off, writes to registers (except NR52) are ignored *)
+  else if a = nr52_addr then begin
+    (* NR52: only bit 7 (power) is writable *)
+    let new_power = Uint8.to_int data land 0x80 <> 0 in
+    if t.power_on && not new_power then
+      power_off t;
+    t.power_on <- new_power
+  end else if t.power_on then begin
+    (* Only allow writes when powered on *)
+    match a with
+    | _ when a >= nr10_addr && a <= nr14_addr ->
+      write_square1 t a data
+    | _ when a >= nr21_addr && a <= nr24_addr ->
+      write_square2 t a data
+    | _ when a = nr50_addr ->
+      t.nr50 <- data
+    | _ when a = nr51_addr ->
+      t.nr51 <- data
+    | _ -> ()
   end
