@@ -31,7 +31,12 @@ let nr22_addr = 0xFF17  (* Square 2 envelope *)
 let nr23_addr = 0xFF18  (* Square 2 frequency low *)
 let nr24_addr = 0xFF19  (* Square 2 frequency high / control *)
 
-let _nr30_addr = 0xFF1A  (* Wave DAC enable - TODO *)
+let nr30_addr = 0xFF1A  (* Wave DAC enable *)
+let nr31_addr = 0xFF1B  (* Wave length *)
+let nr32_addr = 0xFF1C  (* Wave volume *)
+let nr33_addr = 0xFF1D  (* Wave frequency low *)
+let nr34_addr = 0xFF1E  (* Wave frequency high / control *)
+
 let _nr41_addr = 0xFF20  (* Noise length - TODO *)
 let nr50_addr = 0xFF24  (* Master volume *)
 let nr51_addr = 0xFF25  (* Sound panning *)
@@ -45,6 +50,7 @@ type t = {
   square1 : Square_channel.t;
   square2 : Square_channel.t;
   sweep : Sweep.t;  (* For Square 1 *)
+  wave : Wave_channel.t;
 
   (* Frame sequencer drives length/envelope/sweep clocking *)
   frame_seq : Frame_sequencer.t;
@@ -81,6 +87,7 @@ let create ?(sample_rate = default_sample_rate) ?(sec_per_frame = 1. /. 60.) ?bu
     square1 = Square_channel.create ~has_sweep:true;
     square2 = Square_channel.create ~has_sweep:false;
     sweep = Sweep.create ();
+    wave = Wave_channel.create ();
     frame_seq = Frame_sequencer.create ();
     wave_ram = Array.make 16 Uint8.zero;
     nr50 = Uint8.zero;
@@ -97,10 +104,12 @@ let process_frame_events t events =
   List.iter (function
     | Frame_sequencer.Length ->
       Square_channel.clock_length t.square1;
-      Square_channel.clock_length t.square2
+      Square_channel.clock_length t.square2;
+      Wave_channel.clock_length t.wave
     | Frame_sequencer.Envelope ->
       Square_channel.clock_envelope t.square1;
       Square_channel.clock_envelope t.square2
+      (* Wave channel has no envelope *)
     | Frame_sequencer.Sweep ->
       let (new_freq_opt, should_disable) = Sweep.clock t.sweep in
       if should_disable then
@@ -132,7 +141,7 @@ let process_frame_events t events =
 let mix_sample t =
   let s1 = Square_channel.get_sample t.square1 in
   let s2 = Square_channel.get_sample t.square2 in
-  let s3 = 0 in  (* Wave channel - TODO *)
+  let s3 = Wave_channel.get_sample t.wave in
   let s4 = 0 in  (* Noise channel - TODO *)
 
   let nr51 = Uint8.to_int t.nr51 in
@@ -191,6 +200,7 @@ let run t ~mcycles =
     (* Run channels *)
     Square_channel.run t.square1 ~mcycles;
     Square_channel.run t.square2 ~mcycles;
+    Wave_channel.run t.wave ~wave_ram:t.wave_ram ~mcycles;
 
     (* Generate audio samples *)
     generate_samples t ~mcycles
@@ -204,7 +214,7 @@ let accepts _t addr =
 let read_nr52 t =
   let ch1 = if Square_channel.is_enabled t.square1 then 0x01 else 0 in
   let ch2 = if Square_channel.is_enabled t.square2 then 0x02 else 0 in
-  let ch3 = 0 in  (* Wave channel - TODO *)
+  let ch3 = if Wave_channel.is_enabled t.wave then 0x04 else 0 in
   let ch4 = 0 in  (* Noise channel - TODO *)
   let power = if t.power_on then 0x80 else 0 in
   (* Bits 4-6 are unused and read as 1 *)
@@ -256,6 +266,24 @@ let read_byte t addr =
       Uint8.of_int 0xFF
     | _ when a = nr24_addr ->
       let len = Square_channel.get_length t.square2 in
+      Uint8.of_int (0xBF lor (if Length_counter.is_enabled len then 0x40 else 0))
+
+    (* Wave channel registers *)
+    | _ when a = nr30_addr ->
+      (* NR30: bit 7 = DAC enable, bits 6-0 unused (read as 1) *)
+      Uint8.of_int (0x7F lor (if Wave_channel.get_dac_enabled t.wave then 0x80 else 0))
+    | _ when a = nr31_addr ->
+      (* NR31: Write-only, reads as 0xFF *)
+      Uint8.of_int 0xFF
+    | _ when a = nr32_addr ->
+      (* NR32: bits 6-5 = volume, rest unused (read as 1) *)
+      Uint8.of_int (0x9F lor ((Wave_channel.get_volume_code t.wave) lsl 5))
+    | _ when a = nr33_addr ->
+      (* NR33: Write-only, reads as 0xFF *)
+      Uint8.of_int 0xFF
+    | _ when a = nr34_addr ->
+      (* NR34: bit 6 = length enable, rest unused/write-only (read as 1) *)
+      let len = Wave_channel.get_length t.wave in
       Uint8.of_int (0xBF lor (if Length_counter.is_enabled len then 0x40 else 0))
 
     (* Master control *)
@@ -336,11 +364,41 @@ let write_square2 t addr data =
 
   | _ -> ()
 
+(* Write to Wave channel registers *)
+let write_wave t addr data =
+  let d = Uint8.to_int data in
+  match addr with
+  | _ when addr = nr30_addr ->
+    Wave_channel.set_dac_enabled t.wave ((d land 0x80) <> 0)
+
+  | _ when addr = nr31_addr ->
+    let len = Wave_channel.get_length t.wave in
+    Length_counter.load_from_register len ~register_value:d
+
+  | _ when addr = nr32_addr ->
+    Wave_channel.set_volume_code t.wave ((d lsr 5) land 0x03)
+
+  | _ when addr = nr33_addr ->
+    let freq = Wave_channel.get_frequency t.wave in
+    Wave_channel.set_frequency t.wave ((freq land 0x700) lor d)
+
+  | _ when addr = nr34_addr ->
+    let freq = Wave_channel.get_frequency t.wave in
+    Wave_channel.set_frequency t.wave ((freq land 0xFF) lor ((d land 0x07) lsl 8));
+    let len = Wave_channel.get_length t.wave in
+    Length_counter.set_enabled len ((d land 0x40) <> 0);
+    (* Trigger *)
+    if (d land 0x80) <> 0 then
+      Wave_channel.trigger t.wave ~wave_ram:t.wave_ram
+
+  | _ -> ()
+
 (* Reset all channels and registers *)
 let power_off t =
   Square_channel.reset t.square1;
   Square_channel.reset t.square2;
   Sweep.reset t.sweep;
+  Wave_channel.reset t.wave;
   Frame_sequencer.reset t.frame_seq;
   t.nr50 <- Uint8.zero;
   t.nr51 <- Uint8.zero
@@ -362,6 +420,8 @@ let write_byte t ~addr ~data =
       write_square1 t a data
     | _ when a >= nr21_addr && a <= nr24_addr ->
       write_square2 t a data
+    | _ when a >= nr30_addr && a <= nr34_addr ->
+      write_wave t a data
     | _ when a = nr50_addr ->
       t.nr50 <- data
     | _ when a = nr51_addr ->
