@@ -62,7 +62,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in headless mode (i.e., without UI) for ten times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment/commands used for the benchmark.[^1]
 
-[^1]: Note that we can not use this benchmark to compare the FPS with other Game Boy emulators. This is because the performance of an emulator depends significantly on how accurate it is and how much functionality it has. For example, CAMLBOY does not implement the APU (Audio Processing Unit), so there is no point in comparing its FPS with emulators with APU support.
+[^1]: Note that we can not use this benchmark to compare the FPS with other Game Boy emulators. This is because the performance of an emulator depends significantly on how accurate it is and how much functionality it has.
 
 <div align="center">
   <figure>
@@ -106,7 +106,7 @@ Here is a rough sketch of the various modules and their relationship. You can fi
 ## TODO
 
 - [ ] Cartridge based save
-- [ ] Audio Processing Unit (APU)
+- [x] Audio Processing Unit (APU)
 - [ ] Rescript backend
 - [ ] MBC5
 - [ ] Game Boy Color mode
@@ -132,10 +132,20 @@ dune build
 ### Run with SDL2 UI (native)
 
 ```sh
-dune build
-# Usage: main.exe [--mode {default|withtrace|no-throttle}] <rom_path>
-dune exec bin/sdl2/main.exe -- resource/games/tobu.gb
+$ dune build
+# Usage: main.exe [--mode {default|60fps|withtrace|no-throttle}] [--no-blep] [--save-audio <file.wav>] <rom_path>
+$ dune exec bin/sdl2/main.exe -- resource/games/tobu.gb
 ```
+
+Available modes:
+- `default` - Audio-synced emulation (audio enabled)
+- `60fps` - 60 FPS throttled without audio
+- `withtrace` - 60 FPS with instruction tracing
+- `no-throttle` - Unthrottled (runs as fast as possible)
+
+Audio options:
+- `--no-blep` - Disable band-limited synthesis (BLEP) for square wave channels. BLEP reduces aliasing artifacts for higher audio quality. Disable for raw hardware-accurate output.
+- `--save-audio <file.wav>` - Save audio output to a WAV file.
 
 ### Run with Web UI (js_of_ocaml/wasm)
 
@@ -145,6 +155,8 @@ dune build
 python -m http.server 8000 --directory _build/default/bin/web
 # Open localhost:8000 in your browser
 ```
+
+Audio can be enabled using the checkbox in the web UI.
 
 ## How to run benchmarks
 
