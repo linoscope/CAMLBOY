@@ -178,6 +178,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
   let release t key = Joypad.release t.joypad key
 
+  let get_apu t = t.apu
 
   module For_tests = struct
 

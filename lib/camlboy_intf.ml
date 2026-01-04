@@ -18,6 +18,9 @@ module type S = sig
 
   val release : t -> Joypad.key -> unit
 
+  (** Get the APU for audio output access *)
+  val get_apu : t -> Apu.t
+
   module For_tests : sig
     val prev_inst : t -> Instruction.t
 
