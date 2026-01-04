@@ -5,7 +5,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
   module Camlboy = Camlboy.Make (Cartridge)
 
   let run_test_rom_and_print_framebuffer file =
-    let path = Printf.sprintf "../../resource/test_roms/mooneye/%s" file in
+    let path = Printf.sprintf "../../../resource/test_roms/mooneye/%s" file in
     let rom_bytes = Read_rom_file.f path in
     let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
     let rec loop () =

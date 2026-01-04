@@ -62,7 +62,7 @@ Try it out in our **[demo page](https://linoscope.github.io/CAMLBOY/)**!
 
 We ran the first 1500 frames of [Tobu Tobu Girl](https://tangramgames.dk/tobutobugirl/) in headless mode (i.e., without UI) for ten times each and calculated the average FPS. The error bars represent the standard deviation. See [`benchmark.md`](benchmark.md) for details about the environment/commands used for the benchmark.[^1]
 
-[^1]: Note that we can not use this benchmark to compare the FPS with other Game Boy emulators. This is because the performance of an emulator depends significantly on how accurate it is and how much functionality it has. For example, CALMBOY does not implement the APU (Audio Processing Unit), so there is no point in comparing its FPS with emulators with APU support.
+[^1]: Note that we can not use this benchmark to compare the FPS with other Game Boy emulators. This is because the performance of an emulator depends significantly on how accurate it is and how much functionality it has. For example, CAMLBOY does not implement the APU (Audio Processing Unit), so there is no point in comparing its FPS with emulators with APU support.
 
 <div align="center">
   <figure>
@@ -97,8 +97,8 @@ Here is a rough sketch of the various modules and their relationship. You can fi
   - `web` - Web
   - `sdl2` - SDL2
 - `test`
-  - `unit_tests` - Unit tests
-  - `rom_tests` - Integration tests that use test roms
+  - `unit_test` - Unit tests
+  - `rom_test` - Integration tests that use test roms
 - `resource`
   - `games` - Game roms
   - `test_roms` - Test roms used in `rom_tests`
@@ -183,9 +183,9 @@ First, follow the steps in "How to run with UI - js_of_ocaml frontend" above. No
 # Run all tests:
 $ dune runtest
 # Run unit tests only:
-$ dune runtest test/unit_tests/
+$ dune runtest test/unit_test/
 # Run integration tests (tests that use test ROMs):
-$ dune runtest test/rom_tests/
+$ dune runtest test/rom_test/
 ```
 
 ## Resources
