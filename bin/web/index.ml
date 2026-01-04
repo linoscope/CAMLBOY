@@ -59,9 +59,13 @@ module State = struct
   let run_id = ref None
   let key_down_listener = ref None
   let key_up_listener = ref None
+  let audio_context : Web_audio.AudioContext.t option ref = ref None
+  let script_processor : Web_audio.ScriptProcessorNode.t option ref = ref None
+
   let set_listener down up =
     key_down_listener := Some down;
     key_up_listener := Some up
+
   let clear () =
     begin match !run_id with
       | None -> ()
@@ -76,7 +80,12 @@ module State = struct
     begin match !key_up_listener with
       | None -> ()
       | Some lister -> Ev.unlisten lister
-    end
+    end;
+    begin match !script_processor with
+      | None -> ()
+      | Some proc -> Web_audio.AudioNode.disconnect (Web_audio.ScriptProcessorNode.as_node proc)
+    end;
+    script_processor := None
 end
 
 let set_up_keyboard (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
@@ -144,35 +153,130 @@ let set_up_joypad (type a) (module C : Camlboy_intf.S with type t = a) (t : a) =
   ()
 
 let throttled = ref true
+let audio_enabled = ref false
 
-let run_rom_bytes ctx image_data rom_bytes =
+(* FPS counter helper - same pattern as SDL2 frontend *)
+type fps_counter = {
+  mutable frame_count : int;
+  mutable start_time : float;
+}
+
+let create_fps_counter () =
+  { frame_count = 0; start_time = Performance.now_ms G.performance }
+
+let update_fps_counter counter ~on_tick =
+  counter.frame_count <- counter.frame_count + 1;
+  if counter.frame_count = 60 then begin
+    let now = Performance.now_ms G.performance in
+    let fps = 60. /. ((now -. counter.start_time) /. 1000.) in
+    on_tick fps;
+    counter.start_time <- now;
+    counter.frame_count <- 0
+  end
+
+let set_fps_text text =
+  let fps_el = find_el_by_id "fps" in
+  El.set_children fps_el [El.txt (Jstr.v text)]
+
+(* Audio-driven main loop - audio callback drives emulation.
+   Similar to SDL2's main_audio_sync but simpler since ScriptProcessorNode
+   runs on the main thread (no mutex needed). *)
+let run_rom_bytes_with_audio ctx image_data rom_bytes =
   State.clear ();
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
-  let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes () in
+  let t = C.create_with_rom ~print_serial_port:true ~rom_bytes () in
   set_up_keyboard (module C) t;
   set_up_joypad (module C) t;
-  let cnt = ref 0 in
-  let start_time = ref (Performance.now_ms G.performance) in
-  let set_fps fps =
-    let fps_str = Printf.sprintf "%.1f" fps in
-    let fps_el = find_el_by_id "fps" in
-    El.set_children fps_el [El.txt (Jstr.v fps_str)]
+  let apu = C.get_apu t in
+  let sample_rate = Apu.sample_rate apu in
+  let buffer_capacity = Apu.buffer_capacity apu in
+  (* Use a third of the capacity for script processor buffer *)
+  let processor_buffer_size = buffer_capacity / 3 in
+  (* Create audio context with APU's sample rate *)
+  let audio_ctx = match !State.audio_context with
+    | Some ctx -> ctx
+    | None ->
+      let ctx = Web_audio.AudioContext.create ~sample_rate () in
+      State.audio_context := Some ctx;
+      ctx
   in
+  (* Create script processor for audio callback *)
+  let processor = Web_audio.AudioContext.create_script_processor
+      audio_ctx
+      ~buffer_size:processor_buffer_size
+      ~input_channels:0
+      ~output_channels:2
+  in
+  State.script_processor := Some processor;
+  let fps_counter = create_fps_counter () in
+  (* Stats for frames per audio callback *)
+  let total_frames = ref 0 in
+  let total_callbacks = ref 0 in
+  (* Audio callback - drives emulation and rendering.
+     Called by browser when audio samples are needed. *)
+  Web_audio.ScriptProcessorNode.set_onaudioprocess processor (fun ev ->
+    let output_buffer = Web_audio.ScriptProcessorNode.AudioProcessingEvent.output_buffer ev in
+    let left_channel = Web_audio.AudioBuffer.get_channel_data output_buffer 0 in
+    let right_channel = Web_audio.AudioBuffer.get_channel_data output_buffer 1 in
+    let samples_needed = Jv.Jarray.length left_channel in
+    let frames_this_callback = ref 0 in
+    (* Run emulation until we have enough samples *)
+    while Apu.samples_available apu < samples_needed do
+      begin match C.run_instruction t with
+        | In_frame -> ()
+        | Frame_ended fb ->
+          incr frames_this_callback;
+          draw_framebuffer ctx image_data fb;
+          update_fps_counter fps_counter ~on_tick:(fun fps ->
+            let avg_frames = if !total_callbacks > 0
+              then float_of_int !total_frames /. float_of_int !total_callbacks
+              else 0.0 in
+            set_fps_text (Printf.sprintf "%.1f (%.2f f/cb)" fps avg_frames))
+      end
+    done;
+    (* Update callback stats *)
+    total_frames := !total_frames + !frames_this_callback;
+    incr total_callbacks;
+    (* Pop samples from APU and convert int16 to float32 *)
+    for i = 0 to samples_needed - 1 do
+      match Apu.pop_sample apu with
+      | Some sample ->
+        (* Convert from int16 range [-32768, 32767] to float [-1.0, 1.0] *)
+        let left = Jv.of_float (float_of_int sample.left /. 32768.0) in
+        let right = Jv.of_float (float_of_int sample.right /. 32768.0) in
+        Jv.Jarray.set left_channel i left;
+        Jv.Jarray.set right_channel i right
+      | None ->
+        (* Buffer underrun - output silence *)
+        Jv.Jarray.set left_channel i (Jv.of_float 0.0);
+        Jv.Jarray.set right_channel i (Jv.of_float 0.0)
+    done
+  );
+  (* Connect to destination *)
+  let dest = Web_audio.AudioContext.destination audio_ctx in
+  Web_audio.AudioNode.connect
+    (Web_audio.ScriptProcessorNode.as_node processor)
+    (Web_audio.AudioDestinationNode.as_node dest);
+  (* Resume audio context (needed after user interaction) *)
+  Fut.await (Web_audio.AudioContext.resume audio_ctx) (fun _ -> ())
+
+(* Frame-driven main loop - requestAnimationFrame drives emulation *)
+let run_rom_bytes_no_audio ctx image_data rom_bytes =
+  State.clear ();
+  let cartridge = Detect_cartridge.f ~rom_bytes in
+  let module C = Camlboy.Make(val cartridge) in
+  let t = C.create_with_rom ~print_serial_port:true ~rom_bytes () in
+  set_up_keyboard (module C) t;
+  set_up_joypad (module C) t;
+  let fps_counter = create_fps_counter () in
   let rec main_loop () =
     begin match C.run_instruction t with
       | In_frame ->
         main_loop ()
       | Frame_ended fb ->
-        incr cnt;
-        if !cnt = 60 then begin
-          let end_time = Performance.now_ms G.performance in
-          let sec_per_60_frame = (end_time -. !start_time) /. 1000. in
-          let fps = 60. /.  sec_per_60_frame in
-          start_time := end_time;
-          set_fps fps;
-          cnt := 0;
-        end;
+        update_fps_counter fps_counter ~on_tick:(fun fps ->
+          set_fps_text (Printf.sprintf "%.1f" fps));
         draw_framebuffer ctx image_data fb;
         if not !throttled then
           State.run_id := Some (G.set_timeout ~ms:0 main_loop)
@@ -181,6 +285,12 @@ let run_rom_bytes ctx image_data rom_bytes =
     end;
   in
   main_loop ()
+
+let run_rom_bytes ctx image_data rom_bytes =
+  if !audio_enabled then
+    run_rom_bytes_with_audio ctx image_data rom_bytes
+  else
+    run_rom_bytes_no_audio ctx image_data rom_bytes
 
 let run_rom_blob ctx image_data rom_blob =
   let* result = Blob.array_buffer rom_blob in
@@ -247,9 +357,17 @@ let set_default_throttle_val checkbox_el =
     end
   | None -> set_throttled_val true
 
-let on_checkbox_change checkbox_el =
+let on_throttle_change checkbox_el =
   let checked = El.prop (El.Prop.checked) checkbox_el in
   throttled := checked
+
+let on_audio_change ctx image_data checkbox_el =
+  let checked = El.prop (El.Prop.checked) checkbox_el in
+  audio_enabled := checked;
+  (* Reload current ROM to apply audio change *)
+  let selector_el = find_el_by_id "rom-selector" in
+  let rom_path = El.prop (El.Prop.value) selector_el |> Jstr.to_string in
+  Fut.await (run_selected_rom ctx image_data rom_path) (fun () -> ())
 
 let () =
   (* Set up canvas *)
@@ -260,9 +378,12 @@ let () =
   let fb = Array.make_matrix gb_h gb_w `Light_gray in
   draw_framebuffer ctx image_data fb;
   (* Set up throttle checkbox *)
-  let checkbox_el = find_el_by_id "throttle" in
-  set_default_throttle_val checkbox_el;
-  let (_ : Ev.listener) = Ev.listen Ev.change (fun _ -> on_checkbox_change checkbox_el) (El.as_target checkbox_el) in
+  let throttle_el = find_el_by_id "throttle" in
+  set_default_throttle_val throttle_el;
+  let (_ : Ev.listener) = Ev.listen Ev.change (fun _ -> on_throttle_change throttle_el) (El.as_target throttle_el) in
+  (* Set up audio checkbox *)
+  let audio_el = find_el_by_id "audio" in
+  let (_ : Ev.listener) = Ev.listen Ev.change (fun _ -> on_audio_change ctx image_data audio_el) (El.as_target audio_el) in
   (* Set up load rom button *)
   let input_el = find_el_by_id "load-rom" in
   let (_ : Ev.listener) = Ev.listen Ev.change (fun _ -> on_load_rom ctx image_data input_el) (El.as_target input_el) in
