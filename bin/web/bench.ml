@@ -8,7 +8,7 @@ let find_el_by_id id = Document.find_el_by_id G.document (Jstr.v id) |> Option.g
 let run_rom_bytes rom_bytes frames =
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
-  let t =  C.create_with_rom ~print_serial_port:false ~rom_bytes in
+  let t =  C.create_with_rom ~print_serial_port:false ~rom_bytes () in
   let frame_count = ref 0 in
   let start_time = ref (Performance.now_ms G.performance) in
   while !frame_count < frames do

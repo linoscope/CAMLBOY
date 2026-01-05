@@ -63,7 +63,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
 
   let lcd_stat_addr = Uint16.of_int 0xFF41
 
-  let create_with_rom ~print_serial_port ~(rom_bytes : Bigstringaf.t) =
+  let create_with_rom ?(use_blep = true) ~print_serial_port ~(rom_bytes : Bigstringaf.t) () =
     let open Uint16 in
     let cartridge = Cartridge.create ~rom_bytes
     in
@@ -136,7 +136,7 @@ module Make (Cartridge : Cartridge_intf.S) = struct
         ~tac_addr:(of_int 0xFF07)
         ~ic
     in
-    let apu = Apu.create () in
+    let apu = Apu.create ~use_blep () in
     let dma_transfer = Mmap_register.create
         ~addr:(of_int 0xFF46)
         ~type_:`RW

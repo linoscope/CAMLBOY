@@ -22,8 +22,15 @@ type t
       Default: 2 * samples_per_frame, which provides enough headroom
       for audio-driven emulation where the audio callback requests
       samples_per_frame samples and the emulator generates one video
-      frame worth of audio per callback. *)
-val create : ?sample_rate:int -> ?sec_per_frame:float -> ?buffer_size:int -> unit -> t
+      frame worth of audio per callback.
+    @param use_blep Enable band-limited synthesis (polyBLEP) for square
+      channels to prevent aliasing. Default: true. *)
+val create :
+  ?sample_rate:int ->
+  ?sec_per_frame:float ->
+  ?buffer_size:int ->
+  ?use_blep:bool ->
+  unit -> t
 
 (** Advance APU state by the given number of M-cycles.
     This updates the frame sequencer, all channels, and generates audio samples. *)

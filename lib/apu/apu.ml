@@ -3,6 +3,7 @@
 
 open Uints
 
+
 (* Audio timing constants.
    CPU runs at 4194304 Hz (T-cycles), 1 M-cycle = 4 T-cycles.
    We generate audio samples at a configurable rate (default 44100 Hz).
@@ -73,6 +74,7 @@ type t = {
   mutable sample_counter : int64;  (* Fixed-point counter for sample timing *)
   cycles_per_sample : int64;       (* Fixed-point M-cycles per sample *)
   sample_rate : int;
+  use_blep : bool;  (* Use band-limited synthesis for square channels *)
 }
 
 (* Calculate samples per frame for default buffer sizing.
@@ -80,14 +82,21 @@ type t = {
 let samples_per_frame ~sample_rate ~sec_per_frame =
   int_of_float (float sample_rate *. sec_per_frame)
 
-let create ?(sample_rate = default_sample_rate) ?(sec_per_frame = 1. /. 60.) ?buffer_size () =
+let create
+    ?(sample_rate = default_sample_rate)
+    ?(sec_per_frame = 1. /. 60.)
+    ?buffer_size
+    ?(use_blep = true)
+    () =
   let buffer_size =
     Option.value buffer_size
       ~default:(samples_per_frame ~sample_rate ~sec_per_frame)
   in
   (* Calculate fixed-point cycles per sample:
      cycles_per_sample = (mcycles_per_second * timing_precision) / sample_rate *)
-  let cycles_per_sample = Int64.(div (mul mcycles_per_second timing_precision) (of_int sample_rate)) in
+  let cycles_per_sample =
+    Int64.(div (mul mcycles_per_second timing_precision) (of_int sample_rate))
+  in
   {
     square1 = Square_channel.create ~has_sweep:true;
     square2 = Square_channel.create ~has_sweep:false;
@@ -103,6 +112,7 @@ let create ?(sample_rate = default_sample_rate) ?(sec_per_frame = 1. /. 60.) ?bu
     sample_counter = 0L;
     cycles_per_sample;
     sample_rate;
+    use_blep;
   }
 
 (* Process frame sequencer events *)
@@ -130,57 +140,13 @@ let process_frame_events t events =
         | None -> ()
   ) events
 
-(* Mix all channels and return stereo sample.
-   Each channel outputs 0-15, we sum and scale to 16-bit signed audio.
-
-   NR51 controls panning:
-   - Bits 0-3: Channels 1-4 to right output
-   - Bits 4-7: Channels 1-4 to left output
-
-   NR50 controls volume:
-   - Bits 0-2: Right volume (0-7)
-   - Bits 4-6: Left volume (0-7)
-
-   The final sample is scaled to fit int16 range (-32768 to 32767).
-   With 4 channels at 15 max volume each, max sum = 60 per side.
-   After volume (8x max), max = 480.
-   Scale factor to reach ~32767: 32767/480 ≈ 68.
-   We use 64 for efficient multiplication. *)
 let mix_sample t =
-  let s1 = Square_channel.get_sample t.square1 in
-  let s2 = Square_channel.get_sample t.square2 in
-  let s3 = Wave_channel.get_sample t.wave in
-  let s4 = Noise_channel.get_sample t.noise in
-
-  let nr51 = Uint8.to_int t.nr51 in
-  let nr50 = Uint8.to_int t.nr50 in
-
-  (* Sum channels for each output based on NR51 panning *)
-  let left =
-    (if nr51 land 0x10 <> 0 then s1 else 0) +
-    (if nr51 land 0x20 <> 0 then s2 else 0) +
-    (if nr51 land 0x40 <> 0 then s3 else 0) +
-    (if nr51 land 0x80 <> 0 then s4 else 0)
-  in
-  let right =
-    (if nr51 land 0x01 <> 0 then s1 else 0) +
-    (if nr51 land 0x02 <> 0 then s2 else 0) +
-    (if nr51 land 0x04 <> 0 then s3 else 0) +
-    (if nr51 land 0x08 <> 0 then s4 else 0)
-  in
-
-  (* Apply master volume from NR50 (each side 0-7, we use 1-8) *)
-  let vol_left = ((nr50 lsr 4) land 0x07) + 1 in
-  let vol_right = (nr50 land 0x07) + 1 in
-
-  (* Scale to 16-bit signed range *)
-  let scale = 64 in
-  let left_out = (left * vol_left * scale) - 32768 in
-  let right_out = (right * vol_right * scale) - 32768 in
-
-  (* Clamp to int16 range *)
-  let clamp v = max (-32768) (min 32767 v) in
-  (clamp left_out, clamp right_out)
+  let mix = if t.use_blep then Mixer.Blep.mix else Mixer.Naive.mix in
+  mix
+    ~square1:t.square1 ~square2:t.square2
+    ~wave:t.wave ~noise:t.noise
+    ~nr50:t.nr50 ~nr51:t.nr51
+    ~sample_rate:t.sample_rate
 
 (* Generate audio samples based on elapsed cycles *)
 let generate_samples t ~mcycles =

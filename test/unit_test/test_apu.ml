@@ -221,7 +221,7 @@ let%expect_test "samples can be popped" =
   Printf.printf "after pop: %d\n" (Apu.samples_available t);
   [%expect {|
     available: 4
-    got sample: left=-32768, right=-32768
+    got sample: left=0, right=0
     after pop: 3 |}]
 
 let%expect_test "pop_samples batch read" =

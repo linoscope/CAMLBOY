@@ -149,7 +149,7 @@ let run_rom_bytes ctx image_data rom_bytes =
   State.clear ();
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module C = Camlboy.Make(val cartridge) in
-  let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes in
+  let t =  C.create_with_rom ~print_serial_port:true ~rom_bytes () in
   set_up_keyboard (module C) t;
   set_up_joypad (module C) t;
   let cnt = ref 0 in

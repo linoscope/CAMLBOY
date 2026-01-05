@@ -157,6 +157,18 @@ let get_length t = t.length
 let get_envelope t = t.envelope
 let has_sweep t = t.has_sweep
 
+(* Hardware state accessors for Blep.HARDWARE signature *)
+let duty_position t = t.duty_position
+let duty_steps = 8
+let frequency_timer t = t.frequency_timer
+let timer_period t = timer_period t.frequency
+let duty_ratio t = match t.duty with
+  | Duty_12_5 -> 0.125 | Duty_25 -> 0.25
+  | Duty_50 -> 0.5     | Duty_75 -> 0.75
+let output t = (duty_table t.duty).(t.duty_position)
+let volume t = Envelope.get_volume t.envelope
+let is_active t = t.enabled && t.dac_enabled
+
 (* Reset the channel *)
 let reset t =
   t.duty <- Duty_50;
