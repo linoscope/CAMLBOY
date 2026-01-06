@@ -117,28 +117,13 @@ Here is a rough sketch of the various modules and their relationship. You can fi
 
 - [opam](https://opam.ocaml.org/doc/Install.html) 2.1+
 
-### Reproducible Build (Recommended)
-
-Use the lock file for exact dependency versions:
+### Build
 
 ```sh
 git clone https://github.com/linoscope/CAMLBOY.git
 cd CAMLBOY
 opam switch create . --locked
 eval $(opam env)
-dune build
-```
-
-### Development Build
-
-For the latest compatible dependency versions:
-
-```sh
-git clone https://github.com/linoscope/CAMLBOY.git
-cd CAMLBOY
-opam switch create . ocaml-base-compiler.5.2.1
-eval $(opam env)
-opam install . --deps-only --with-test
 dune build
 ```
 
