@@ -37,7 +37,7 @@ jobs:
         run: opam exec -- dune build --profile release
 
       - name: Run tests
-        run: opam exec -- dune runtest --force
+        run: opam exec -- dune runtest --force --verbose
 
       # Build and deploy release build that uses js-of-ocaml instead of wasm-of-ocaml
       - name: Build js_of_ocaml version
