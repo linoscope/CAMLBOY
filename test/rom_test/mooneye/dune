@@ -1,0 +1,5 @@
+(library
+ (name camlboy_mooneye_tests)
+ (libraries camlboy_lib)
+ (inline_tests (deps (source_tree ../../../resource/test_roms)))
+ (preprocess (pps ppx_jane)))
