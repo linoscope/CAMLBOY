@@ -111,82 +111,93 @@ Here is a rough sketch of the various modules and their relationship. You can fi
 - [ ] MBC5
 - [ ] Game Boy Color mode
 
+## Quick Start
+
+### Prerequisites
+
+- [opam](https://opam.ocaml.org/doc/Install.html) 2.1+
+
+### Reproducible Build (Recommended)
+
+Use the lock file for exact dependency versions:
+
+```sh
+git clone https://github.com/linoscope/CAMLBOY.git
+cd CAMLBOY
+opam switch create . --locked
+eval $(opam env)
+dune build
+```
+
+### Development Build
+
+For the latest compatible dependency versions:
+
+```sh
+git clone https://github.com/linoscope/CAMLBOY.git
+cd CAMLBOY
+opam switch create . ocaml-base-compiler.5.2.1
+eval $(opam env)
+opam install . --deps-only --with-test
+dune build
+```
+
 ## How to run
 
-### Prerequisite
-
-Install [opam](https://opam.ocaml.org/doc/Install.html), OCaml's package manager, if you haven't yet.
-
-### Basic setup
+### Run with SDL2 UI (native)
 
 ```sh
-# Clone repository
-git clone https://github.com/linoscope/CAMLBOY.git
-# cd into repository
-cd CAMLBOY
-# Create local switch for the repository
-opam switch create . ocaml-base-compiler.4.14.2
-eval $(opam env)
-# Install system packages required by opam packages (SDL, etc)
-opam pin add camlboy.dev . --no-action
-opam depext camlboy
-# Install opam dependencies
-opam install . --with-test
-```
-
-### How to run with UI
-
-#### Run with SDL2 UI
-
-```sh
-# Build
-$ dune build
+dune build
 # Usage: main.exe [--mode {default|withtrace|no-throttle}] <rom_path>
-# For example:
-$ dune exec bin/sdl2/main.exe -- resource/games/tobu.gb
+dune exec bin/sdl2/main.exe -- resource/games/tobu.gb
 ```
 
-#### Run with js_of_ocaml UI
+### Run with Web UI (js_of_ocaml/wasm)
 
 ```sh
-# Build
-$ dune build
-# Serve `_build/default/bin/web` using some server. For example, run the following with python:
-$ python -m http.server 8000 --directory _build/default/bin/web
-# Now open `localhost:8000` in the browser
-
+dune build
+# Serve the web directory
+python -m http.server 8000 --directory _build/default/bin/web
+# Open localhost:8000 in your browser
 ```
 
-### How to run benchmarks in headless mode
+## How to run benchmarks
 
-#### Benchmark for native build
+### Native benchmark
 
 ```sh
 # Usage: bench.exe [--frames <frames>] <rom_path>
-# For example:
-$ dune exec bin/sdl2/bench.exe -- resource/games/tobu.gb --frames 1500
-ROM path: resource/games/tobu.gb
-  Frames: 1500
-Duration: 1.453315
-     FPS: 1032.123098
+dune exec bin/sdl2/bench.exe -- resource/games/tobu.gb --frames 1500
 ```
 
-#### Benchmark for js_of_ocaml build
+### Web benchmark
 
-First, follow the steps in "How to run with UI - js_of_ocaml frontend" above. Now open `http://localhost:8000/bench.html?frames=<frames>&rom_path=<rom_path>`. For example, if you open [http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb](http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb) you should see something like this:
+After starting the web server (see above), open:
+`http://localhost:8000/bench.html?frames=1500&rom_path=./tobu.gb`
 
 ![web-bench-example](resource/screenshot/web-bench-example.png)
 
-### How to run tests
+## How to run tests
 
 ```sh
 # Run all tests:
-$ dune runtest
+dune runtest
 # Run unit tests only:
-$ dune runtest test/unit_test/
+dune runtest test/unit_test/
 # Run integration tests (tests that use test ROMs):
-$ dune runtest test/rom_test/
+dune runtest test/rom_test/
 ```
+
+## Updating the lock file
+
+After modifying dependencies in `dune-project`:
+
+```sh
+opam pin add camlboy.dev . --no-action
+opam lock camlboy
+```
+
+Commit the updated `camlboy.opam.locked` file.
 
 ## Resources
 

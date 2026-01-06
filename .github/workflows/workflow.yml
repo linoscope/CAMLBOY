@@ -10,42 +10,45 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          # - macos-latest
           - ubuntu-latest
-          # - windows-latest
+          - macos-latest
         ocaml-compiler:
-          - 4.14.x
-          - 5.x
+          - 5.2.x
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - run: |
-          sudo apt-get update
+      - name: Install system dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
-      - run: opam install . --deps-only --with-test
+      - name: Install dependencies (locked)
+        run: opam install . --locked --deps-only --with-test
 
-      - run: opam exec -- dune build --profile release
+      - name: Build
+        run: opam exec -- dune build --profile release
 
-      - run: opam exec -- dune runtest
+      - name: Run tests
+        run: opam exec -- dune runtest --force
 
       # Build and deploy release build that uses js-of-ocaml instead of wasm-of-ocaml
-      - run: |
+      - name: Build js_of_ocaml version
+        run: |
           cp bin/web/dune-for-js bin/web/dune
           opam exec -- dune build --profile release --build-dir _build-js
           cp -r _build-js/default/bin/web _build/default/bin/web/js
 
       - name: Deploy website
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: peaceiris/actions-gh-pages@v4
+        if: ${{ github.ref == 'refs/heads/main' && matrix.os == 'ubuntu-latest' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: _build/default/bin/web
