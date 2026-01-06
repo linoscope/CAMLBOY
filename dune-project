@@ -28,6 +28,6 @@
   (js_of_ocaml-lwt (>= 6.0.1))
   (ppx_deriving (>= 4.5))
   (tsdl (>= 0.9.8))
+  (bigstringaf (>= 0.8.0))
   (base (and (>= v0.16.0) :with-test))
-  (bigstringaf (and (>= 0.8.0) :with-test))
   (ppx_jane (and (>= v0.16.0) :with-test))))

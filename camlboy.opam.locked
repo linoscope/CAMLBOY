@@ -18,7 +18,7 @@ depends: [
   "base-threads" {= "base"}
   "base-unix" {= "base"}
   "base_quickcheck" {= "v0.17.0" & with-test}
-  "bigstringaf" {= "0.10.0" & with-test}
+  "bigstringaf" {= "0.10.0"}
   "bin_prot" {= "v0.17.0-1" & with-test}
   "binaryen-bin" {= "119"}
   "brr" {= "0.0.8"}
