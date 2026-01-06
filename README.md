@@ -122,7 +122,7 @@ Here is a rough sketch of the various modules and their relationship. You can fi
 ```sh
 git clone https://github.com/linoscope/CAMLBOY.git
 cd CAMLBOY
-opam switch create . --locked
+opam switch create . --locked --with-test
 eval $(opam env)
 dune build
 ```
