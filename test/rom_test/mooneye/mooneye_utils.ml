@@ -12,28 +12,25 @@ module Make (Cartridge : Cartridge_intf.S) = struct
       let run_result = Camlboy.run_instruction camlboy in
       let prev_instr = Camlboy.For_tests.prev_inst camlboy in
       match prev_instr, run_result with
-      | JR (None, i8), Frame_ended famebuffer ->
-        if Int8.to_int i8 <> -3 then
-          loop ()
-        else begin
-          Printf.printf "%s\n" @@ Camlboy.show camlboy;
-          famebuffer
-          |> Array.iteri (fun i row ->
-              if row |> Array.for_all (fun color -> color = `White) then
-                ()
-              else begin
-                let show_color = function
-                  | `Black -> '#'
-                  | `Dark_gray -> '@'
-                  | `Light_gray -> 'x'
-                  | `White -> '-'
-                in
-                Printf.printf "%03d:" i;
-                row |> Array.iter (fun color -> show_color color |> print_char);
-                print_newline ()
-              end
-            )
-        end
+      | JR (None, i8), Frame_ended famebuffer
+          when List.mem (Int8.to_int i8) [-2; -3] ->
+        Printf.printf "%s\n" @@ Camlboy.show camlboy;
+        famebuffer
+        |> Array.iteri (fun i row ->
+            if row |> Array.for_all (fun color -> color = `White) then
+              ()
+            else begin
+              let show_color = function
+                | `Black -> '#'
+                | `Dark_gray -> '@'
+                | `Light_gray -> 'x'
+                | `White -> '-'
+              in
+              Printf.printf "%03d:" i;
+              row |> Array.iter (fun color -> show_color color |> print_char);
+              print_newline ()
+            end
+          )
       | _, _ -> loop ()
     in
     loop ()

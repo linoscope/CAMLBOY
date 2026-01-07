@@ -8,4 +8,7 @@ let f ~rom_bytes =
   | MBC1
   | MBC1_RAM
   | MBC1_RAM_BATTERY        -> (module Mbc1 : Cartridge_intf.S)
-  | _                       -> assert false
+  | MBC2
+  | MBC2_BATTERY            -> (module Mbc2 : Cartridge_intf.S)
+  | other ->
+    failwith (Printf.sprintf "Unsupported cartridge type: %s" (Cartridge_type.show other))
