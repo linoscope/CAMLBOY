@@ -184,6 +184,9 @@ The following hardware quirks are implemented for accuracy:
   The first sample played is whatever was previously in the buffer; the new
   position 0 sample isn't read until the waveform advances.
 
+- **Noise channel clock shift 14-15**: Using clock shift 14 or 15 results in
+  the LFSR receiving no clocks, producing a static output.
+
 ## References
 
 - [Game Boy Sound Hardware (gbdev wiki)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)

@@ -68,9 +68,16 @@ let clock_lfsr t =
   if t.width_mode then
     t.lfsr <- (t.lfsr land (lnot 0x40)) lor (xor_result lsl 6)
 
-(* Run the channel for given M-cycles *)
+(* Run the channel for given M-cycles.
+
+   Obscure behavior: Using clock shift 14 or 15 results in the LFSR
+   receiving no clocks, producing a static output.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Noise_Channel *)
 let run t ~mcycles =
   if not t.enabled then
+    ()
+  (* Clock shift 14-15: LFSR receives no clocks *)
+  else if t.clock_shift >= 14 then
     ()
   else begin
     t.frequency_timer <- t.frequency_timer - mcycles;

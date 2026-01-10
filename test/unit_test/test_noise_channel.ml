@@ -109,6 +109,41 @@ let%expect_test "length counter disables channel" =
     before: true
     after: false |}]
 
+(* Obscure behavior: clock shift 14 or 15 results in no LFSR clocks.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Noise_Channel *)
+let%expect_test "clock shift 14-15 produces no LFSR clocks (obscure behavior)" =
+  let ch = Noise_channel.create () in
+  let env = Noise_channel.get_envelope ch in
+  Envelope.load_from_register env ~register_value:0xF0;  (* vol=15 *)
+  Noise_channel.update_dac ch;
+
+  (* With clock_shift=14, LFSR should not advance *)
+  Noise_channel.set_clock_shift ch 14;
+  Noise_channel.set_divisor_code ch 0;
+  Noise_channel.trigger ch;
+
+  let sample_before = Noise_channel.get_sample ch in
+  (* Run for a long time - with shift=0 this would cause many LFSR clocks *)
+  Noise_channel.run ch ~mcycles:10000;
+  let sample_after = Noise_channel.get_sample ch in
+
+  Printf.printf "shift 14 - before: %d, after: %d, same: %b\n"
+    sample_before sample_after (sample_before = sample_after);
+
+  (* Also test shift=15 *)
+  Noise_channel.set_clock_shift ch 15;
+  Noise_channel.trigger ch;
+  let sample_before = Noise_channel.get_sample ch in
+  Noise_channel.run ch ~mcycles:10000;
+  let sample_after = Noise_channel.get_sample ch in
+
+  Printf.printf "shift 15 - before: %d, after: %d, same: %b\n"
+    sample_before sample_after (sample_before = sample_after);
+
+  [%expect {|
+    shift 14 - before: 0, after: 0, same: true
+    shift 15 - before: 0, after: 0, same: true |}]
+
 let%expect_test "reset clears all state" =
   let ch = Noise_channel.create () in
   let env = Noise_channel.get_envelope ch in
