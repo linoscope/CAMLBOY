@@ -137,6 +137,27 @@ let%expect_test "reset clears all state" =
     (show_dir (Envelope.get_direction env));
   [%expect {| volume: 0, period: 0, direction: Down |}]
 
+(* Obscure behavior: period 0 is treated as 8 for timer reload.
+   When trigger is called with period=0, the internal timer is set to 8.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Volume_Envelope *)
+let%expect_test "period 0 treated as 8 for timer reload (obscure behavior)" =
+  let env = Envelope.create () in
+  Envelope.set_volume env 8;
+  Envelope.set_period env 0;
+  Envelope.set_direction env Envelope.Down;
+  Envelope.trigger env;  (* Timer set to 8 because period=0 is treated as 8 *)
+  (* Period 0 means envelope clocking is disabled, so change to period=1 *)
+  Envelope.set_period env 1;
+  (* Now clock 7 times - timer decrements from 8 to 1, no volume change yet *)
+  for _ = 1 to 7 do Envelope.clock env done;
+  Printf.printf "volume after 7 clocks: %d\n" (Envelope.get_volume env);
+  (* 8th clock: timer 1->0, triggers volume change *)
+  Envelope.clock env;
+  Printf.printf "volume after 8th clock: %d\n" (Envelope.get_volume env);
+  [%expect {|
+    volume after 7 clocks: 8
+    volume after 8th clock: 7 |}]
+
 let%expect_test "full ramp down from 15" =
   let env = Envelope.create () in
   Envelope.set_volume env 15;

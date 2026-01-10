@@ -191,6 +191,9 @@ The following hardware quirks are implemented for accuracy:
   after at least one sweep calculation used negate mode (since the last trigger)
   immediately disables the channel.
 
+- **Period 0 treated as 8**: Both envelope and sweep timers treat a period of 0
+  as 8 for timer reload purposes. This prevents infinite-speed operation.
+
 ## References
 
 - [Game Boy Sound Hardware (gbdev wiki)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)

@@ -151,6 +151,33 @@ let%expect_test "reset clears all state" =
     (Sweep.get_period sw);
   [%expect {| enabled: false, shadow: 0, period: 0 |}]
 
+(* Obscure behavior: period 0 is treated as 8 for timer reload.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Frequency_Sweep *)
+let%expect_test "period 0 treated as 8 for timer reload (obscure behavior)" =
+  let sw = Sweep.create () in
+  (* period=0, shift=1 means sweep is enabled but period acts as 8 *)
+  Sweep.load_from_register sw ~register_value:0x01;  (* period=0, negate=false, shift=1 *)
+  let _ = Sweep.trigger sw ~frequency:1000 in
+  (* Clock 7 times - no frequency change because timer counts down from 8 *)
+  for i = 1 to 7 do
+    let (freq, _) = Sweep.clock sw in
+    Printf.printf "clock %d: %s\n" i
+      (match freq with Some f -> string_of_int f | None -> "none")
+  done;
+  (* 8th clock should produce frequency change *)
+  let (freq8, _) = Sweep.clock sw in
+  Printf.printf "clock 8: %s\n"
+    (match freq8 with Some f -> string_of_int f | None -> "none");
+  [%expect {|
+    clock 1: none
+    clock 2: none
+    clock 3: none
+    clock 4: none
+    clock 5: none
+    clock 6: none
+    clock 7: none
+    clock 8: none |}]
+
 (* Obscure behavior: clearing negate bit after using negate mode disables channel.
    Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Frequency_Sweep *)
 let%expect_test "negate_to_positive_switch detection (obscure behavior)" =
