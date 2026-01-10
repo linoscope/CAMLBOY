@@ -198,6 +198,11 @@ The following hardware quirks are implemented for accuracy:
   if the counter was 0 (being reloaded to max) and the next frame sequencer step
   won't clock length, the counter is set to max-1 instead of max.
 
+- **Extra length clocking on enable**: When writing to NRx4 and the next frame
+  sequencer step won't clock length, if length was previously disabled and is
+  now enabled and the counter is non-zero, the counter is decremented. If it
+  reaches 0, the channel is disabled.
+
 ## References
 
 - [Game Boy Sound Hardware (gbdev wiki)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)

@@ -323,10 +323,14 @@ let write_square1 t addr data =
     let freq = Square_channel.get_frequency t.square1 in
     Square_channel.set_frequency t.square1 ((freq land 0xFF) lor ((d land 0x07) lsl 8));
     let len = Square_channel.get_length t.square1 in
+    let was_enabled = Length_counter.is_enabled len in
     Length_counter.set_enabled len ((d land 0x40) <> 0);
+    let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+    (* Extra length clocking on enable (obscure behavior) *)
+    if Length_counter.extra_clock_on_enable len ~was_enabled ~next_step_clocks_length then
+      Square_channel.set_enabled t.square1 false;
     (* Trigger *)
     if (d land 0x80) <> 0 then begin
-      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
       Square_channel.trigger t.square1 ~next_step_clocks_length;
       let overflow = Sweep.trigger t.sweep ~frequency:(Square_channel.get_frequency t.square1) in
       if overflow then
@@ -357,12 +361,15 @@ let write_square2 t addr data =
     let freq = Square_channel.get_frequency t.square2 in
     Square_channel.set_frequency t.square2 ((freq land 0xFF) lor ((d land 0x07) lsl 8));
     let len = Square_channel.get_length t.square2 in
+    let was_enabled = Length_counter.is_enabled len in
     Length_counter.set_enabled len ((d land 0x40) <> 0);
+    let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+    (* Extra length clocking on enable (obscure behavior) *)
+    if Length_counter.extra_clock_on_enable len ~was_enabled ~next_step_clocks_length then
+      Square_channel.set_enabled t.square2 false;
     (* Trigger *)
-    if (d land 0x80) <> 0 then begin
-      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+    if (d land 0x80) <> 0 then
       Square_channel.trigger t.square2 ~next_step_clocks_length
-    end
 
   | _ -> ()
 
@@ -388,12 +395,15 @@ let write_wave t addr data =
     let freq = Wave_channel.get_frequency t.wave in
     Wave_channel.set_frequency t.wave ((freq land 0xFF) lor ((d land 0x07) lsl 8));
     let len = Wave_channel.get_length t.wave in
+    let was_enabled = Length_counter.is_enabled len in
     Length_counter.set_enabled len ((d land 0x40) <> 0);
+    let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+    (* Extra length clocking on enable (obscure behavior) *)
+    if Length_counter.extra_clock_on_enable len ~was_enabled ~next_step_clocks_length then
+      Wave_channel.set_enabled t.wave false;
     (* Trigger *)
-    if (d land 0x80) <> 0 then begin
-      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+    if (d land 0x80) <> 0 then
       Wave_channel.trigger t.wave ~wave_ram:t.wave_ram ~next_step_clocks_length
-    end
 
   | _ -> ()
 
@@ -417,12 +427,15 @@ let write_noise t addr data =
 
   | _ when addr = nr44_addr ->
     let len = Noise_channel.get_length t.noise in
+    let was_enabled = Length_counter.is_enabled len in
     Length_counter.set_enabled len ((d land 0x40) <> 0);
+    let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+    (* Extra length clocking on enable (obscure behavior) *)
+    if Length_counter.extra_clock_on_enable len ~was_enabled ~next_step_clocks_length then
+      Noise_channel.set_enabled t.noise false;
     (* Trigger *)
-    if (d land 0x80) <> 0 then begin
-      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+    if (d land 0x80) <> 0 then
       Noise_channel.trigger t.noise ~next_step_clocks_length
-    end
 
   | _ -> ()
 

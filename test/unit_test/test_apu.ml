@@ -178,14 +178,19 @@ let%expect_test "length counter disables channel" =
   power_on t;
   (* Set envelope to enable DAC *)
   Apu.write_byte t ~addr:nr12_addr ~data:(Uint8.of_int 0xF0);
-  (* Set length to 1 (register value 63 means length = 64 - 63 = 1) *)
-  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0x3F);
+  (* Set length to 2 (register value 62 means length = 64 - 62 = 2) *)
+  (* We use 2 instead of 1 because of obscure behavior: extra length clocking
+     on enable when next step doesn't clock length. With length=1, extra clock
+     would set it to 0, causing trigger to reload it to max. *)
+  Apu.write_byte t ~addr:nr11_addr ~data:(Uint8.of_int 0x3E);
   (* Trigger with length enable *)
   Apu.write_byte t ~addr:nr14_addr ~data:(Uint8.of_int 0xC0);
   print t nr52_addr;
-  (* Run enough cycles for length to expire (1 tick at 256Hz = 4096 mcycles) *)
-  (* Frame sequencer clocks length at steps 0,2,4,6, so we need to hit one *)
-  Apu.run t ~mcycles:2048;  (* One frame sequencer step *)
+  (* Due to extra clocking quirk, length is now 1 (was 2, decremented on enable) *)
+  (* Run enough cycles for length to expire - need to hit a length-clocking step *)
+  (* Frame sequencer starts at 0, after 2048 mcycles goes to step 1 (no length clock) *)
+  (* After another 2048, step 2 (length clocks): 1 -> 0, channel disabled *)
+  Apu.run t ~mcycles:4096;  (* Two frame sequencer steps to hit step 2 *)
   print t nr52_addr;
   [%expect {|
     $F1

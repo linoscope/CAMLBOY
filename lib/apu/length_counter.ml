@@ -65,6 +65,19 @@ let trigger t ~next_step_clocks_length =
       t.counter <- t.counter - 1
   end
 
+(* Extra clocking on NRx4 write.
+   Obscure behavior: When writing to NRx4 and the next frame sequencer step
+   won't clock length, if length was previously disabled and is now being
+   enabled and counter is non-zero, decrement the counter.
+   Returns true if the channel should be disabled (counter reached 0).
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Length_Counter *)
+let extra_clock_on_enable t ~was_enabled ~next_step_clocks_length =
+  if not was_enabled && t.enabled && not next_step_clocks_length && t.counter > 0 then begin
+    t.counter <- t.counter - 1;
+    t.counter = 0  (* Return true if we hit zero *)
+  end else
+    false
+
 (* Reset the length counter *)
 let reset t =
   t.counter <- 0;

@@ -119,6 +119,45 @@ let%expect_test "trigger quirk for wave channel (max 256 -> 255)" =
   Printf.printf "counter: %d (expected: 255)\n" (Length_counter.get_counter lc);
   [%expect {| counter: 255 (expected: 255) |}]
 
+(* Obscure behavior: extra clocking when enabling length on non-length step.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Length_Counter *)
+let%expect_test "extra clock on enable when next step doesn't clock length (obscure behavior)" =
+  let lc = Length_counter.create ~max_length:64 in
+  Length_counter.set_length lc 5;
+  (* Enable length when next step doesn't clock *)
+  Length_counter.set_enabled lc true;
+  let disabled = Length_counter.extra_clock_on_enable lc
+    ~was_enabled:false ~next_step_clocks_length:false in
+  Printf.printf "counter: %d, disabled: %b\n" (Length_counter.get_counter lc) disabled;
+  [%expect {| counter: 4, disabled: false |}]
+
+let%expect_test "extra clock disables channel when counter reaches 0" =
+  let lc = Length_counter.create ~max_length:64 in
+  Length_counter.set_length lc 1;
+  Length_counter.set_enabled lc true;
+  let disabled = Length_counter.extra_clock_on_enable lc
+    ~was_enabled:false ~next_step_clocks_length:false in
+  Printf.printf "counter: %d, disabled: %b\n" (Length_counter.get_counter lc) disabled;
+  [%expect {| counter: 0, disabled: true |}]
+
+let%expect_test "no extra clock when was already enabled" =
+  let lc = Length_counter.create ~max_length:64 in
+  Length_counter.set_length lc 5;
+  Length_counter.set_enabled lc true;
+  let disabled = Length_counter.extra_clock_on_enable lc
+    ~was_enabled:true ~next_step_clocks_length:false in
+  Printf.printf "counter: %d, disabled: %b\n" (Length_counter.get_counter lc) disabled;
+  [%expect {| counter: 5, disabled: false |}]
+
+let%expect_test "no extra clock when next step clocks length" =
+  let lc = Length_counter.create ~max_length:64 in
+  Length_counter.set_length lc 5;
+  Length_counter.set_enabled lc true;
+  let disabled = Length_counter.extra_clock_on_enable lc
+    ~was_enabled:false ~next_step_clocks_length:true in
+  Printf.printf "counter: %d, disabled: %b\n" (Length_counter.get_counter lc) disabled;
+  [%expect {| counter: 5, disabled: false |}]
+
 let%expect_test "full countdown to zero" =
   let lc = Length_counter.create ~max_length:64 in
   Length_counter.set_length lc 3;
