@@ -176,6 +176,14 @@ The noise channel uses a Linear Feedback Shift Register:
 - Optional 7-bit mode for more "metallic" sounds
 - XOR of bits 0 and 1 fed back to bit 14 (and bit 6 in 7-bit mode)
 
+### Obscure Behaviors
+
+The following hardware quirks are implemented for accuracy:
+
+- **Wave channel first sample**: On trigger, the sample buffer is NOT updated.
+  The first sample played is whatever was previously in the buffer; the new
+  position 0 sample isn't read until the waveform advances.
+
 ## References
 
 - [Game Boy Sound Hardware (gbdev wiki)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)

@@ -55,11 +55,13 @@ let%expect_test "disabling DAC disables channel" =
 
 let%expect_test "volume codes" =
   let ch = Wave_channel.create () in
-  let wave_ram = create_wave_ram () in
-  (* Create RAM with 0xF0 in first byte (sample 0 = 0xF, sample 1 = 0x0) *)
-  wave_ram.(0) <- Uint8.of_int 0xF0;
+  (* Fill all wave RAM with 0xFF so every sample is 0xF *)
+  let wave_ram = Array.make 16 (Uint8.of_int 0xFF) in
   Wave_channel.set_dac_enabled ch true;
+  Wave_channel.set_frequency ch 2046;  (* period = 1 M-cycle *)
   Wave_channel.trigger ch ~wave_ram;
+  (* Advance once to load sample 0xF into buffer *)
+  Wave_channel.run ch ~wave_ram ~mcycles:1;
 
   (* Volume code 0 = mute (shift 4) *)
   Wave_channel.set_volume_code ch 0;
@@ -130,6 +132,41 @@ let%expect_test "length counter disables channel" =
   [%expect {|
     before: true
     after: false |}]
+
+(* Obscure behavior: triggering keeps the previous sample_buffer value.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Trigger_Event *)
+let%expect_test "trigger keeps previous sample_buffer (obscure behavior)" =
+  let ch = Wave_channel.create () in
+  let wave_ram = Array.make 16 Uint8.zero in
+  (* Fill wave RAM: byte 0 = 0x12 (samples 1,2), byte 1 = 0x34 (samples 3,4), etc. *)
+  wave_ram.(0) <- Uint8.of_int 0x12;
+  wave_ram.(1) <- Uint8.of_int 0x34;
+
+  Wave_channel.set_dac_enabled ch true;
+  Wave_channel.set_volume_code ch 1;  (* 100% volume *)
+  Wave_channel.set_frequency ch 2044;  (* period = 2 M-cycles *)
+  Wave_channel.trigger ch ~wave_ram;
+
+  (* Initially sample_buffer is 0 (from create), trigger should NOT update it *)
+  Printf.printf "after trigger: %d\n" (Wave_channel.get_sample ch);
+
+  (* Advance to load sample at position 1 (low nibble of byte 0 = 2) *)
+  Wave_channel.run ch ~wave_ram ~mcycles:2;
+  Printf.printf "after first advance: %d\n" (Wave_channel.get_sample ch);
+
+  (* Now re-trigger - sample_buffer should keep the value 2 *)
+  Wave_channel.trigger ch ~wave_ram;
+  Printf.printf "after re-trigger: %d\n" (Wave_channel.get_sample ch);
+
+  (* Advance again - now should read position 1 again = 2 *)
+  Wave_channel.run ch ~wave_ram ~mcycles:2;
+  Printf.printf "after advance post-retrigger: %d\n" (Wave_channel.get_sample ch);
+
+  [%expect {|
+    after trigger: 0
+    after first advance: 2
+    after re-trigger: 2
+    after advance post-retrigger: 2 |}]
 
 let%expect_test "reset clears all state" =
   let ch = Wave_channel.create () in

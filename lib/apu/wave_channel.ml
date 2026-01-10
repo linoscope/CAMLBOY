@@ -97,13 +97,18 @@ let clock_length t =
   if Length_counter.clock t.length then
     t.enabled <- false
 
-(* Trigger the channel (NR34 bit 7 written) *)
-let trigger t ~wave_ram =
+(* Trigger the channel (NR34 bit 7 written)
+
+   Obscure behavior: When triggering, the sample_buffer is NOT updated.
+   The first sample played is whatever was previously in the buffer.
+   The new position 0 sample isn't read until the waveform advances.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Trigger_Event *)
+let trigger t ~wave_ram:_ =
   t.enabled <- t.dac_enabled;
   Length_counter.trigger t.length;
   t.frequency_timer <- timer_period t.frequency;
-  t.position <- 0;
-  t.sample_buffer <- read_sample_from_ram wave_ram t.position
+  t.position <- 0
+  (* Note: sample_buffer intentionally NOT updated - keeps previous value *)
 
 (* Check if channel is enabled *)
 let is_enabled t = t.enabled
