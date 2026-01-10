@@ -78,3 +78,13 @@ let get_step t = t.step
 
 (* Get current counter for testing *)
 let get_counter t = t.counter
+
+(* Check if the NEXT step will clock the length counter.
+   Length clocks on steps 0, 2, 4, 6 (even steps).
+   So next step clocks length if current step is odd (1, 3, 5, 7).
+
+   Obscure behavior: Extra length clocking occurs when writing to NRx4
+   when the next step DOESN'T clock length (i.e., when current step is even).
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Length_Counter *)
+let next_step_clocks_length t =
+  t.step land 1 = 1  (* Current step is odd means next step is even *)

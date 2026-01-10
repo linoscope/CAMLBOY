@@ -326,7 +326,8 @@ let write_square1 t addr data =
     Length_counter.set_enabled len ((d land 0x40) <> 0);
     (* Trigger *)
     if (d land 0x80) <> 0 then begin
-      Square_channel.trigger t.square1;
+      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+      Square_channel.trigger t.square1 ~next_step_clocks_length;
       let overflow = Sweep.trigger t.sweep ~frequency:(Square_channel.get_frequency t.square1) in
       if overflow then
         Square_channel.set_enabled t.square1 false
@@ -358,8 +359,10 @@ let write_square2 t addr data =
     let len = Square_channel.get_length t.square2 in
     Length_counter.set_enabled len ((d land 0x40) <> 0);
     (* Trigger *)
-    if (d land 0x80) <> 0 then
-      Square_channel.trigger t.square2
+    if (d land 0x80) <> 0 then begin
+      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+      Square_channel.trigger t.square2 ~next_step_clocks_length
+    end
 
   | _ -> ()
 
@@ -387,8 +390,10 @@ let write_wave t addr data =
     let len = Wave_channel.get_length t.wave in
     Length_counter.set_enabled len ((d land 0x40) <> 0);
     (* Trigger *)
-    if (d land 0x80) <> 0 then
-      Wave_channel.trigger t.wave ~wave_ram:t.wave_ram
+    if (d land 0x80) <> 0 then begin
+      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+      Wave_channel.trigger t.wave ~wave_ram:t.wave_ram ~next_step_clocks_length
+    end
 
   | _ -> ()
 
@@ -414,8 +419,10 @@ let write_noise t addr data =
     let len = Noise_channel.get_length t.noise in
     Length_counter.set_enabled len ((d land 0x40) <> 0);
     (* Trigger *)
-    if (d land 0x80) <> 0 then
-      Noise_channel.trigger t.noise
+    if (d land 0x80) <> 0 then begin
+      let next_step_clocks_length = Frame_sequencer.next_step_clocks_length t.frame_seq in
+      Noise_channel.trigger t.noise ~next_step_clocks_length
+    end
 
   | _ -> ()
 

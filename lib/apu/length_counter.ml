@@ -52,12 +52,18 @@ let get_max_length t = t.max_length
 (* Called when channel is triggered.
    If counter is 0, it's reloaded with max_length.
 
-   Note: There's a subtle edge case on real hardware where if length is enabled
-   and we're on a frame sequencer step that clocks length, an extra clock happens.
-   This will be handled by the channel implementation when needed. *)
-let trigger t =
-  if t.counter = 0 then
-    t.counter <- t.max_length
+   Obscure behavior: If triggered when the frame sequencer's next step doesn't
+   clock length, AND length is now enabled, AND length was being set to max
+   because it was 0, then set it to max-1 instead.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Trigger_Event *)
+let trigger t ~next_step_clocks_length =
+  if t.counter = 0 then begin
+    t.counter <- t.max_length;
+    (* Obscure: if next step doesn't clock length and length is enabled,
+       use max-1 instead of max *)
+    if t.enabled && not next_step_clocks_length then
+      t.counter <- t.counter - 1
+  end
 
 (* Reset the length counter *)
 let reset t =

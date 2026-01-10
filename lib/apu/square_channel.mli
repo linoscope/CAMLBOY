@@ -18,7 +18,7 @@ type t
 
 val create : has_sweep:bool -> t
 val reset : t -> unit
-val trigger : t -> unit
+val trigger : t -> next_step_clocks_length:bool -> unit
 
 (** {2 Emulation} *)
 

@@ -13,14 +13,14 @@ let%expect_test "trigger enables channel when DAC on" =
   (* Set envelope to enable DAC: volume > 0 or direction = up *)
   Envelope.load_from_register env ~register_value:0xF0;  (* vol=15, dir=down *)
   Noise_channel.update_dac ch;
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
   Printf.printf "enabled: %b\n" (Noise_channel.is_enabled ch);
   [%expect {| enabled: true |}]
 
 let%expect_test "trigger does not enable channel when DAC off" =
   let ch = Noise_channel.create () in
   (* DAC is off by default (volume=0, direction=down) *)
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
   Printf.printf "enabled: %b\n" (Noise_channel.is_enabled ch);
   [%expect {| enabled: false |}]
 
@@ -50,7 +50,7 @@ let%expect_test "output depends on LFSR" =
   let env = Noise_channel.get_envelope ch in
   Envelope.load_from_register env ~register_value:0xF0;  (* vol=15 *)
   Noise_channel.update_dac ch;
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
 
   (* LFSR starts at 0x7FFF, bit 0 = 1, inverted = 0 *)
   Printf.printf "sample: %d\n" (Noise_channel.get_sample ch);
@@ -73,7 +73,7 @@ let%expect_test "envelope affects volume" =
   (* Start with volume 15, direction down, period 1 *)
   Envelope.load_from_register env ~register_value:0xF1;
   Noise_channel.update_dac ch;
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
 
   (* Get initial sample (0 because LFSR bit 0 starts as 1, inverted = 0) *)
   Printf.printf "sample at vol 15: %d\n" (Noise_channel.get_sample ch);
@@ -99,7 +99,7 @@ let%expect_test "length counter disables channel" =
   Noise_channel.update_dac ch;
   Length_counter.load_from_register len ~register_value:63;  (* length = 1 *)
   Length_counter.set_enabled len true;
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
 
   Printf.printf "before: %b\n" (Noise_channel.is_enabled ch);
   Noise_channel.clock_length ch;  (* Should expire *)
@@ -120,7 +120,7 @@ let%expect_test "clock shift 14-15 produces no LFSR clocks (obscure behavior)" =
   (* With clock_shift=14, LFSR should not advance *)
   Noise_channel.set_clock_shift ch 14;
   Noise_channel.set_divisor_code ch 0;
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
 
   let sample_before = Noise_channel.get_sample ch in
   (* Run for a long time - with shift=0 this would cause many LFSR clocks *)
@@ -132,7 +132,7 @@ let%expect_test "clock shift 14-15 produces no LFSR clocks (obscure behavior)" =
 
   (* Also test shift=15 *)
   Noise_channel.set_clock_shift ch 15;
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
   let sample_before = Noise_channel.get_sample ch in
   Noise_channel.run ch ~mcycles:10000;
   let sample_after = Noise_channel.get_sample ch in
@@ -153,7 +153,7 @@ let%expect_test "reset clears all state" =
   Noise_channel.set_clock_shift ch 5;
   Noise_channel.set_width_mode ch true;
   Noise_channel.set_divisor_code ch 3;
-  Noise_channel.trigger ch;
+  Noise_channel.trigger ch ~next_step_clocks_length:true;
 
   Noise_channel.reset ch;
 

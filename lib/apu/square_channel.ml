@@ -121,9 +121,9 @@ let clock_envelope t =
   Envelope.clock t.envelope
 
 (* Trigger the channel (NRx4 bit 7 written) *)
-let trigger t =
+let trigger t ~next_step_clocks_length =
   t.enabled <- t.dac_enabled;
-  Length_counter.trigger t.length;
+  Length_counter.trigger t.length ~next_step_clocks_length;
   Envelope.trigger t.envelope;
   t.frequency_timer <- timer_period t.frequency;
   t.duty_position <- 0

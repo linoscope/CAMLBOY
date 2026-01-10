@@ -70,7 +70,7 @@ let%expect_test "BLEP functor with Square_channel" =
   Square_channel.update_dac ch;
   Square_channel.set_frequency ch 1024;
   Square_channel.set_duty ch Square_channel.Duty_50;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   let phase = BlepSquare.get_phase ch in
   let dt = BlepSquare.get_dt ch ~sample_rate:44100 in
   let sample = BlepSquare.get_sample ch ~sample_rate:44100 in
@@ -106,7 +106,7 @@ let%expect_test "BLEP phase advances as channel runs" =
   Envelope.set_volume env 15;
   Square_channel.update_dac ch;
   Square_channel.set_frequency ch 2044;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   let p1 = BlepSquare.get_phase ch in
   Square_channel.run ch ~mcycles:4;
   let p2 = BlepSquare.get_phase ch in

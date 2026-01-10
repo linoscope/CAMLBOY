@@ -40,14 +40,14 @@ let%expect_test "trigger enables channel when DAC enabled" =
   (* Set up envelope with volume > 0 to enable DAC *)
   Envelope.set_volume env 8;
   Square_channel.update_dac ch;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   Printf.printf "enabled: %b\n" (Square_channel.is_enabled ch);
   [%expect {| enabled: true |}]
 
 let%expect_test "trigger does not enable when DAC disabled" =
   let ch = Square_channel.create ~has_sweep:false in
   (* DAC is disabled when volume=0 and direction=down *)
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   Printf.printf "enabled: %b\n" (Square_channel.is_enabled ch);
   [%expect {| enabled: false |}]
 
@@ -56,7 +56,7 @@ let%expect_test "get_sample uses envelope volume" =
   let env = Square_channel.get_envelope ch in
   Envelope.set_volume env 10;
   Square_channel.update_dac ch;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   (* Duty 50% starts with waveform[0] = 1, so sample = 1 * volume *)
   Square_channel.set_duty ch Square_channel.Duty_50;
   Printf.printf "sample: %d\n" (Square_channel.get_sample ch);
@@ -69,7 +69,7 @@ let%expect_test "run advances duty position" =
   Square_channel.update_dac ch;
   (* Frequency 2047 gives timer period = 2048 - 2047 = 1 mcycle *)
   Square_channel.set_frequency ch 2047;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   Square_channel.set_duty ch Square_channel.Duty_25;
   (* Duty_25 = [1,0,0,0,0,0,0,1] *)
   Printf.printf "pos 0: sample=%d\n" (Square_channel.get_sample ch);
@@ -89,7 +89,7 @@ let%expect_test "timer period depends on frequency" =
   Square_channel.update_dac ch;
   (* Frequency 2044 gives timer period = 2048 - 2044 = 4 mcycles *)
   Square_channel.set_frequency ch 2044;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   (* After 3 mcycles, position should still be 0 *)
   Square_channel.run ch ~mcycles:3;
   Printf.printf "after 3: sample=%d\n" (Square_channel.get_sample ch);
@@ -108,7 +108,7 @@ let%expect_test "clock_length can disable channel" =
   let len = Square_channel.get_length ch in
   Length_counter.set_length len 1;
   Length_counter.set_enabled len true;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   Printf.printf "before clock: enabled=%b\n" (Square_channel.is_enabled ch);
   Square_channel.clock_length ch;
   Printf.printf "after clock: enabled=%b\n" (Square_channel.is_enabled ch);
@@ -123,7 +123,7 @@ let%expect_test "clock_envelope changes volume" =
   Envelope.set_period env 1;
   Envelope.set_direction env Envelope.Down;
   Square_channel.update_dac ch;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   let sample1 = Square_channel.get_sample ch in
   Square_channel.clock_envelope ch;
   let sample2 = Square_channel.get_sample ch in
@@ -143,7 +143,7 @@ let%expect_test "reset clears all state" =
   Square_channel.update_dac ch;
   Square_channel.set_frequency ch 1000;
   Square_channel.set_duty ch Square_channel.Duty_75;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   Square_channel.reset ch;
   Printf.printf "enabled: %b, freq: %d, duty: %s\n"
     (Square_channel.is_enabled ch)
@@ -158,7 +158,7 @@ let%expect_test "full duty cycle for 12.5%" =
   Square_channel.update_dac ch;
   Square_channel.set_frequency ch 2047;
   Square_channel.set_duty ch Square_channel.Duty_12_5;
-  Square_channel.trigger ch;
+  Square_channel.trigger ch ~next_step_clocks_length:true;
   let samples = Array.init 8 (fun _ ->
       let s = Square_channel.get_sample ch in
       Square_channel.run ch ~mcycles:1;

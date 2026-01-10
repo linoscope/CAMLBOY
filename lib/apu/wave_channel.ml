@@ -103,9 +103,9 @@ let clock_length t =
    The first sample played is whatever was previously in the buffer.
    The new position 0 sample isn't read until the waveform advances.
    Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Trigger_Event *)
-let trigger t ~wave_ram:_ =
+let trigger t ~wave_ram:_ ~next_step_clocks_length =
   t.enabled <- t.dac_enabled;
-  Length_counter.trigger t.length;
+  Length_counter.trigger t.length ~next_step_clocks_length;
   t.frequency_timer <- timer_period t.frequency;
   t.position <- 0
   (* Note: sample_buffer intentionally NOT updated - keeps previous value *)

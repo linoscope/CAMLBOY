@@ -194,6 +194,10 @@ The following hardware quirks are implemented for accuracy:
 - **Period 0 treated as 8**: Both envelope and sweep timers treat a period of 0
   as 8 for timer reload purposes. This prevents infinite-speed operation.
 
+- **Trigger length reload quirk**: When triggering a channel with length enabled,
+  if the counter was 0 (being reloaded to max) and the next frame sequencer step
+  won't clock length, the counter is set to max-1 instead of max.
+
 ## References
 
 - [Game Boy Sound Hardware (gbdev wiki)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
