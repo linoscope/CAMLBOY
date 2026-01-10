@@ -151,7 +151,9 @@ let%expect_test "reset clears all state" =
     (Sweep.get_period sw);
   [%expect {| enabled: false, shadow: 0, period: 0 |}]
 
-let%expect_test "negate_to_positive_switch detection" =
+(* Obscure behavior: clearing negate bit after using negate mode disables channel.
+   Reference: https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware#Frequency_Sweep *)
+let%expect_test "negate_to_positive_switch detection (obscure behavior)" =
   let sw = Sweep.create () in
   Sweep.load_from_register sw ~register_value:0x19;  (* negate=true *)
   let _ = Sweep.trigger sw ~frequency:1000 in

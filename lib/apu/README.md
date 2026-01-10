@@ -187,6 +187,10 @@ The following hardware quirks are implemented for accuracy:
 - **Noise channel clock shift 14-15**: Using clock shift 14 or 15 results in
   the LFSR receiving no clocks, producing a static output.
 
+- **Sweep negate-to-positive switch**: Clearing the sweep negate bit in NR10
+  after at least one sweep calculation used negate mode (since the last trigger)
+  immediately disables the channel.
+
 ## References
 
 - [Game Boy Sound Hardware (gbdev wiki)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
