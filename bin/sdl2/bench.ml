@@ -3,7 +3,7 @@ open Camlboy_lib
 let run ~rom_bytes ~frames =
   let cartridge = Detect_cartridge.f ~rom_bytes in
   let module Camlboy = Camlboy.Make (val cartridge) in
-  let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false in
+  let camlboy = Camlboy.create_with_rom ~rom_bytes ~print_serial_port:false () in
   let frame_count = ref 0 in
   let start_time = ref (Unix.gettimeofday ()) in
   while !frame_count < frames do

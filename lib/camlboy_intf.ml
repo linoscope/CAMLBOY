@@ -5,13 +5,21 @@ module type S = sig
 
   val show : t -> string
 
-  val create_with_rom : print_serial_port:bool -> rom_bytes:Bigstringaf.t -> t
+  val create_with_rom :
+    ?use_blep:bool ->
+    print_serial_port:bool ->
+    rom_bytes:Bigstringaf.t ->
+    unit ->
+    t
 
   val run_instruction : t -> Gpu.run_result
 
   val press : t -> Joypad.key -> unit
 
   val release : t -> Joypad.key -> unit
+
+  (** Get the APU for audio output access *)
+  val get_apu : t -> Apu.t
 
   module For_tests : sig
     val prev_inst : t -> Instruction.t
