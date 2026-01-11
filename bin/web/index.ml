@@ -178,6 +178,13 @@ let set_fps_text text =
   let fps_el = find_el_by_id "fps" in
   El.set_children fps_el [El.txt (Jstr.v text)]
 
+(* Audio processor script requires an even number between
+   256 and 16384 *)
+let valid_buffer_size n =
+  let n = max n 256 in
+  let n = min n 16384 in
+  (n / 2) * 2
+
 (* Audio-driven main loop - audio callback drives emulation.
    Similar to SDL2's main_audio_sync but simpler since ScriptProcessorNode
    runs on the main thread (no mutex needed). *)
@@ -192,7 +199,9 @@ let run_rom_bytes_with_audio ctx image_data rom_bytes =
   let sample_rate = Apu.sample_rate apu in
   let buffer_capacity = Apu.buffer_capacity apu in
   (* Use a third of the capacity for script processor buffer *)
-  let processor_buffer_size = buffer_capacity / 3 in
+  let processor_buffer_size =
+    valid_buffer_size (buffer_capacity / 3)
+  in
   (* Create audio context with APU's sample rate *)
   let audio_ctx = match !State.audio_context with
     | Some ctx -> ctx

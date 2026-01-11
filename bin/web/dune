@@ -57,3 +57,11 @@
  (targets cavern.gb)
  (deps ../../resource/games/cavern.gb)
  (action (run cp %{deps} %{targets})))
+
+(rule
+ (alias serve-web)
+ (deps
+  (alias all)
+  serve-web.sh)
+ (action
+  (run sh serve-web.sh)))

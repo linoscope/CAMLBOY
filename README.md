@@ -150,9 +150,7 @@ Audio options:
 ### Run with Web UI (js_of_ocaml/wasm)
 
 ```sh
-dune build
-# Serve the web directory
-python -m http.server 8000 --directory _build/default/bin/web
+dune build @serve-web
 # Open localhost:8000 in your browser
 ```
 
