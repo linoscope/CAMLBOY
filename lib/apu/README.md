@@ -125,11 +125,7 @@ lib/apu/
    - Both use the same pattern: callback-driven, low-latency lock-step
    - Buffer is sized to ~1/3 capacity per callback to balance latency vs. underruns
 
-3. **Band-limited synthesis (BLEP)**:
-   - Square waves have sharp transitions that cause aliasing at 44.1 kHz
-   - The `blep.ml` module implements polyBLEP (polynomial band-limited step)
-   - Smooths discontinuities using polynomial approximations near edges
-   - Eliminates high-frequency aliasing artifacts without filtering
+3. **Band-limited synthesis (BLEP)**: See [Band-Limited Synthesis](#band-limited-synthesis-blep-1) below
 
 4. **Strict separation between hardware and synthesis**:
    - Each channel module (`Square_channel`, etc.) implements pure hardware emulation
@@ -203,9 +199,120 @@ The following hardware quirks are implemented for accuracy:
   now enabled and the counter is non-zero, the counter is decremented. If it
   reaches 0, the channel is disabled.
 
+## Band-Limited Synthesis (BLEP)
+
+### The Aliasing Problem
+
+The Game Boy's square wave channels produce signals with instantaneous transitions
+between high and low states. These sharp edges contain harmonics extending to
+infinity. When we sample this signal at a finite rate (e.g., 44.1 kHz), any
+harmonics above the Nyquist frequency (22.05 kHz) fold back into the audible
+range as aliasing artifacts.
+
+For example, a 2 kHz square wave has harmonics at 6 kHz, 10 kHz, 14 kHz, 18 kHz,
+22 kHz, 26 kHz, etc. At 44.1 kHz sample rate, the 26 kHz harmonic aliases to
+18.1 kHz (44.1 - 26), producing an audible tone that wasn't in the original signal.
+
+This is particularly problematic for Game Boy emulation because:
+
+1. **High fundamental frequencies**: Game Boy square waves can reach over 130 kHz
+   (frequency register = 2047), well above human hearing but with harmonics that
+   alias into audible range
+2. **Rich harmonic content**: Square waves have strong odd harmonics (3rd, 5th, 7th...)
+   that extend far beyond the fundamental
+3. **Variable duty cycles**: Non-50% duty cycles add even harmonics, increasing
+   the aliasing potential
+
+### Visual Comparison
+
+![BLEP comparison](../../resource/blep-comarison.png)
+
+The image above shows the same audio rendered with and without BLEP. On the left,
+BLEP produces clean, smooth waveforms. On the right, without BLEP, you can see
+the characteristic "fuzzy" distortion caused by aliasing - the waveform appears
+noisy and irregular due to folded-back high-frequency components.
+
+### Why Original Hardware Didn't Have This Problem
+
+The original Game Boy didn't have aliasing because it never sampled its own output.
+The hardware path was a continuous analog signal:
+
+```
+Digital waveform generator → DAC → Analog amplifier → Speaker/Headphones
+```
+
+Aliasing only occurs when you **sample** a continuous signal at a finite rate. The
+Game Boy's square waves went straight from the DAC to your ears as analog audio.
+
+The sharp transitions were naturally softened by:
+
+1. **DAC bandwidth**: The 4-bit DAC couldn't produce truly instantaneous transitions
+2. **Capacitive coupling**: The audio output circuit had capacitors acting as low-pass filters
+3. **Amplifier bandwidth**: The analog amp had limited slew rate
+4. **Speaker physics**: A physical cone can't move infinitely fast
+
+The "infinite" harmonics of a perfect square wave were already rolled off by the
+analog electronics before reaching your ears. The Game Boy's characteristic sound
+partly comes from these analog limitations.
+
+When we emulate digitally, we're doing:
+
+```
+Emulated waveform → Sample at 44.1kHz → Sound card DAC → Speakers
+```
+
+That sampling step in the middle is where aliasing occurs. We're converting a
+mathematically perfect square wave (with infinite harmonics) into discrete samples,
+and the Nyquist theorem catches us. BLEP essentially simulates what the analog
+circuitry did naturally - smoothing transitions to remove harmonics above what
+our sample rate can represent.
+
+### How polyBLEP Works
+
+Band-Limited Step (BLEP) synthesis replaces the instant transitions of a naive
+square wave with smooth, band-limited transitions that don't contain harmonics
+above the Nyquist frequency.
+
+The `blep.ml` module implements **polyBLEP** (polynomial BLEP), which:
+
+1. **Detects transitions**: Identifies when the waveform crosses from high to low
+   or vice versa
+2. **Applies polynomial correction**: Near each transition, adds a polynomial
+   correction term that smooths the edge over approximately one sample period
+3. **Preserves waveform shape**: Away from transitions, the output matches the
+   original square wave exactly
+
+The polynomial used is:
+- Just after a transition (t in [0, dt)): `2t - t² - 1`
+- Just before a transition (t in [1-dt, 1)): `t² + 2t + 1`
+
+Where `t` is the phase relative to the transition and `dt` is the normalized
+frequency (frequency / sample_rate).
+
+### Architecture
+
+The implementation cleanly separates hardware emulation from synthesis:
+
+```
+┌─────────────────────┐     ┌─────────────────────┐
+│  Square_channel.ml  │     │      blep.ml        │
+│  (Hardware state)   │────>│  (BLEP synthesis)   │
+│                     │     │                     │
+│  - duty_position    │     │  - Computes phase   │
+│  - frequency_timer  │     │  - Applies polyBLEP │
+│  - timer_period     │     │  - Returns sample   │
+│  - volume, etc.     │     │                     │
+└─────────────────────┘     └─────────────────────┘
+```
+
+The `Blep.Make` functor takes any module implementing `Blep.HARDWARE` and produces
+a band-limited sampler. This allows the same BLEP code to work with both square
+channels while keeping hardware emulation pure and testable.
+
 ## References
 
 - [Game Boy Sound Hardware (gbdev wiki)](https://gbdev.gg8.se/wiki/articles/Gameboy_sound_hardware)
 - [Pan Docs - Audio](https://gbdev.io/pandocs/Audio.html)
 - [SameBoy APU implementation](https://github.com/LIJI32/SameBoy/blob/master/Core/apu.c)
 - [Blargg's APU test ROMs](https://github.com/retrio/gb-test-roms)
+- [Making Audio Plugins Part 18: PolyBLEP Oscillator](https://www.martin-finke.de/articles/audio-plugins-018-polyblep-oscillator/)
