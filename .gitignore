@@ -5,3 +5,5 @@ resource/private
 *.bs.js
 lib/bs
 node_modules/
+result
+.direnv
